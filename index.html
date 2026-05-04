@@ -83,22 +83,23 @@ body {
     align-items: center;
 
     overflow-x: hidden;
-    color: #e6ecf5;
+    color: #f5f3ff;
 
     background: url('question_background_image.png');
     background-size: cover;
     background-position: center;
 }
 
-/* subtle cold overlay to kill warmth */
+/* royal twilight overlay */
 body::after{
     content:"";
     position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background: radial-gradient(circle at center, rgba(10,20,40,0.35), rgba(0,0,0,0.75));
+    inset:0;
+    background:
+        radial-gradient(circle at center,
+            rgba(124,58,237,0.22),
+            rgba(46,16,101,0.55) 45%,
+            rgba(5,3,18,0.88) 100%);
     pointer-events:none;
     z-index:-1;
 }
@@ -125,42 +126,46 @@ body::after{
   text-align:center;    
 }
 
-/* TITLE — sharper, colder */
+/* TITLE — white-gold imperial citadel */
 .title{
   font-size:64px;
   letter-spacing:4px;
   margin-bottom:10px;
-  color:#f0c86a;
+  color:#fff7d6;
 
   text-shadow:
-    0 0 10px rgba(240,200,106,0.7),
-    0 0 25px rgba(40,90,160,0.5),
-    0 3px 8px rgba(0,0,0,0.9);
+    0 0 10px rgba(240,200,106,0.75),
+    0 0 28px rgba(196,181,253,0.6),
+    0 0 48px rgba(109,40,217,0.45),
+    0 3px 8px rgba(0,0,0,0.95);
 }
 
-/* SUBTITLE — shift to blue tone */
+/* SUBTITLE — royal violet */
 .subtitle{
   font-size:34px;
   margin-bottom:35px;
   letter-spacing:2px;
-  color:#7fa8d6;
+  color:#c4b5fd;
 
   text-shadow:
-    0 0 12px rgba(80,130,200,0.45),
-    0 2px 6px rgba(0,0,0,0.85);
+    0 0 14px rgba(196,181,253,0.65),
+    0 0 28px rgba(109,40,217,0.45),
+    0 2px 6px rgba(0,0,0,0.9);
 }
 
 /* TAGLINE */
 .tagline{
   margin-bottom:30px;
   font-style:italic;
-  opacity:0.9;
-  color:#c9d4e6;
+  opacity:0.92;
+  color:#ede9fe;
 
-  text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+  text-shadow:
+    0 0 10px rgba(196,181,253,0.25),
+    0 2px 6px rgba(0,0,0,0.9);
 }
 
-/* INPUT — looks like a console panel now */
+/* INPUT — citadel ledger panel */
 .name-input{
   width:100%;
   max-width:320px;
@@ -168,28 +173,28 @@ body::after{
   padding:15px;
   border-radius:10px;
 
-  border:1px solid rgba(120,170,255,0.45);   
-  background: rgba(8,14,28,0.9);          
-  color:#e6ecf5;                             
+  border:1px solid rgba(196,181,253,0.45);   
+  background: rgba(11,6,24,0.9);          
+  color:#f5f3ff;                             
   font-size:20px;
   margin-bottom:20px;
   outline:none;
 
   box-shadow:
-    0 0 12px rgba(80,130,200,0.35),
-    inset 0 0 12px rgba(0,0,0,0.7);
+    0 0 12px rgba(109,40,217,0.38),
+    inset 0 0 12px rgba(0,0,0,0.72);
 }
 
-/* INPUT FOCUS — command activation feel */
+/* INPUT FOCUS — exchange activation */
 .name-input:focus{
-  border-color: rgba(140,190,255,0.8);
+  border-color: rgba(240,200,106,0.85);
   box-shadow:
-    0 0 18px rgba(120,180,255,0.6),
-    0 0 35px rgba(40,90,160,0.5),
-    inset 0 0 12px rgba(0,0,0,0.8);
+    0 0 16px rgba(240,200,106,0.55),
+    0 0 34px rgba(124,58,237,0.55),
+    inset 0 0 12px rgba(0,0,0,0.85);
 }
 
-/* BUTTON BASE (you’ll likely style deeper later) */
+/* BUTTON BASE */
 .start-btn{
   width:100%;
   max-width:320px;
@@ -198,7 +203,7 @@ body::after{
 /* PLACEHOLDER */
 #emailInput::placeholder,
 #username::placeholder{
-    color: rgba(180,200,230,0.55);
+    color: rgba(237,233,254,0.55);
     font-style: italic;
     letter-spacing: 0.5px;
     text-align: center;
@@ -218,31 +223,32 @@ body::after{
     text-align: center;
 
     background: radial-gradient(circle at center,
-        rgba(25,70,120,0.34) 0%,
-        rgba(8,16,32,0.94) 52%,
-        rgba(2,4,10,0.98) 100%);
+        rgba(109,40,217,0.32) 0%,
+        rgba(46,16,101,0.62) 45%,
+        rgba(11,6,24,0.96) 72%,
+        rgba(5,3,18,0.99) 100%);
 
     backdrop-filter: blur(6px);
     border-radius: 14px;
     box-sizing: border-box;
 
     box-shadow:
-        0 0 24px rgba(80,140,220,0.28),
-        0 0 70px rgba(10,45,95,0.35),
-        inset 0 0 38px rgba(0,0,0,0.76);
+        0 0 24px rgba(196,181,253,0.24),
+        0 0 70px rgba(109,40,217,0.34),
+        inset 0 0 40px rgba(0,0,0,0.78);
 
-    border: 1px solid rgba(240,200,106,0.34);
+    border: 1px solid rgba(240,200,106,0.36);
     animation: torchFlicker 6s infinite;
     transition: box-shadow .3s ease, border-color .3s ease;
     position: relative;
 }
 
 #gameBox.boss-mode {
-    border: 2px solid #f0c86a;
+    border: 2px solid #fff7d6;
     box-shadow:
-        0 0 32px rgba(240,200,106,0.52),
-        0 0 64px rgba(60,130,220,0.45),
-        inset 0 0 42px rgba(0,0,0,0.82);
+        0 0 30px rgba(240,200,106,0.55),
+        0 0 62px rgba(124,58,237,0.55),
+        inset 0 0 44px rgba(0,0,0,0.84);
 }
 
 .boss-icon{
@@ -252,32 +258,32 @@ body::after{
     pointer-events: none;
 }
 
-/* Tier 1 — Demand Cartographer */
+/* Tier 1 — Keeper of Account Identities */
 .boss10 .boss-icon{
     filter:
-        drop-shadow(0 0 6px rgba(240,200,106,0.85))
-        drop-shadow(0 0 12px rgba(70,140,220,0.55));
+        drop-shadow(0 0 6px rgba(240,200,106,0.9))
+        drop-shadow(0 0 14px rgba(196,181,253,0.55));
 }
 
-/* Tier 2 — Rate Engineer */
+/* Tier 2 — Trade Chancellor */
 .boss20 .boss-icon{
     filter:
-        drop-shadow(0 0 8px rgba(110,180,255,0.9))
-        drop-shadow(0 0 18px rgba(240,200,106,0.55));
+        drop-shadow(0 0 8px rgba(245,230,184,0.9))
+        drop-shadow(0 0 18px rgba(124,58,237,0.58));
 }
 
-/* Tier 3 — Shock Forecaster */
+/* Tier 3 — Emperor of Exchange */
 .boss30 .boss-icon{
     filter:
         drop-shadow(0 0 10px rgba(240,200,106,1))
-        drop-shadow(0 0 24px rgba(127,29,29,0.85));
+        drop-shadow(0 0 25px rgba(124,58,237,0.95));
 }
 
 .hit {
     box-shadow:
-        0 0 60px rgba(127,29,29,0.95),
-        0 0 28px rgba(240,200,106,0.35),
-        inset 0 0 42px rgba(80,10,18,0.85) !important;
+        0 0 58px rgba(88,28,135,0.95),
+        0 0 30px rgba(240,200,106,0.38),
+        inset 0 0 44px rgba(46,16,101,0.88) !important;
     animation: hitshake 0.4s ease;
 }
 
@@ -286,10 +292,10 @@ body::after{
     top: 15px;
     right: 15px;
     font-size: 11px;
-    opacity: 0.5;
+    opacity: 0.55;
     font-style: italic;
-    color: #c9d4e6;
-    text-shadow: 0 0 6px rgba(100,170,255,0.38);
+    color: #ede9fe;
+    text-shadow: 0 0 6px rgba(196,181,253,0.45);
 }
 
 #questionImageBox{
@@ -303,21 +309,21 @@ body::after{
   width: 420px;
   height: auto;
   border-radius: 10px;
-  border: 1px solid rgba(240,200,106,0.24);
+  border: 1px solid rgba(240,200,106,0.28);
   box-shadow:
-    0 0 14px rgba(80,140,220,0.22),
-    0 0 28px rgba(0,0,0,0.68);
+    0 0 14px rgba(196,181,253,0.24),
+    0 0 30px rgba(109,40,217,0.32),
+    0 0 28px rgba(0,0,0,0.7);
 }
-
 /* =========================================
    3. TEXT & TYPOGRAPHY SYSTEM — SAFE TO CUSTOMIZE
 ========================================= */
 
 h2 {
     text-shadow:
-        0 0 10px rgba(180,210,255,0.24),
-        0 0 20px rgba(80,140,220,0.22),
-        0 2px 6px rgba(0,0,0,0.85);
+        0 0 10px rgba(245,243,255,0.24),
+        0 0 22px rgba(196,181,253,0.28),
+        0 2px 6px rgba(0,0,0,0.88);
     margin-bottom: 5px;
 }
 
@@ -326,10 +332,10 @@ h2 {
     line-height: 1.4;
     font-weight: 600;
     margin: 14px 0;
-    color: #e6ecf5;
+    color: #f5f3ff;
     text-shadow:
-        0 2px 5px rgba(0,0,0,0.88),
-        0 0 8px rgba(100,170,255,0.14);
+        0 2px 5px rgba(0,0,0,0.9),
+        0 0 8px rgba(196,181,253,0.16);
 }
 
 .boss-title {
@@ -337,22 +343,23 @@ h2 {
     font-weight: bold;
     margin-bottom: 15px;
     display: block;
-    color: #f0c86a;
+    color: #fff7d6;
     text-shadow:
-        0 0 10px rgba(240,200,106,0.62),
-        0 0 26px rgba(80,140,220,0.42),
-        0 3px 8px rgba(0,0,0,0.9);
+        0 0 10px rgba(240,200,106,0.68),
+        0 0 28px rgba(196,181,253,0.48),
+        0 0 42px rgba(109,40,217,0.34),
+        0 3px 8px rgba(0,0,0,0.92);
 }
 
 .area-title {
-    color: #8fb6e6;
+    color: #c4b5fd;
     font-size: 14px;
     letter-spacing: 3px;
     text-transform: uppercase;
     margin-bottom: 15px;
     text-shadow:
-        0 0 8px rgba(100,170,255,0.22),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 0 8px rgba(196,181,253,0.32),
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
 .boss-q {
@@ -363,28 +370,30 @@ h2 {
     padding-left: 15px;
     margin: 20px 0;
     text-align: left;
-    color: #e6ecf5;
-    box-shadow: -4px 0 12px rgba(80,140,220,0.34);
-    text-shadow: 0 2px 5px rgba(0,0,0,0.85);
+    color: #f5f3ff;
+    box-shadow: -4px 0 12px rgba(124,58,237,0.34);
+    text-shadow: 0 2px 5px rgba(0,0,0,0.88);
 }
 
 .hint-box {
     font-size: 13px;
     color: #f0c86a;
     margin-top: 15px;
-    opacity: 0.84;
+    opacity: 0.86;
     height: 18px;
-    text-shadow: 0 0 6px rgba(240,200,106,0.28);
+    text-shadow:
+        0 0 6px rgba(240,200,106,0.32),
+        0 0 12px rgba(196,181,253,0.18);
 }
     
 .fade-out-text {
     animation: fadeOut 5s forwards;
     font-weight: bold;
-    color: #f0c86a;
+    color: #f5e6b8;
     text-shadow:
         0 0 8px rgba(240,200,106,0.55),
-        0 0 18px rgba(80,140,220,0.28),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 0 18px rgba(196,181,253,0.32),
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
 #message {
@@ -392,16 +401,17 @@ h2 {
     font-style: italic;
     letter-spacing: 0.5px;
     text-align: center;
-    color: #c9d4e6;
+    color: #ede9fe;
     opacity: 0.9;
     text-shadow:
-        0 0 7px rgba(100,170,255,0.22),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 0 7px rgba(196,181,253,0.26),
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
-/* Command Nexus override */
-.nexus #message {
-    color: #9fc7f5;
+/* Exchange Citadel override */
+.exchange-citadel #message,
+.citadel #message {
+    color: #c4b5fd;
     font-size: 17px;
     font-style: italic;
     margin-top: 12px;
@@ -409,10 +419,11 @@ h2 {
     font-weight: 600;
     letter-spacing: 1px;
     text-shadow:
-        0 0 8px rgba(100,170,255,0.45),
+        0 0 8px rgba(196,181,253,0.52),
         0 0 18px rgba(240,200,106,0.18),
-        0 2px 6px rgba(0,0,0,0.85);
+        0 2px 6px rgba(0,0,0,0.88);
 }
+	
 /* =========================================
    4. BUTTONS & INTERACTION — SAFE TO CUSTOMIZE
 ========================================= */
@@ -424,28 +435,28 @@ button {
     font-size: 16px;
     cursor: pointer;
 
-    background: linear-gradient(180deg, #12345a, #07111f);
-    color: #e6ecf5;
+    background: linear-gradient(180deg, #4c1d95, #120820);
+    color: #f5f3ff;
 
     border: 1px solid rgba(240,200,106,0.38);
     border-radius: 8px;
 
     box-shadow:
-       0 0 12px rgba(80,140,220,0.28),
-       0 0 24px rgba(10,45,95,0.22),
-       inset 0 0 10px rgba(0,0,0,0.68);
+       0 0 12px rgba(124,58,237,0.32),
+       0 0 24px rgba(46,16,101,0.26),
+       inset 0 0 10px rgba(0,0,0,0.72);
 
     transition: all 0.15s ease;
 }
 
 button:hover {
-    background: linear-gradient(180deg, #1b4f86, #0b1f38);
-    border-color: rgba(240,200,106,0.72);
+    background: linear-gradient(180deg, #6d28d9, #2e1065);
+    border-color: rgba(240,200,106,0.74);
 
     box-shadow:
-        0 0 18px rgba(100,170,255,0.5),
-        0 0 34px rgba(240,200,106,0.22),
-        inset 0 0 12px rgba(0,0,0,0.7);
+        0 0 18px rgba(196,181,253,0.52),
+        0 0 34px rgba(240,200,106,0.24),
+        inset 0 0 12px rgba(0,0,0,0.72);
 
     transform: translateY(-2px) scale(1.02);
 }
@@ -471,29 +482,29 @@ button:active {
     margin: 0;
 
     background: linear-gradient(180deg,
-        rgba(18,54,92,0.98),
-        rgba(7,18,34,0.98));
+        rgba(76,29,149,0.96),
+        rgba(18,8,32,0.98));
 
-    color: #e6ecf5;
-    border: 1px solid rgba(120,180,255,0.34);
+    color: #f5f3ff;
+    border: 1px solid rgba(196,181,253,0.34);
 
     box-shadow:
-        0 0 10px rgba(80,140,220,0.18),
-        0 0 18px rgba(240,200,106,0.12),
-        inset 0 0 14px rgba(0,0,0,0.74);
+        0 0 10px rgba(124,58,237,0.22),
+        0 0 18px rgba(240,200,106,0.13),
+        inset 0 0 14px rgba(0,0,0,0.76);
 }
 
 .answers button:hover {
     background: linear-gradient(180deg,
-        rgba(28,82,135,0.98),
-        rgba(10,34,62,0.98));
+        rgba(109,40,217,0.98),
+        rgba(46,16,101,0.98));
 
-    border-color: rgba(240,200,106,0.68);
+    border-color: rgba(240,200,106,0.7);
 
     box-shadow:
-        0 0 18px rgba(100,170,255,0.42),
-        0 0 34px rgba(240,200,106,0.22),
-        inset 0 0 14px rgba(0,0,0,0.7);
+        0 0 18px rgba(196,181,253,0.46),
+        0 0 34px rgba(240,200,106,0.24),
+        inset 0 0 14px rgba(0,0,0,0.72);
 }
 
 .fullscreenBtn {
@@ -506,63 +517,63 @@ button:active {
     letter-spacing: 1px;
     text-transform: uppercase;
 
-    color: #e6ecf5;
-    background: linear-gradient(180deg, #102c4d, #050b14);
+    color: #ede9fe;
+    background: linear-gradient(180deg, #2e1065, #050312);
 
-    border: 1px solid rgba(120,180,255,0.34);
+    border: 1px solid rgba(196,181,253,0.34);
     border-radius: 6px;
     cursor: pointer;
 
     box-shadow:
-        0 0 10px rgba(80,140,220,0.28),
-        inset 0 0 7px rgba(0,0,0,0.76);
+        0 0 10px rgba(124,58,237,0.3),
+        inset 0 0 7px rgba(0,0,0,0.78);
 
     transition: all 0.15s ease;
 }
 
 .fullscreenBtn:hover {
-    background: linear-gradient(180deg, #1a4d82, #0b1d34);
-    border-color: rgba(240,200,106,0.62);
+    background: linear-gradient(180deg, #4c1d95, #120820);
+    border-color: rgba(240,200,106,0.64);
 
     box-shadow:
-        0 0 16px rgba(100,170,255,0.44),
-        inset 0 0 8px rgba(0,0,0,0.74);
+        0 0 16px rgba(196,181,253,0.44),
+        inset 0 0 8px rgba(0,0,0,0.76);
 }
 
 .fullscreenBtn:active {
     transform: scale(0.95);
     box-shadow:
-        0 0 8px rgba(80,140,220,0.3),
-        inset 0 0 10px rgba(0,0,0,0.86);
+        0 0 8px rgba(124,58,237,0.32),
+        inset 0 0 10px rgba(0,0,0,0.88);
 }
 
 .continue-btn {
-    background: linear-gradient(180deg, #1b5b98, #09213d);
-    color: #e6ecf5;
+    background: linear-gradient(180deg, #6d28d9, #2e1065);
+    color: #fff7d6;
     font-weight: bold;
 
     padding: 14px 40px;
     font-size: 18px;
     border-radius: 8px;
 
-    border: 1px solid rgba(240,200,106,0.54);
+    border: 1px solid rgba(240,200,106,0.56);
     cursor: pointer;
 
     box-shadow:
-        0 0 16px rgba(100,170,255,0.42),
-        0 0 34px rgba(240,200,106,0.22),
-        inset 0 0 12px rgba(0,0,0,0.68);
+        0 0 16px rgba(196,181,253,0.45),
+        0 0 34px rgba(240,200,106,0.24),
+        inset 0 0 12px rgba(0,0,0,0.7);
 
     transition: all 0.15s ease;
 }
 
 .continue-btn:hover {
-    background: linear-gradient(180deg, #2470b8, #0f355f);
+    background: linear-gradient(180deg, #7c3aed, #4c1d95);
 
     box-shadow:
-        0 0 24px rgba(100,170,255,0.62),
-        0 0 42px rgba(240,200,106,0.28),
-        inset 0 0 12px rgba(0,0,0,0.68);
+        0 0 24px rgba(196,181,253,0.65),
+        0 0 42px rgba(240,200,106,0.3),
+        inset 0 0 12px rgba(0,0,0,0.7);
 
     transform: scale(1.03);
 }
@@ -570,9 +581,10 @@ button:active {
 #continueBtn:active {
     transform: scale(0.97);
     box-shadow:
-        0 0 10px rgba(80,140,220,0.32),
-        inset 0 0 10px rgba(0,0,0,0.78);
+        0 0 10px rgba(124,58,237,0.34),
+        inset 0 0 10px rgba(0,0,0,0.8);
 }
+	
 /* =========================================
    5. PROGRESS & MAZE TRACK — SAFE TO CUSTOMIZE (WITH RULES)
 ========================================= */
@@ -582,18 +594,18 @@ button:active {
     height: 22px;
 
     background: linear-gradient(180deg,
-        rgba(6,14,28,0.96),
-        rgba(2,5,12,0.98));
+        rgba(11,6,24,0.96),
+        rgba(5,3,18,0.98));
 
     border-radius: 12px;
     margin-bottom: 20px;
     overflow: hidden;
 
-    border: 1px solid rgba(120,180,255,0.24);
+    border: 1px solid rgba(196,181,253,0.26);
 
     box-shadow:
-        inset 0 0 12px rgba(0,0,0,0.84),
-        0 0 10px rgba(80,140,220,0.18);
+        inset 0 0 12px rgba(0,0,0,0.86),
+        0 0 10px rgba(124,58,237,0.22);
 }
     
 #progressFill {
@@ -601,13 +613,13 @@ button:active {
     width: 0%;
 
     background: linear-gradient(90deg,
-        #123a66,
-        #4f9fe8,
+        #4c1d95,
+        #c4b5fd,
         #f0c86a);
 
     box-shadow:
-        0 0 12px rgba(100,170,255,0.46),
-        0 0 22px rgba(240,200,106,0.26);
+        0 0 12px rgba(196,181,253,0.48),
+        0 0 22px rgba(240,200,106,0.28);
 
     transition: width 0.4s ease;
 }
@@ -632,30 +644,30 @@ button:active {
     border-radius: 6px;
 
     background: linear-gradient(180deg,
-        rgba(10,24,46,0.76),
-        rgba(3,8,18,0.9));
+        rgba(46,16,101,0.74),
+        rgba(11,6,24,0.92));
 
-    border: 1px solid rgba(120,180,255,0.18);
+    border: 1px solid rgba(196,181,253,0.2);
 
     box-shadow:
-        inset 0 0 10px rgba(0,0,0,0.76),
-        0 0 5px rgba(80,140,220,0.1);
+        inset 0 0 10px rgba(0,0,0,0.78),
+        0 0 5px rgba(124,58,237,0.14);
 
     transition: all 0.3s ease;
 }
 
 .maze-box.active {
     background: radial-gradient(circle,
-        rgba(100,170,255,0.48),
-        rgba(18,58,102,0.42),
-        rgba(3,8,18,0.94));
+        rgba(196,181,253,0.5),
+        rgba(109,40,217,0.44),
+        rgba(11,6,24,0.96));
 
     border: 2px solid #f0c86a;
 
     box-shadow:
-        0 0 12px rgba(100,170,255,0.78),
-        0 0 24px rgba(240,200,106,0.36),
-        inset 0 0 12px rgba(0,0,0,0.66);
+        0 0 12px rgba(196,181,253,0.8),
+        0 0 24px rgba(240,200,106,0.38),
+        inset 0 0 12px rgba(0,0,0,0.68);
 
     z-index: 10;
     animation: activePulse 1s infinite alternate;
@@ -663,47 +675,47 @@ button:active {
 
 .maze-box.completed {
     background: linear-gradient(180deg,
-        rgba(24,82,135,0.62),
-        rgba(8,24,44,0.9));
+        rgba(109,40,217,0.58),
+        rgba(18,8,32,0.94));
 
-    border-color: rgba(240,200,106,0.36);
+    border-color: rgba(240,200,106,0.38);
 
     box-shadow:
-        0 0 8px rgba(80,140,220,0.32),
-        inset 0 0 10px rgba(0,0,0,0.72);
+        0 0 8px rgba(196,181,253,0.34),
+        inset 0 0 10px rgba(0,0,0,0.74);
 }
 
-/* Boss room highlights: 10 Demand, 20 Rate, 30 Shock */
+/* Boss room highlights: 10 Keeper, 20 Chancellor, 30 Emperor */
 .maze-box:nth-child(10) {
     text-shadow:
         0 0 8px #f0c86a,
-        0 0 18px rgba(80,140,220,0.78);
+        0 0 18px rgba(196,181,253,0.78);
 }
 
 .maze-box:nth-child(20) {
     text-shadow:
-        0 0 8px #6eb4ff,
-        0 0 18px rgba(240,200,106,0.58);
+        0 0 8px #f5e6b8,
+        0 0 18px rgba(124,58,237,0.68);
 }
 
 .maze-box:nth-child(30) {
     text-shadow:
         0 0 10px #f0c86a,
-        0 0 24px rgba(127,29,29,0.9),
-        0 0 34px rgba(80,140,220,0.35);
+        0 0 24px rgba(124,58,237,0.95),
+        0 0 34px rgba(196,181,253,0.42);
 }
 
-/* Streak styling — Command Nexus */
+/* Streak styling — Exchange Citadel */
 .streak {
     display:inline-flex;
     align-items:center;
     gap:10px;
     font-weight:600;
     letter-spacing:0.5px;
-    color: rgba(230,236,245,0.95);
+    color: rgba(245,243,255,0.96);
     text-shadow:
-        0 0 7px rgba(100,170,255,0.34),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 0 7px rgba(196,181,253,0.38),
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
 .streak-icon {
@@ -713,12 +725,12 @@ button:active {
     border-radius:50%;
 
     filter:
-        drop-shadow(0 0 8px rgba(100,170,255,0.76))
-        drop-shadow(0 0 15px rgba(240,200,106,0.42));
+        drop-shadow(0 0 8px rgba(240,200,106,0.82))
+        drop-shadow(0 0 15px rgba(196,181,253,0.46));
 
     background: radial-gradient(circle,
-        rgba(100,170,255,0.48) 0%,
-        rgba(240,200,106,0.28) 42%,
+        rgba(240,200,106,0.46) 0%,
+        rgba(196,181,253,0.32) 42%,
         transparent 72%);
 
     animation: pulseControl 2.2s ease-in-out infinite;
@@ -733,17 +745,18 @@ button:active {
     padding: 14px;
 
     background: radial-gradient(circle at center,
-        rgba(24,82,135,0.36),
-        rgba(6,14,28,0.96) 62%,
-        rgba(2,5,12,0.98));
+        rgba(124,58,237,0.30),
+        rgba(46,16,101,0.72) 45%,
+        rgba(11,6,24,0.96) 68%,
+        rgba(5,3,18,0.99));
 
     border-radius: 10px;
-    border: 1px solid rgba(240,200,106,0.34);
+    border: 1px solid rgba(240,200,106,0.36);
 
     box-shadow:
-        0 0 22px rgba(100,170,255,0.3),
+        0 0 22px rgba(196,181,253,0.30),
         0 0 42px rgba(240,200,106,0.18),
-        inset 0 0 28px rgba(0,0,0,0.78);
+        inset 0 0 28px rgba(0,0,0,0.8);
 
     text-align: center;
 }
@@ -755,8 +768,8 @@ button:active {
 
 #artifactDrop img {
     filter:
-        drop-shadow(0 0 14px rgba(100,170,255,0.82))
-        drop-shadow(0 0 26px rgba(240,200,106,0.34));
+        drop-shadow(0 0 14px rgba(196,181,253,0.82))
+        drop-shadow(0 0 26px rgba(240,200,106,0.36));
 }
 
 #artifactVault {
@@ -766,26 +779,27 @@ button:active {
     border-radius: 12px;
 
     background: radial-gradient(circle at top,
-        rgba(24,82,135,0.42),
-        rgba(6,14,28,0.96) 58%,
-        rgba(2,5,12,0.98));
+        rgba(124,58,237,0.32),
+        rgba(46,16,101,0.72) 46%,
+        rgba(11,6,24,0.96) 70%,
+        rgba(5,3,18,0.99));
 
-    border: 1px solid rgba(120,180,255,0.28);
+    border: 1px solid rgba(196,181,253,0.28);
 
     box-shadow:
-        0 0 20px rgba(80,140,220,0.26),
+        0 0 20px rgba(196,181,253,0.24),
         0 0 38px rgba(240,200,106,0.14),
-        inset 0 0 30px rgba(0,0,0,0.78);
+        inset 0 0 30px rgba(0,0,0,0.8);
 
     text-align: center;
 }
 
 #artifactVault h3 {
-    color: #f0c86a;
+    color: #fff7d6;
     text-shadow:
-        0 0 10px rgba(240,200,106,0.48),
-        0 0 18px rgba(100,170,255,0.22),
-        0 2px 6px rgba(0,0,0,0.85);
+        0 0 10px rgba(240,200,106,0.52),
+        0 0 18px rgba(196,181,253,0.22),
+        0 2px 6px rgba(0,0,0,0.88);
 }
 
 .vaultRow {
@@ -815,8 +829,8 @@ button:active {
 
     filter:
         brightness(0.28)
-        contrast(0.86)
-        saturate(0.75);
+        contrast(0.88)
+        saturate(0.72);
 
     transition: all .4s ease;
 }
@@ -824,7 +838,7 @@ button:active {
 .artifactSlot span {
     display: block;
     font-size: 13px;
-    color: rgba(180,200,230,0.42);
+    color: rgba(237,233,254,0.42);
     margin-top: 8px;
     line-height: 1.2;
 }
@@ -836,9 +850,9 @@ button:active {
 
 .artifactSlot.unlocked img {
     filter:
-        drop-shadow(0 0 14px rgba(100,170,255,0.86))
-        drop-shadow(0 0 26px rgba(240,200,106,0.42))
-        drop-shadow(0 0 34px rgba(80,140,220,0.24));
+        drop-shadow(0 0 14px rgba(240,200,106,0.82))
+        drop-shadow(0 0 26px rgba(196,181,253,0.46))
+        drop-shadow(0 0 34px rgba(124,58,237,0.24));
 
     animation: relicPulse 2.5s ease-in-out infinite;
     backface-visibility: hidden;
@@ -846,12 +860,12 @@ button:active {
 }
 
 .artifactSlot.unlocked span {
-    color: #e6ecf5;
+    color: #f5f3ff;
     font-weight: 600;
     text-shadow:
-        0 0 7px rgba(100,170,255,0.38),
+        0 0 7px rgba(196,181,253,0.40),
         0 0 14px rgba(240,200,106,0.18),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
 /* =========================================
@@ -870,29 +884,29 @@ button:active {
     animation: bossFloat 4s ease-in-out infinite;
 }
 
-/* Boss 1 — The Demand Cartographer */
-.cartographerGlow {
+/* Boss 1 — The Keeper of Account Identities */
+.keeperGlow {
     filter:
-        drop-shadow(0 0 12px rgba(240,200,106,0.82))
-        drop-shadow(0 0 24px rgba(80,140,220,0.58))
-        drop-shadow(0 0 34px rgba(0,0,0,0.8));
+        drop-shadow(0 0 12px rgba(240,200,106,0.84))
+        drop-shadow(0 0 24px rgba(196,181,253,0.52))
+        drop-shadow(0 0 34px rgba(0,0,0,0.82));
 }
 
-/* Boss 2 — The Rate Engineer */
-.rateEngineerGlow {
+/* Boss 2 — The Trade Chancellor */
+.chancellorGlow {
     filter:
-        drop-shadow(0 0 14px rgba(110,180,255,0.88))
-        drop-shadow(0 0 28px rgba(240,200,106,0.44))
-        drop-shadow(0 0 38px rgba(0,0,0,0.82));
+        drop-shadow(0 0 14px rgba(245,230,184,0.88))
+        drop-shadow(0 0 28px rgba(124,58,237,0.56))
+        drop-shadow(0 0 38px rgba(0,0,0,0.84));
 }
 
-/* Boss 3 — The Shock Forecaster */
-.shockForecasterGlow {
+/* Boss 3 — The Emperor of Exchange */
+.emperorGlow {
     filter:
         drop-shadow(0 0 16px rgba(240,200,106,0.96))
-        drop-shadow(0 0 34px rgba(127,29,29,0.76))
-        drop-shadow(0 0 46px rgba(80,140,220,0.26))
-        drop-shadow(0 0 52px rgba(0,0,0,0.86));
+        drop-shadow(0 0 34px rgba(124,58,237,0.82))
+        drop-shadow(0 0 46px rgba(196,181,253,0.26))
+        drop-shadow(0 0 52px rgba(0,0,0,0.88));
 }
 
 .torch {
@@ -905,8 +919,8 @@ button:active {
     opacity: .9;
 
     filter:
-        drop-shadow(0 0 12px rgba(100,170,255,0.54))
-        drop-shadow(0 0 24px rgba(240,200,106,0.24));
+        drop-shadow(0 0 12px rgba(196,181,253,0.54))
+        drop-shadow(0 0 24px rgba(240,200,106,0.26));
 
     display:none;
 }
@@ -919,6 +933,7 @@ button:active {
     right: 18px;
     transform: scaleX(-1);
 }
+	
 /* =========================================
    8. FULLSCREEN SCREENS & TRANSITIONS — SAFE TO CUSTOMIZE
 ========================================= */
@@ -929,8 +944,8 @@ button:active {
 
   background-image:
     linear-gradient(
-        rgba(2,5,12,0.26),
-        rgba(2,5,12,0.52)
+        rgba(5,3,18,0.24),
+        rgba(5,3,18,0.58)
     ),
     url('start screen image.png');
 
@@ -960,8 +975,8 @@ button:active {
 
   background:
     linear-gradient(
-        rgba(2,5,12,0.66),
-        rgba(2,5,12,0.78)
+        rgba(5,3,18,0.62),
+        rgba(5,3,18,0.82)
     ),
     url('hallway1.png');
 
@@ -973,7 +988,7 @@ button:active {
   align-items: center;
   text-align: center;
 
-  color: #e6ecf5;
+  color: #f5e6b8;
   font-size: 26px;
 
   z-index: 200;
@@ -992,40 +1007,40 @@ button:active {
   max-width: 600px;
 
   background: radial-gradient(circle at center,
-      rgba(24,82,135,0.32),
-      rgba(6,14,28,0.84) 58%,
-      rgba(2,5,12,0.94));
+      rgba(76,29,149,0.34),
+      rgba(18,8,32,0.88) 56%,
+      rgba(5,3,18,0.96));
 
   padding: 30px;
   border-radius: 10px;
 
-  border: 1px solid rgba(240,200,106,0.28);
+  border: 1px solid rgba(240,200,106,0.34);
 
   box-shadow:
-      0 0 24px rgba(0,0,0,0.84),
-      0 0 28px rgba(100,170,255,0.2),
-      0 0 42px rgba(240,200,106,0.12),
-      inset 0 0 26px rgba(0,0,0,0.74);
+      0 0 24px rgba(0,0,0,0.86),
+      0 0 30px rgba(124,58,237,0.24),
+      0 0 44px rgba(240,200,106,0.14),
+      inset 0 0 28px rgba(0,0,0,0.76);
 
-  color: #e6ecf5;
+  color: #f5e6b8;
 
   text-shadow:
-      0 0 8px rgba(100,170,255,0.3),
-      0 0 16px rgba(240,200,106,0.14),
+      0 0 8px rgba(240,200,106,0.24),
+      0 0 16px rgba(196,181,253,0.18),
       0 2px 6px rgba(0,0,0,0.9);
 }
-
 /* =========================================
    9. ANIMATION SYSTEM — SAFE TO CUSTOMIZE (WITH CARE)
 ========================================= */
 
+/* Ambient lighting effect */
 @keyframes torchFlicker {
   0%, 100% {
     filter: brightness(1);
   }
 
   25% {
-    filter: brightness(1.05) saturate(1.05);
+    filter: brightness(1.05) saturate(1.06);
   }
 
   50% {
@@ -1033,10 +1048,11 @@ button:active {
   }
 
   75% {
-    filter: brightness(1.04) saturate(1.04);
+    filter: brightness(1.04) saturate(1.05);
   }
 }
 
+/* Damage feedback */
 @keyframes hitshake {
   0% {
     transform: translateX(0);
@@ -1059,6 +1075,7 @@ button:active {
   }
 }
 
+/* Boss hit feedback */
 @keyframes bossShake {
   10%, 90% {
     transform: translate3d(-1px, 0, 0);
@@ -1077,59 +1094,65 @@ button:active {
   }
 }
 
+/* Current room pulse — Exchange Citadel */
 @keyframes activePulse {
   0% {
     transform: scale(1.06);
     box-shadow:
-      0 0 8px rgba(100,170,255,0.68),
-      inset 0 0 10px rgba(0,0,0,0.62);
+      0 0 8px rgba(240,200,106,0.62),
+      0 0 16px rgba(124,58,237,0.28),
+      inset 0 0 10px rgba(0,0,0,0.64);
   }
 
   45% {
     transform: scale(1.13);
     box-shadow:
-      0 0 18px rgba(100,170,255,0.92),
-      0 0 32px rgba(240,200,106,0.42),
-      0 0 42px rgba(24,82,135,0.3),
-      inset 0 0 12px rgba(0,0,0,0.66);
+      0 0 18px rgba(240,200,106,0.88),
+      0 0 32px rgba(124,58,237,0.48),
+      0 0 42px rgba(76,29,149,0.34),
+      inset 0 0 12px rgba(0,0,0,0.68);
   }
 
   70% {
     transform: scale(1.09);
     box-shadow:
-      0 0 12px rgba(100,170,255,0.78),
-      0 0 24px rgba(240,200,106,0.22),
-      inset 0 0 11px rgba(0,0,0,0.66);
+      0 0 12px rgba(240,200,106,0.72),
+      0 0 24px rgba(196,181,253,0.26),
+      0 0 30px rgba(76,29,149,0.24),
+      inset 0 0 11px rgba(0,0,0,0.68);
   }
 
   100% {
     transform: scale(1.11);
     box-shadow:
-      0 0 15px rgba(100,170,255,0.72),
-      0 0 30px rgba(240,200,106,0.32),
-      inset 0 0 12px rgba(0,0,0,0.68);
+      0 0 15px rgba(240,200,106,0.78),
+      0 0 30px rgba(124,58,237,0.36),
+      0 0 38px rgba(5,3,18,0.58),
+      inset 0 0 12px rgba(0,0,0,0.7);
   }
 }
 
+/* Victory title glow */
 @keyframes victoryGlow {
   0%, 100% {
     transform: scale(1);
     text-shadow:
-      0 0 10px rgba(240,200,106,0.72),
-      0 0 18px rgba(100,170,255,0.24),
-      0 2px 6px rgba(0,0,0,0.9);
+      0 0 10px rgba(240,200,106,0.76),
+      0 0 18px rgba(124,58,237,0.28),
+      0 2px 6px rgba(0,0,0,0.92);
   }
 
   50% {
     transform: scale(1.08);
     text-shadow:
-      0 0 24px rgba(240,200,106,0.95),
-      0 0 42px rgba(100,170,255,0.58),
-      0 0 52px rgba(24,82,135,0.38),
-      0 3px 8px rgba(0,0,0,0.9);
+      0 0 24px rgba(240,200,106,0.96),
+      0 0 42px rgba(196,181,253,0.48),
+      0 0 52px rgba(124,58,237,0.42),
+      0 3px 8px rgba(0,0,0,0.92);
   }
 }
 
+/* Idle boss movement */
 @keyframes bossFloat {
   0%, 100% {
     transform: translateY(0);
@@ -1140,6 +1163,7 @@ button:active {
   }
 }
 
+/* Temporary feedback text fade-out */
 @keyframes fadeOut {
   0%, 70% {
     opacity: 1;
@@ -1150,6 +1174,7 @@ button:active {
   }
 }
 
+/* Wizard idle movement */
 @keyframes wizardFloat {
   0%,100% {
     transform: translateY(0);
@@ -1160,6 +1185,7 @@ button:active {
   }
 }
 
+/* General UI entrance */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -1172,24 +1198,26 @@ button:active {
   }
 }
 
+/* Artifact/relic pulse — Exchange Citadel */
 @keyframes relicPulse {
   0%,100% {
     transform: scale(1.05);
     filter:
-      drop-shadow(0 0 8px rgba(100,170,255,0.68))
-      drop-shadow(0 0 18px rgba(240,200,106,0.32))
-      drop-shadow(0 0 24px rgba(0,0,0,0.58));
+      drop-shadow(0 0 8px rgba(240,200,106,0.72))
+      drop-shadow(0 0 18px rgba(124,58,237,0.34))
+      drop-shadow(0 0 24px rgba(0,0,0,0.62));
   }
 
   50% {
     transform: scale(1.1);
     filter:
-      drop-shadow(0 0 16px rgba(100,170,255,0.94))
-      drop-shadow(0 0 30px rgba(240,200,106,0.48))
-      drop-shadow(0 0 38px rgba(24,82,135,0.26));
+      drop-shadow(0 0 16px rgba(240,200,106,0.96))
+      drop-shadow(0 0 30px rgba(196,181,253,0.46))
+      drop-shadow(0 0 38px rgba(124,58,237,0.34));
   }
 }
 
+/* Streak icon pulse */
 @keyframes pulseControl {
   0%,100% {
     transform: scale(1);
@@ -1221,13 +1249,13 @@ button:active {
 .top-title{
     font-size:22px;
     font-weight:bold;
-    color:#f0c86a;
+    color:#fff7d6;
     text-align:center;
     margin-bottom:6px;
     text-shadow:
-        0 0 10px rgba(240,200,106,0.42),
-        0 0 18px rgba(100,170,255,0.22),
-        0 2px 6px rgba(0,0,0,0.9);
+        0 0 10px rgba(240,200,106,0.48),
+        0 0 18px rgba(196,181,253,0.24),
+        0 2px 6px rgba(0,0,0,0.92);
 }
    
 #mazeTrackContainer{
@@ -1259,20 +1287,20 @@ button:active {
 
     background: linear-gradient(
         180deg,
-        rgba(6,14,28,0.96),
-        rgba(2,5,12,0.98)
+        rgba(18,8,32,0.96),
+        rgba(5,3,18,0.99)
     );
 
     padding:20px;
     border-radius:16px;
 
-    border:1px solid rgba(120,180,255,0.26);
+    border:1px solid rgba(196,181,253,0.28);
 
     box-shadow:
-       0 0 30px rgba(0,0,0,0.92),
-       0 0 58px rgba(80,140,220,0.18),
+       0 0 30px rgba(0,0,0,0.94),
+       0 0 58px rgba(124,58,237,0.22),
        0 0 76px rgba(240,200,106,0.10),
-       inset 0 0 42px rgba(0,0,0,0.76);
+       inset 0 0 42px rgba(0,0,0,0.78);
 }
    
 #wizardBox{
@@ -1282,8 +1310,9 @@ button:active {
 
     background: linear-gradient(
         180deg,
-        rgba(18,54,92,0.92),
-        rgba(4,10,20,0.98)
+        rgba(76,29,149,0.62),
+        rgba(18,8,32,0.94) 52%,
+        rgba(5,3,18,0.99)
     );
 
     border-radius:12px;
@@ -1295,32 +1324,32 @@ button:active {
     align-items:center;    
     gap:6px;
 
-    border:1px solid rgba(120,180,255,0.28);
+    border:1px solid rgba(240,200,106,0.26);
 
     box-shadow:
-        inset 0 0 26px rgba(0,0,0,0.8),
-        0 0 18px rgba(80,140,220,0.16),
-        0 0 30px rgba(240,200,106,0.08);
+        inset 0 0 26px rgba(0,0,0,0.82),
+        0 0 18px rgba(196,181,253,0.16),
+        0 0 30px rgba(240,200,106,0.09);
 }
 
 #wizardName {
     font-size: 12px;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: #9fc7f5; 
+    color: #f5e6b8; 
     margin-top: 4px;
     margin-bottom: 6px;
-    opacity: 0.92;
+    opacity: 0.94;
     text-align: center;
     font-weight: 600;
 
-    border-bottom: 1px solid rgba(240,200,106,0.32);
+    border-bottom: 1px solid rgba(240,200,106,0.34);
     padding-bottom: 2px;
 
     text-shadow:
-        0 0 6px rgba(100,170,255,0.48),
-        0 0 12px rgba(240,200,106,0.16),
-        0 2px 5px rgba(0,0,0,0.85);
+        0 0 6px rgba(240,200,106,0.34),
+        0 0 12px rgba(196,181,253,0.18),
+        0 2px 5px rgba(0,0,0,0.88);
 }
 
 #wizardImage{
@@ -1328,9 +1357,9 @@ button:active {
     max-width:180px;
 
     filter:
-        drop-shadow(0 0 12px rgba(100,170,255,0.62))
-        drop-shadow(0 0 24px rgba(240,200,106,0.22))
-        drop-shadow(0 0 30px rgba(0,0,0,0.84));
+        drop-shadow(0 0 12px rgba(196,181,253,0.54))
+        drop-shadow(0 0 24px rgba(240,200,106,0.24))
+        drop-shadow(0 0 30px rgba(0,0,0,0.86));
 
     animation: wizardFloat 4s ease-in-out infinite, torchFlicker 5s infinite;
 }
@@ -1348,13 +1377,13 @@ button:active {
     width:90%;
     margin:0 auto;
 
-    border-color: rgba(240,200,106,0.72);
+    border-color: rgba(240,200,106,0.76);
 
     box-shadow:
-        0 0 34px rgba(100,170,255,0.46),
+        0 0 34px rgba(196,181,253,0.44),
         0 0 72px rgba(240,200,106,0.24),
-        0 0 92px rgba(127,29,29,0.22),
-        inset 0 0 46px rgba(0,0,0,0.84);
+        0 0 92px rgba(124,58,237,0.32),
+        inset 0 0 46px rgba(0,0,0,0.86);
 }
 
 .boss-mode .bossIcon{
@@ -1368,13 +1397,13 @@ button:active {
 .boss-mode #gameShell{
     justify-content:center;
 
-    border-color: rgba(120,180,255,0.42);
+    border-color: rgba(196,181,253,0.42);
 
     box-shadow:
-       0 0 36px rgba(0,0,0,0.94),
-       0 0 64px rgba(80,140,220,0.26),
-       0 0 90px rgba(240,200,106,0.14),
-       inset 0 0 48px rgba(0,0,0,0.8);
+       0 0 36px rgba(0,0,0,0.95),
+       0 0 64px rgba(124,58,237,0.28),
+       0 0 90px rgba(240,200,106,0.15),
+       inset 0 0 48px rgba(0,0,0,0.82);
 }
 
 /* =========================================
@@ -1820,7 +1849,7 @@ Edit appearance freely.
 Respect structure strictly.
 
 ========================================= -->
-<body class="command-nexus">
+<body class="command-citadel">
 <!-- Screen reader announcements (accessibility — do not remove) -->    
   <div id="srAnnouncements"
      aria-live="assertive"
@@ -1836,10 +1865,10 @@ Respect structure strictly.
 <!-- Start screen / player entry (safe to redesign completely) -->
 <div id="startScreen">
   <div class="start-content">
-    <h1 class="title">THE COMMAND NEXUS</h1>
-    <h2 class="subtitle">Collect. Analyze. Stabilize.</h2>
+    <h1 class="title">THE EXCHANGE CITADEL</h1>
+    <h2 class="subtitle">Trade. Capital. Grow.</h2>
     <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
-    <button class="start-btn" onclick="startGame()">ENTER THE NEXUS</button>
+    <button class="start-btn" onclick="startGame()">ENTER THE CITADEL</button>
   </div>
 </div>
 
@@ -1872,29 +1901,29 @@ or simplify this section.
 
     <!-- Top panel: progress track + artifact vault -->
     <div class="top-panel">
-       <div class="top-title">The Command Nexus</div>
+       <div class="top-title">The Exchange Citadel</div>
         <div id="mazeTrackContainer">
             <div id="mazeTrack"></div>
         </div>
 
         <!-- Artifact slots (IDs must match unlock system in JS) -->
-        <div id="artifactVault">
-            <h3>Acquired Artifacts</h3>
-            <div class="vaultRow">
-                <div id="vaultAtlas" class="artifactSlot">
-                    <img src="atlas.png">
-                    <span>The Atlas of Demand</span>
-                </div>
-                <div id="vaultDial" class="artifactSlot">
-                    <img src="dial.png">
-                    <span>The Calibrated Dial</span>
-                </div>
-                <div id="vaultLens" class="artifactSlot">
-                    <img src="lens.png">
-                    <span>The Stabilizer's Lens</span>
-                </div>
-            </div>
-        </div>
+		<div id="artifactVault">
+		    <h3>Acquired Artifacts</h3>
+ 		 	  <div class="vaultRow">
+   		     <div id="vaultLedger" class="artifactSlot">
+          	  <img src="ledger.png">
+           	 <span>National Ledger</span>
+        	</div>
+       		 <div id="vaultPolicy" class="artifactSlot">
+       	     <img src="charter.png">
+            <span>Policy Charter</span>
+      	  </div>
+      	  <div id="vaultPen" class="artifactSlot">
+            <img src="pen.png">
+            <span>Pen of Exchange</span>
+       		 </div>
+  		  </div>
+		</div>
     </div>
 
     <!-- MAIN PANEL -->
@@ -1902,14 +1931,14 @@ or simplify this section.
     <div class="main-panel">
         <div id="gameShell">
             <div id="wizardBox">
-                <div id="wizardName">The Analyst</div>
-                <img src="analyst.png" id="wizardImage">
+                <div id="wizardName">The Skybroker</div>
+                <img src="skybroker.png" id="wizardImage">
             </div>
 
             <!-- GAME -->
             <!-- Dynamic question + answer rendering (DO NOT rename IDs) -->
             <div id="gameBox">
-                <div id="autosave">💾 System Saved</div>
+                <div id="autosave">💾 Route Preserved</div>
                 <p id="areaDisplay" class="area-title"></p>
 
                 <div id="progressBar">
@@ -2206,7 +2235,7 @@ function getTypeBucket(tag, type){
     }
     return tagBucket.byType[key];
 }
-
+	 
 function inferObjective(question){
     if(!question) return "general";
     if(question.objective) return question.objective;
@@ -2215,97 +2244,103 @@ function inferObjective(question){
     const tag = (question.tag || "general").toLowerCase();
     const type = (question.type || "default").toLowerCase();
 
-  // =============================================
-// COMMAND NEXUS OBJECTIVE INFERENCE
-// Chapters 12–13: IS-LM, shocks, policy, AD, Great Depression
-// =============================================
+    // =============================================
+    // EXCHANGE CITADEL OBJECTIVE INFERENCE
+    // Chapters 6 & 14: Open economy, trade balance,
+    // exchange rates, Mundell-Fleming, small open economy AD
+    // =============================================
 
-if(tag === "is" || tag === "is_curve" || tag === "goods_market" || tag === "keynesian_cross" || tag === "loanable_funds"){
-    if(q.includes("keynesian cross") || q.includes("planned expenditure") || q.includes("expenditure")) return "LO12.1_keynesian_cross";
-    if(q.includes("loanable funds") || q.includes("saving") || q.includes("investment")) return "LO12.1_loanable_funds";
-    if(q.includes("is curve") || q.includes("is-curve")) return "LO12.1_is_curve";
-    if(q.includes("interest rate") && q.includes("investment")) return "LO12.1_interest_investment_link";
-    if(q.includes("fiscal policy") || q.includes("government purchases") || q.includes("government spending") || q.includes("tax")) return "LO12.1_fiscal_shift_is";
-    if(q.includes("shift right") || q.includes("rightward")) return "LO12.1_is_shift_right";
-    if(q.includes("shift left") || q.includes("leftward")) return "LO12.1_is_shift_left";
-    return "LO12.1_is_curve";
-}
+    if(tag === "identity" || tag === "identities" || tag === "accounting" || tag === "national_accounts" || tag === "open_economy_identity"){
+        if(q.includes("s = i + nco") || q.includes("saving equals investment plus net capital outflow")) return "LO6.1_saving_investment_nco_identity";
+        if(q.includes("nx = nco") || q.includes("net exports equal net capital outflow")) return "LO6.1_nx_nco_identity";
+        if(q.includes("y = c + i + g + nx") || q.includes("national income identity")) return "LO6.1_national_income_identity";
+        if(q.includes("accounting identity") || q.includes("identity")) return "LO6.1_accounting_identities";
+        if(q.includes("solve") || q.includes("calculate") || q.includes("given")) return "LO6.2_apply_accounting_identities";
+        return "LO6.1_accounting_identities";
+    }
 
-if(tag === "lm" || tag === "lm_curve" || tag === "money_market" || tag === "liquidity_preference" || tag === "interest_rate"){
-    if(q.includes("liquidity preference") || q.includes("money demand")) return "LO12.2_liquidity_preference";
-    if(q.includes("money supply")) return "LO12.2_money_supply";
-    if(q.includes("lm curve") || q.includes("lm-curve")) return "LO12.2_lm_curve";
-    if(q.includes("income") && q.includes("money demand")) return "LO12.2_income_money_demand";
-    if(q.includes("interest rate") && q.includes("money demand")) return "LO12.2_interest_money_demand";
-    if(q.includes("open market purchase") || q.includes("buys bonds") || q.includes("monetary expansion")) return "LO12.2_monetary_expansion_lm";
-    if(q.includes("open market sale") || q.includes("sells bonds") || q.includes("monetary contraction")) return "LO12.2_monetary_contraction_lm";
-    if(q.includes("shift right") || q.includes("rightward")) return "LO12.2_lm_shift_right";
-    if(q.includes("shift left") || q.includes("leftward")) return "LO12.2_lm_shift_left";
-    return "LO12.2_lm_curve";
-}
+    if(tag === "saving" || tag === "investment" || tag === "capital_flows" || tag === "nco" || tag === "net_capital_outflow"){
+        if(q.includes("net capital outflow") || q.includes("nco")) return "LO6.2_net_capital_outflow";
+        if(q.includes("saving") && q.includes("investment")) return "LO6.2_saving_investment_relationship";
+        if(q.includes("capital outflow") || q.includes("capital inflow")) return "LO6.2_capital_flow_application";
+        if(q.includes("domestic saving") || q.includes("national saving")) return "LO6.2_national_saving";
+        if(q.includes("world interest rate") || q.includes("r*")) return "LO6.3_world_interest_rate";
+        return "LO6.2_apply_accounting_identities";
+    }
 
-if(tag === "is_lm" || tag === "islm" || tag === "equilibrium" || tag === "short_run_equilibrium"){
-    if(q.includes("intersection") || q.includes("equilibrium")) return "LO12.3_is_lm_equilibrium";
-    if(q.includes("income") && q.includes("interest rate")) return "LO12.3_income_interest_equilibrium";
-    if(q.includes("fixed price level") || q.includes("price level fixed")) return "LO12.3_fixed_price_level";
-    if(q.includes("short run")) return "LO12.3_short_run_equilibrium";
-    if(q.includes("output") && q.includes("interest rate")) return "LO12.3_output_interest_rate";
-    return "LO12.3_is_lm_equilibrium";
-}
+    if(tag === "small_open" || tag === "small_open_economy" || tag === "world_interest_rate" || tag === "r_star"){
+        if(q.includes("small open economy") || q.includes("small economy")) return "LO6.3_small_open_economy";
+        if(q.includes("world interest rate") || q.includes("takes the interest rate") || q.includes("r*")) return "LO6.3_takes_world_interest_rate";
+        if(q.includes("cannot affect") || q.includes("too small")) return "LO6.3_small_country_assumption";
+        return "LO6.3_small_open_economy";
+    }
 
-if(tag === "shocks" || tag === "shock" || tag === "business_cycle" || tag === "instability"){
-    if(q.includes("negative demand shock") || q.includes("fall in consumption") || q.includes("fall in investment")) return "LO13.1_negative_demand_shock";
-    if(q.includes("positive demand shock") || q.includes("rise in consumption") || q.includes("rise in investment")) return "LO13.1_positive_demand_shock";
-    if(q.includes("is shifts left") || q.includes("is curve shifts left")) return "LO13.1_is_left_shock";
-    if(q.includes("is shifts right") || q.includes("is curve shifts right")) return "LO13.1_is_right_shock";
-    if(q.includes("lm shifts left") || q.includes("money supply falls")) return "LO13.1_lm_left_shock";
-    if(q.includes("lm shifts right") || q.includes("money supply rises")) return "LO13.1_lm_right_shock";
-    if(q.includes("income") && q.includes("interest rate")) return "LO13.1_shock_effects_income_interest";
-    return "LO13.1_is_lm_shocks";
-}
+    if(tag === "trade" || tag === "trade_balance" || tag === "net_exports" || tag === "nx" || tag === "exports" || tag === "imports"){
+        if(q.includes("trade surplus")) return "LO6.4_trade_surplus";
+        if(q.includes("trade deficit")) return "LO6.4_trade_deficit";
+        if(q.includes("balanced trade")) return "LO6.4_balanced_trade";
+        if(q.includes("net exports") || q.includes("nx")) return "LO6.4_net_exports";
+        if(q.includes("real exchange rate") || q.includes("nominal exchange rate")) return "LO6.4_exchange_rates";
+        if(q.includes("appreciation") || q.includes("depreciation")) return "LO6.4_exchange_rate_adjustment";
+        return "LO6.4_trade_balance_exchange_rates";
+    }
 
-if(tag === "fiscal" || tag === "fiscal_policy" || tag === "government_spending" || tag === "taxes"){
-    if(q.includes("government purchases") || q.includes("government spending")) return "LO13.2_government_spending";
-    if(q.includes("tax cut") || q.includes("tax decrease")) return "LO13.2_tax_cut";
-    if(q.includes("tax increase")) return "LO13.2_tax_increase";
-    if(q.includes("crowding out")) return "LO13.2_crowding_out";
-    if(q.includes("multiplier")) return "LO13.2_fiscal_multiplier";
-    if(q.includes("expansionary fiscal")) return "LO13.2_expansionary_fiscal_policy";
-    if(q.includes("contractionary fiscal")) return "LO13.2_contractionary_fiscal_policy";
-    if(q.includes("is curve") || q.includes("is shifts")) return "LO13.2_fiscal_policy_is_shift";
-    return "LO13.2_fiscal_policy";
-}
+    if(tag === "exchange" || tag === "exchange_rate" || tag === "real_exchange_rate" || tag === "nominal_exchange_rate" || tag === "currency"){
+        if(q.includes("real exchange rate")) return "LO6.4_real_exchange_rate";
+        if(q.includes("nominal exchange rate")) return "LO6.4_nominal_exchange_rate";
+        if(q.includes("appreciation") || q.includes("appreciates")) return "LO6.4_appreciation";
+        if(q.includes("depreciation") || q.includes("depreciates")) return "LO6.4_depreciation";
+        if(q.includes("net exports") || q.includes("trade balance")) return "LO6.4_exchange_rate_trade_balance";
+        return "LO6.4_exchange_rates";
+    }
 
-if(tag === "monetary" || tag === "monetary_policy" || tag === "fed" || tag === "money_supply"){
-    if(q.includes("increase money supply") || q.includes("monetary expansion") || q.includes("open market purchase") || q.includes("buys bonds")) return "LO13.3_expansionary_monetary_policy";
-    if(q.includes("decrease money supply") || q.includes("monetary contraction") || q.includes("open market sale") || q.includes("sells bonds")) return "LO13.3_contractionary_monetary_policy";
-    if(q.includes("lm curve") || q.includes("lm shifts")) return "LO13.3_monetary_policy_lm_shift";
-    if(q.includes("interest rate") && q.includes("investment")) return "LO13.3_interest_investment_channel";
-    if(q.includes("fed")) return "LO13.3_federal_reserve_policy";
-    return "LO13.3_monetary_policy";
-}
+    if(tag === "policy" || tag === "fiscal_policy" || tag === "trade_policy" || tag === "tariff" || tag === "quota" || tag === "capital_policy"){
+        if(q.includes("tariff") || q.includes("quota") || q.includes("import restriction")) return "LO6.5_trade_policy";
+        if(q.includes("budget deficit") || q.includes("government budget deficit")) return "LO6.5_budget_deficit";
+        if(q.includes("fiscal policy") || q.includes("government spending") || q.includes("tax cut") || q.includes("tax increase")) return "LO6.5_fiscal_policy_open_economy";
+        if(q.includes("capital flight")) return "LO6.5_capital_flight";
+        if(q.includes("trade balance") || q.includes("net exports")) return "LO6.5_policy_trade_balance";
+        if(q.includes("exchange rate") || q.includes("appreciation") || q.includes("depreciation")) return "LO6.5_policy_exchange_rate";
+        return "LO6.5_policy_effects_open_economy";
+    }
 
-if(tag === "aggregate_demand" || tag === "ad" || tag === "ad_curve" || tag === "price_level"){
-    if(q.includes("derive aggregate demand") || q.includes("derived from is-lm") || q.includes("derive ad")) return "LO13.4_derive_aggregate_demand";
-    if(q.includes("price level") && q.includes("money supply")) return "LO13.4_price_level_real_money_balances";
-    if(q.includes("price level") && q.includes("lm")) return "LO13.4_price_level_lm_shift";
-    if(q.includes("price level") && q.includes("income")) return "LO13.4_price_level_income_relationship";
-    if(q.includes("aggregate demand") || q.includes("ad curve")) return "LO13.4_aggregate_demand_curve";
-    if(q.includes("downward sloping")) return "LO13.4_downward_sloping_ad";
-    return "LO13.4_aggregate_demand";
-}
+    if(tag === "mundell" || tag === "mundell_fleming" || tag === "mf" || tag === "open_economy_model" || tag === "is_lm_open"){
+        if(q.includes("mundell-fleming") || q.includes("mundell fleming")) return "LO14.1_mundell_fleming_model";
+        if(q.includes("is*") || q.includes("is star") || q.includes("is curve")) return "LO14.1_is_star_curve";
+        if(q.includes("lm*") || q.includes("lm star") || q.includes("lm curve")) return "LO14.1_lm_star_curve";
+        if(q.includes("small open economy")) return "LO14.1_small_open_mundell_fleming";
+        if(q.includes("floating") || q.includes("fixed")) return "LO14.3_exchange_rate_regime";
+        return "LO14.1_mundell_fleming_model";
+    }
 
-if(tag === "depression" || tag === "great_depression" || tag === "crisis" || tag === "deflation"){
-    if(q.includes("spending hypothesis")) return "LO13.5_spending_hypothesis";
-    if(q.includes("money hypothesis")) return "LO13.5_money_hypothesis";
-    if(q.includes("deflation")) return "LO13.5_deflation_effects";
-    if(q.includes("debt-deflation") || q.includes("debt deflation")) return "LO13.5_debt_deflation";
-    if(q.includes("bank failure") || q.includes("banking panic")) return "LO13.5_banking_crisis";
-    if(q.includes("great depression")) return "LO13.5_great_depression";
-    if(q.includes("is curve")) return "LO13.5_depression_is_shift";
-    if(q.includes("lm curve")) return "LO13.5_depression_lm_shift";
-    return "LO13.5_great_depression_theories";
-}
+    if(tag === "interest_differential" || tag === "interest_rate_differential" || tag === "risk_premium" || tag === "expected_depreciation" || tag === "capital_mobility"){
+        if(q.includes("risk premium")) return "LO14.2_risk_premium";
+        if(q.includes("expected depreciation") || q.includes("expected appreciation")) return "LO14.2_expected_exchange_rate_change";
+        if(q.includes("interest rate differential") || q.includes("interest differential")) return "LO14.2_interest_rate_differential";
+        if(q.includes("capital mobility") || q.includes("capital flows")) return "LO14.2_capital_mobility";
+        if(q.includes("domestic interest rate") && q.includes("world interest rate")) return "LO14.2_domestic_world_interest_gap";
+        return "LO14.2_interest_rate_differentials";
+    }
+
+    if(tag === "fixed" || tag === "floating" || tag === "exchange_regime" || tag === "fixed_exchange_rate" || tag === "floating_exchange_rate" || tag === "central_bank"){
+        if(q.includes("fixed exchange rate") || q.includes("fixed regime")) return "LO14.3_fixed_exchange_rate";
+        if(q.includes("floating exchange rate") || q.includes("floating regime")) return "LO14.3_floating_exchange_rate";
+        if(q.includes("monetary policy") && q.includes("fixed")) return "LO14.3_monetary_policy_fixed";
+        if(q.includes("monetary policy") && q.includes("floating")) return "LO14.3_monetary_policy_floating";
+        if(q.includes("fiscal policy") && q.includes("fixed")) return "LO14.3_fiscal_policy_fixed";
+        if(q.includes("fiscal policy") && q.includes("floating")) return "LO14.3_fiscal_policy_floating";
+        if(q.includes("central bank") || q.includes("foreign exchange reserves")) return "LO14.3_exchange_rate_intervention";
+        return "LO14.3_fixed_vs_floating_exchange_rates";
+    }
+
+    if(tag === "ad" || tag === "aggregate_demand" || tag === "ad_curve" || tag === "small_open_ad" || tag === "price_level"){
+        if(q.includes("derive aggregate demand") || q.includes("derive ad")) return "LO14.4_derive_ad_small_open_economy";
+        if(q.includes("price level") && q.includes("exchange rate")) return "LO14.4_price_level_exchange_rate_channel";
+        if(q.includes("price level") && q.includes("net exports")) return "LO14.4_price_level_net_exports";
+        if(q.includes("small open economy") && q.includes("aggregate demand")) return "LO14.4_small_open_ad_curve";
+        if(q.includes("downward sloping")) return "LO14.4_downward_sloping_ad";
+        return "LO14.4_ad_curve_small_open_economy";
+    }
 
     return `${tag}_${type}`;
 }
@@ -2795,21 +2830,21 @@ const TIMING = {
 // Do NOT remove bossHealth logic.
      
 const artifacts = {
-    atlas:{
-        img:"atlas.png",
-        title:"The Atlas of Demand",
-        text:"The first map locks into place. Spending, investment, and interest-rate pressure no longer scatter across the table. You can trace the path of demand and see where output begins to move."
-    },
-    dial:{
-        img:"dial.png",
-        title:"The Calibrated Dial",
-        text:"The rate holds steady under pressure. Money demand, money supply, income, and interest now answer to the same mechanism. The short-run system can be adjusted without guessing."
-    },
-    lens:{
-        img:"lens.png",
-        title:"The Stabilizer’s Lens",
-        text:"The shock is no longer hidden. Fiscal force, monetary response, aggregate demand, and crisis signals come into focus. The Nexus does not promise certainty. It reveals the pressure points."
-    }
+ledger:{
+    img:"ledger.png",
+    title:"The National Ledger",
+    text:"The accounts now balance. Savings, investment, trade, and capital flows are no longer scattered entries—they are one system."
+},
+charter:{
+    img:"charter.png",
+    title:"The Chancellor’s Policy Charter",
+    text:"Policy now has form and force. Taxes, spending, and capital rules ripple through trade balances, exchange rates, and national income."
+},
+pen:{
+    img:"exchange.png",
+    title:"The Pen of Exchange",
+    text:"With a single stroke, trade can be reconciled, deficits explained, and exchange restored. The world ledger bends toward balance."
+}
 };
   
 // =============================================
@@ -2866,7 +2901,7 @@ function startGame() {
     let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
 
     if (!inputEmail) {
-        alert("An email is required to enter the Nexus.");
+        alert("An email is required to enter the Citadel.");
         return;
     }
 
@@ -2890,7 +2925,7 @@ function startGame() {
 
     sendGameData({
         runID: runID,
-        game: "The Command Nexus",
+        game: "The Exchange Citadel",
         event: "start",
         user: username,
         email: studentEmail
@@ -2917,11 +2952,11 @@ function startGame() {
 
     localStorage.removeItem("gauntletRoom");
 
-    // Command Nexus artifact keys — keep these matched to your actual Command Nexus IDs.
-    localStorage.removeItem("vaultAtlas");
-    localStorage.removeItem("vaultDial");
-    localStorage.removeItem("vaultLens");
-
+    // Exchange Citadel artifact keys — keep these matched to your actual Exchange Citadel IDs.
+	localStorage.removeItem("vaultLedger");
+	localStorage.removeItem("vaultCharter");
+	localStorage.removeItem("vaultPen");
+	
     questionHistory = {
         easy: [], medium: [], hard: [], elite: [], calculation: [],
         easyBoss: [], mediumBoss: [], finalBoss: []
@@ -2947,17 +2982,17 @@ function startGame() {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-    if(localStorage.getItem("vaultAtlas")){
-        document.getElementById("vaultAtlas").classList.add("unlocked");
-    }
+if(localStorage.getItem("vaultLedger")){
+    document.getElementById("vaultLedger").classList.add("unlocked");
+}
 
-    if(localStorage.getItem("vaultDial")){
-        document.getElementById("vaultDial").classList.add("unlocked");
-    }    
+if(localStorage.getItem("vaultCharter")){
+    document.getElementById("vaultCharter").classList.add("unlocked");
+}    
 
-    if(localStorage.getItem("vaultLens")){
-        document.getElementById("vaultLens").classList.add("unlocked");
-    }
+if(localStorage.getItem("vaultPen")){
+    document.getElementById("vaultPen").classList.add("unlocked");
+}
   
 // Start game loop: music + timer + first question
     bgMusic.play().catch(e => console.log("Audio started"));
@@ -2996,13 +3031,13 @@ document.getElementById("emailInput").addEventListener("keypress", function(even
 // This affects UI only, not game logic.
 // =============================================
 function getAreaName(r) {
-    if (r <= 9) return "The Demand Maps";
-    if (r === 10) return "The Cartographer’s Table";
-    if (r <= 19) return "The Rateworks";
-    if (r === 20) return "The Engineer’s Dial";
-    if (r <= 25) return "The Policy Channel";
-    if (r <= 29) return "The Forecast Array";
-    return "The Nexus Core";
+    if (r <= 9) return "The Account Halls";
+    if (r === 10) return "The Keeper’s Ledger";
+    if (r <= 19) return "The Trade Causeway";
+    if (r === 20) return "The Chancellor’s Table";
+    if (r <= 25) return "The Exchange Ramparts";
+    if (r <= 29) return "The Mundell-Fleming Spire";
+    return "The Imperial Exchange";
 }
 	 
 // =============================================
@@ -3027,52 +3062,52 @@ function getAreaName(r) {
 // =============================================
 const wizardFeedback = {
     correct: [
-        "Signal holds.",
-        "That stabilizes the model.",
-        "Good. The system responds.",
-        "Clean adjustment.",
-        "The Nexus accepts it."
+        "The route holds.",
+        "Good. The flows align.",
+        "That balances cleanly.",
+        "Correct. The Citadel recognizes the exchange.",
+        "Well read. The ledger accepts it."
     ],
     wrong: [
-        "That destabilizes the system.",
-        "No. That shifts the wrong curve.",
-        "Bad read. Recalibrate.",
-        "You just moved the economy the wrong way.",
-        "The model rejects that."
+        "No. That route collapses.",
+        "Careful. You crossed the wrong border.",
+        "That imbalance will not clear.",
+        "Bad read. The flows move elsewhere.",
+        "The Citadel rejects that exchange."
     ]
 };
 
 const wizardLines = {
     definition: [
-        "Name the mechanism.",
-        "Start with the structure.",
-        "Define it before you break it.",
-        "Classify the signal."
+        "Name the identity.",
+        "Start with the balance.",
+        "Define the flow before you follow it.",
+        "Classify the transaction."
     ],
     interpretation: [
-        "Trace the shift.",
-        "Follow the pressure.",
-        "Read the adjustment.",
-        "What changes next?"
+        "Trace the capital movement.",
+        "Follow the trade pressure.",
+        "Read the exchange adjustment.",
+        "What crosses the border next?"
     ],
     trap: [
-        "That answer is bait.",
-        "Do not confuse movement with cause.",
-        "Slow down. The curve is lying to you.",
-        "Audit the assumption.",
-        "Find the hidden shift."
+        "That answer is dressed like a treaty.",
+        "Do not confuse the flow with the balance.",
+        "Slow down. The exchange rate is baiting you.",
+        "Audit the border crossing.",
+        "Find the hidden capital movement."
     ],
     calculation: [
-        "Compute before you command.",
-        "Numbers first. Then policy.",
-        "Calibrate the rate.",
-        "Solve the mechanism."
+        "Balance the accounts.",
+        "Compute the flow before you price it.",
+        "Set the exchange cleanly.",
+        "Numbers first. Then the world moves."
     ],
     default: [
         "Decide.",
         "Commit.",
         "Proceed.",
-        "Enter your command."
+        "Make the exchange."
     ]
 };
      
@@ -3901,18 +3936,18 @@ function updateMazeTrack() {
         
         // Determine the icon and state
         if (i < room) {
-            box.innerText = "🟩";
+            box.innerText = "⬜";
             box.style.opacity = "0.6";
         } else if (i === room) {
             box.classList.add("active"); // Trigger the blue pulse
             box.setAttribute("aria-label",`Current room ${i} of 30`);
-            box.innerText = "🟦";
+            box.innerText = "🟨";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="cartographer.png" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="engineer.png" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="forecaster.png" class="boss-icon">';box.classList.add("boss30");}
-            else box.innerText = "⬛";
+            if (i === 10){box.innerHTML = '<img src="keeper.png" class="boss-icon">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="chancellor.png" class="boss-icon">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="emperor.png" class="boss-icon">';box.classList.add("boss30");}
+            else box.innerText = "🟪";
         }
         
         track.appendChild(box);
@@ -4135,13 +4170,13 @@ function loadQuestion() {
 		}
 
         // 3. Boss Identity UI (Logic moved ABOVE the return)
-        let bTitle = room === 10 ? "THE DEMAND CARTOGRAPHER"
-               : room === 20 ? "THE RATE ENGINEER"
-               : "THE SHOCK FORECASTER";
+		let bTitle = room === 10 ? "THE KEEPER OF ACCOUNT IDENTITIES"
+       		: room === 20 ? "THE TRADE CHANCELLOR"
+      		 : "THE EMPEROR OF EXCHANGE";
 
-        let bColor = room === 10 ? "#f0c86a"
-               : room === 20 ? "#6eb4ff"
-               : "#991b1b";
+		let bColor = room === 10 ? "#f0c86a"
+      		 : room === 20 ? "#f5e6b8"
+      		 : "#7c3aed";
        
         document.getElementById("srAnnouncements").innerText =`Boss encounter. ${bTitle}. Prepare yourself`;
         bossMsg.innerText = "⚠ BOSS ENCOUNTER ⚠";
@@ -4162,16 +4197,16 @@ function loadQuestion() {
 // =============================================
         
     if(room === 10){
-        bossImage = "cartographer.png";
-        bossClass = "cartographerGlow";
+        bossImage = "keeper.png";
+        bossClass = "keeperGlow";
     }
     else if(room === 20){
-        bossImage = "engineer.png";
-        bossClass = "engineerGlow";
+        bossImage = "chancellor.png";
+        bossClass = "chancellorGlow";
     }
     else{
-        bossImage = "forecaster.png";
-        bossClass = "forecasterGlow";
+        bossImage = "emperor.png";
+        bossClass = "emperorGlow";
     }
 
         questionElement.innerHTML = `
@@ -4368,7 +4403,7 @@ function answer(choice) {
     // =============================================
     sendGameData({
         runID: runID,
-		game: "The Command Nexus",
+		game: "The Exchange Citadel",
         event: "question",
         user: username || "anonymous",
 		email: studentEmail || "",
@@ -4379,10 +4414,10 @@ function answer(choice) {
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
         responseTime: responseTime,
-	     attempt: totalAttempts ?? 0,
-		  streak: streak ?? 0,
-		  elapsedTime: startTime ? (Date.now() - startTime) : 0,
-          adaptiveMode: adaptiveMode
+	    attempt: totalAttempts ?? 0,
+		streak: streak ?? 0,
+		elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        adaptiveMode: adaptiveMode
     });
 
     // =============================================
@@ -4470,7 +4505,7 @@ if(remediationState.active){
     adaptiveMode = "support";
 
     msgElement.innerHTML =
-        `<span class='fade-out-text'>Recovery confirmed. Return to the Nexus.</span>`;
+        `<span class='fade-out-text'>Recovery confirmed. Return to the Citadel.</span>`;
 
     room = returnRoom;
     localStorage.setItem("gauntletRoom", room);
@@ -4502,7 +4537,7 @@ if(remediationState.active){
          // Boss defeated
          sendGameData({
             runID: runID,
-			game: "The Command Nexus",
+			game: "The Exchange Citadel",
             event: "boss_defeated",
             user: username,
 			email: studentEmail,
@@ -4512,23 +4547,23 @@ if(remediationState.active){
          bossPool = [];
            
         // Boss defeated (CHANGE ARTIFACT NAMES)
-        if(room === 10){
-        document.getElementById("vaultAtlas").classList.add("unlocked");
-        localStorage.setItem("vaultAtlas", "true");
-        showArtifact(artifacts.atlas.img, artifacts.atlas.title, artifacts.atlas.text);
-        }
+if(room === 10){
+    document.getElementById("vaultLedger").classList.add("unlocked");
+    localStorage.setItem("vaultLedger", "true");
+    showArtifact(artifacts.ledger.img, artifacts.ledger.title, artifacts.ledger.text);
+}
 
-        if(room === 20){
-        document.getElementById("vaultDial").classList.add("unlocked");
-        localStorage.setItem("vaultDial", "true");
-        showArtifact(artifacts.dial.img, artifacts.dial.title, artifacts.dial.text);
-        }
+if(room === 20){
+    document.getElementById("vaultCharter").classList.add("unlocked");
+    localStorage.setItem("vaultCharter", "true");
+    showArtifact(artifacts.charter.img, artifacts.charter.title, artifacts.charter.text);
+}
 
-        if(room === 30){
-        document.getElementById("vaultLens").classList.add("unlocked");
-        localStorage.setItem("vaultLens", "true");
-        showArtifact(artifacts.lens.img, artifacts.lens.title, artifacts.lens.text);
-        }
+if(room === 30){
+    document.getElementById("vaultPen").classList.add("unlocked");
+    localStorage.setItem("vaultPen", "true");
+    showArtifact(artifacts.pen.img, artifacts.pen.title, artifacts.pen.text);
+}
 
 // ... (Inside the Boss Victory check)
         showKnowledgeRoom(room);
@@ -4622,7 +4657,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
         const remediationMessage = remediationState.careless
             ? "You rushed the choice. Slow down and regain control."
             : remediationState.slowStruggle
-                ? "The Nexus resists. Rebuild the concept before advancing."
+                ? "The Citadel resists. Rebuild the concept before advancing."
                 : "Your control fractured. Repair the weakness before moving on.";
 
         msgElement.innerHTML =
@@ -4702,16 +4737,16 @@ function handleStreakVisuals() {
     let streakColor = "#f0c86a";
 
     if (streak === 5) {
-        streakMsg = `<span class="streak"><img src="streakspark.png" class="streak-icon">SPARK OF RECOVERY</span>`;
-        streakColor = "#6eb4ff";
-    }
-    else if (streak === 10) {
-        streakMsg = `<span class="streak"><img src="streakgear.png" class="streak-icon">GEAR OF MOMENTUM</span>`;
+        streakMsg = `<span class="streak"><img src="streakcoin.png" class="streak-icon">COIN OF PASSAGE</span>`;
         streakColor = "#f0c86a";
     }
+    else if (streak === 10) {
+        streakMsg = `<span class="streak"><img src="streakbill.png" class="streak-icon">BILL OF LADING</span>`;
+        streakColor = "#f5e6b8";
+    }
     else if (streak === 20) {
-        streakMsg = `<span class="streak"><img src="streaksignal.png" class="streak-icon">SIGNAL OF COMMAND</span>`;
-        streakColor = "#9fc7f5";
+        streakMsg = `<span class="streak"><img src="streakquill.png" class="streak-icon">PARITY QUILL</span>`;
+        streakColor = "#c4b5fd";
     }
 
     if (streakMsg) {
@@ -4723,7 +4758,7 @@ function handleStreakVisuals() {
         document.getElementById("streakDisplay").innerText = `Streak: ${streak}`;
         document.getElementById("streakDisplay").style.color = "#f0c86a";
     }
-} 
+}
 
 // =============================================
 // TRANSITION SCREEN — SAFE TO CUSTOMIZE
@@ -4745,17 +4780,17 @@ function showHallwayTransition(feedback){
 // pick a random hallway image
     const randomHall = hallwayImages[Math.floor(Math.random()*hallwayImages.length)];
 
-    overlay.style.background =
-    `linear-gradient(rgba(0,0,0,.7),rgba(0,0,0,.7)), url('${randomHall}')`;
+overlay.style.background =
+`linear-gradient(rgba(5,3,18,.64),rgba(5,3,18,.82)), url('${randomHall}')`;
 
     overlay.style.backgroundSize = "cover";
     overlay.style.backgroundPosition = "center";
 
-    text.innerHTML = `
-    <div style="font-size:22px;margin-bottom:15px;color:#4ade80;">${getWizardFeedback("correct")}</div>
-    <div style="font-size:18px;opacity:.9;">${feedback}</div>
-    <div style="margin-top:25px;font-size:14px;opacity:.7;">You move deeper into the Nexus...</div>
-    `;
+text.innerHTML = `
+<div style="font-size:22px;margin-bottom:15px;color:#f0c86a;text-shadow:0 0 10px rgba(240,200,106,0.36);">${getWizardFeedback("correct")}</div>
+<div style="font-size:18px;opacity:.92;color:#f5e6b8;">${feedback}</div>
+<div style="margin-top:25px;font-size:14px;opacity:.74;color:#c4b5fd;">You cross deeper into the Exchange Citadel...</div>
+`;
 
     overlay.classList.add("active");
 
@@ -4878,16 +4913,16 @@ function showKnowledgeRoom(bossRoom) {
 // - actual boss encounters
 // =============================================    
 if (bossRoom === 10) {
-    title = "THE DEMAND CARTOGRAPHER YIELDS: THE MAP REALIGNS";
-    summary = "The charts settle into place. You have traced spending, investment, and interest-rate pressure through the IS curve, and mapped aggregate demand from scattered signals into command.";
+    title = "THE KEEPER OF ACCOUNT IDENTITIES YIELDS: THE LEDGER BALANCES";
+    summary = "The columns lock into place. You have traced saving, investment, net exports, and capital flows through the identities that bind the open economy together.";
 } 
 else if (bossRoom === 20) {
-    title = "THE RATE ENGINEER BOWS: THE DIAL HOLDS";
-    summary = "The gauges stop trembling. You have balanced money demand, money supply, income, and the interest rate through the LM curve, and forced the short-run system into alignment.";
+    title = "THE TRADE CHANCELLOR BOWS: THE POLICY GATES OPEN";
+    summary = "The diplomatic tables fall silent. You have followed tariffs, fiscal pressure, capital flows, and exchange-rate movements through the channels that reshape trade balances.";
 } 
 else if (bossRoom === 30) {
-    title = "THE SHOCK FORECASTER FALLS: THE NEXUS STABILIZES";
-    summary = "The forecasts break against reality. You have followed shocks through IS-LM, directed fiscal and monetary responses, derived aggregate demand, and read the failures that can drag an economy into crisis.";
+    title = "THE EMPEROR OF EXCHANGE FALLS: THE WORLDGATE STABILIZES";
+    summary = "The imperial pen strikes its final line. You have commanded interest differentials, fixed and floating exchange regimes, Mundell-Fleming pressure, and aggregate demand in the small open economy.";
 }
   
     // Update the UI
@@ -4898,7 +4933,7 @@ else if (bossRoom === 30) {
     
     // logic to ensure Room 30 triggers the end game, while 10 and 20 trigger the next level
     let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; loadQuestion();";
-    let buttonLabel = bossRoom === 30 ? "FINALIZE THE NEXUS CONQUEST →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
+    let buttonLabel = bossRoom === 30 ? "FINALIZE THE CITADEL CONQUEST →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
 
 aContainer.innerHTML = `
 <button id="continueBtn" class="continue-btn">
@@ -4953,9 +4988,9 @@ document.getElementById("continueBtn").onclick = () => {
 //
 // ---------------------------------------------
 // DO NOT CHANGE:
-// - string structure (name|acc|streak|total|ARCHIVE42)
+// - string structure (name|acc|streak|total|CITADEL00)
 // - hashing logic
-// - return format ("ARCH-...")
+// - return format ("CITADEL-...")
 //
 // Changing this WILL:
 // - invalidate all existing completion codes
@@ -4970,7 +5005,7 @@ document.getElementById("continueBtn").onclick = () => {
 // It is a lightweight integrity check.
 // =============================================
 function generateCode(name, acc, streak, total){
-    let str = `${name}|${acc}|${streak}|${total}|NEXUS99`;
+    let str = `${name}|${acc}|${streak}|${total}|CITADEL00`;
     let hash = 0;
 
     for(let i = 0; i < str.length; i++){
@@ -5026,7 +5061,7 @@ function handleVictory() {
 
 sendGameData({
     runID: runID,
-	game: "The Command Nexus",
+	game: "The Exchange Citadel",
     event: "complete",
     user: username,
 	email: studentEmail,
@@ -5062,13 +5097,13 @@ sendGameData({
 // =============================================
     let archivistLine = "";
     if(accuracy >= 90){
-        archivistLine = "You have mastered the Nexus. Few reach this level of clarity.";
+        archivistLine = "You have mastered the Citadel. Few reach this level of clarity.";
     }
     else if(accuracy >= 75){
-        archivistLine = "You see much… but not all. The Nexus still holds power over you.";
+        archivistLine = "You see much… but not all. The Citadel still holds power over you.";
     }
     else{
-        archivistLine = "You survived. Barely. The Nexus is not finished with you.";
+        archivistLine = "You survived. Barely. The Citadel is not finished with you.";
     }
 
     let lineColor = "#5123db";
@@ -5236,7 +5271,7 @@ function copyResults() {
         Best Streak: ${maxStreak}
         Total Questions: ${totalAttempts}
         Code: ${code}
-        Verified by The Anaylst`;
+        Verified by The Skybroker`;
 
     navigator.clipboard.writeText(shareText).then(() => {
         const btn = document.getElementById("shareBtn");
@@ -5258,9 +5293,9 @@ function sendGameData(data) {
     timestamp: new Date().toISOString(),
     runID: data.runID || localStorage.getItem("gauntletRunID") || "",
     token: data.token || "",
-    version: "NEXUS-engine-ms-telemetry-v1",
+    version: "Citadel-ms-telemetry-v1",
     userAgent: navigator.userAgent || "",
-    game: data.game || "The Command Nexus",
+    game: data.game || "The Exchange Citadel",
     event: data.event || "",
     user: data.user || username || "anonymous",
 	email: studentEmail || "",  
