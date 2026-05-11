@@ -2111,6 +2111,20 @@ let remediationState = {
 let conceptMemory = {};
 let masteryState = { byTag: {}, byObjective: {}, recent: [] };
 let adaptiveMode = "support";
+// =============================================
+// RAPID GUESSING / BUTTON-MASHING DETECTOR
+// =============================================
+let rapidGuessHistory = [];
+let rapidGuessWarnings = 0;
+let rapidGuessLocked = false;
+
+const RAPID_GUESS_CONFIG = {
+    windowSize: 8,          // look at last 8 attempts
+    minAttempts: 5,         // don't trigger until at least 5 recent attempts exist
+    avgTimeMs: 3000,        // average under 3 seconds = suspicious
+    maxAccuracy: 0.50,      // under 50% accuracy = not engaged
+    lockMs: 4500            // pause length
+};
 let tagHistory = [];
 let lastTypes = [];
 let easyCycle = 0 ;
@@ -2949,6 +2963,9 @@ function startGame() {
     lastTypes = [];
     adaptiveMode = "support";
     resetRemediationState();
+	rapidGuessHistory = [];
+	rapidGuessWarnings = 0;
+	rapidGuessLocked = false;
 
     localStorage.removeItem("gauntletRoom");
 
@@ -4355,6 +4372,44 @@ function displayQuestion() {
     });
 }
 
+function setAnswerButtonsDisabled(disabled){
+    document.querySelectorAll("#answers button").forEach(btn => {
+        btn.disabled = disabled;
+        btn.style.opacity = disabled ? "0.55" : "1";
+        btn.style.cursor = disabled ? "not-allowed" : "pointer";
+    });
+}
+
+function checkRapidGuessing(isCorrect, responseTime){
+    rapidGuessHistory.push({
+        correct: isCorrect ? 1 : 0,
+        responseTime: responseTime
+    });
+
+    if(rapidGuessHistory.length > RAPID_GUESS_CONFIG.windowSize){
+        rapidGuessHistory.shift();
+    }
+
+    if(rapidGuessHistory.length < RAPID_GUESS_CONFIG.minAttempts){
+        return {
+            triggered: false,
+            avgTime: responseTime,
+            accuracy: isCorrect ? 1 : 0
+        };
+    }
+
+    const recent = rapidGuessHistory.slice(-RAPID_GUESS_CONFIG.windowSize);
+
+    const avgTime = recent.reduce((sum, item) => sum + item.responseTime, 0) / recent.length;
+    const accuracy = recent.reduce((sum, item) => sum + item.correct, 0) / recent.length;
+
+    return {
+        triggered: avgTime < RAPID_GUESS_CONFIG.avgTimeMs && accuracy < RAPID_GUESS_CONFIG.maxAccuracy,
+        avgTime,
+        accuracy
+    };
+}
+
 // =============================================
 // ANSWER HANDLER — CRITICAL SYSTEM
 // =============================================
@@ -4383,11 +4438,67 @@ function answer(choice) {
     const isBossRoom = (room === 10 || room === 20 || room === 30);
     const msgElement = document.getElementById("message");
     const wizard = document.getElementById("wizardImage");
-    const isCorrect = (choice === currentQuestion.a);
-    const responseTime = Date.now() - questionStartTime;
+   const isCorrect = (choice === currentQuestion.a);
+const responseTime = Date.now() - questionStartTime;
 
-    recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
+// =============================================
+// RAPID GUESSING LOCKOUT
+// Catches button-mashing before it pollutes mastery,
+// streaks, normal question telemetry, or progression.
+// =============================================
+const rapidGuess = checkRapidGuessing(isCorrect, responseTime);
 
+if(rapidGuess.triggered && !rapidGuessLocked){
+    rapidGuessLocked = true;
+    rapidGuessWarnings++;
+    adaptiveMode = "non-engaged";
+
+    setAnswerButtonsDisabled(true);
+
+    msgElement.innerHTML =
+        `<span class='fade-out-text'>Slow down. Rapid guessing will not move you forward.</span>`;
+
+    sendGameData({
+        runID: runID,
+        game: "The Dominion of Power",
+        event: "rapid_guessing",
+        user: username || "anonymous",
+        email: studentEmail || "",
+        room: room,
+        questionId: currentQuestion.id || 0,
+        correct: isCorrect ? 1 : 0,
+        tag: currentQuestion.tag || "none",
+        type: currentQuestion.type || "none",
+        objective: currentQuestion.objective || inferObjective(currentQuestion),
+        responseTime: responseTime,
+        attempt: totalAttempts ?? 0,
+        streak: streak ?? 0,
+        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        adaptiveMode: adaptiveMode
+    });
+
+    // Give them a clean restart after the warning.
+    // Same question. No movement. No reward.
+    rapidGuessHistory = [];
+
+    setTimeout(() => {
+        rapidGuessLocked = false;
+        questionStartTime = Date.now();
+        displayQuestion();
+
+        if(rapidGuessWarnings >= 2){
+            msgElement.innerHTML =
+                `<span class='fade-out-text'>This is practice, not a slot machine. Read before answering.</span>`;
+        } else {
+            msgElement.innerHTML =
+                `<span class='fade-out-text'>Try again. Read the question carefully.</span>`;
+        }
+    }, RAPID_GUESS_CONFIG.lockMs);
+
+    return;
+}
+
+recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     // =============================================
     // 🔥 UPDATE STREAK FIRST (SOURCE OF TRUTH)
     // =============================================
