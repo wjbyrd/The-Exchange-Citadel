@@ -200,6 +200,13 @@ body::after{
   max-width:320px;
 }
 
+.secondary-start-btn{
+    margin-top: 10px;
+    background: linear-gradient(180deg, #2e1065, #050312);
+    border-color: rgba(240,200,106,0.56);
+    color: #fff7d6;
+}
+
 /* PLACEHOLDER */
 #emailInput::placeholder,
 #username::placeholder{
@@ -1868,7 +1875,14 @@ Respect structure strictly.
     <h1 class="title">THE EXCHANGE CITADEL</h1>
     <h2 class="subtitle">Trade. Capital. Grow.</h2>
     <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
-    <button class="start-btn" onclick="startGame()">ENTER THE CITADEL</button>
+    <button class="start-btn" onclick="startNewRun()">ENTER THE CITADEL</button>
+
+    <button id="continueRunBtn"
+            class="start-btn secondary-start-btn"
+            onclick="continueSavedRun()"
+            style="display:none;">
+        CONTINUE CITADEL RUN
+    </button>
   </div>
 </div>
 
@@ -1914,7 +1928,7 @@ or simplify this section.
           	  <img src="ledger.png">
            	 <span>National Ledger</span>
         	</div>
-       		 <div id="vaultPolicy" class="artifactSlot">
+       		 <div id="vaultCharter" class="artifactSlot">
        	     <img src="charter.png">
             <span>Policy Charter</span>
       	  </div>
@@ -1938,7 +1952,7 @@ or simplify this section.
             <!-- GAME -->
             <!-- Dynamic question + answer rendering (DO NOT rename IDs) -->
             <div id="gameBox">
-                <div id="autosave">💾 Route Preserved</div>
+                <div id="autosave">💾 Route Saved Locally</div>
                 <p id="areaDisplay" class="area-title"></p>
 
                 <div id="progressBar">
@@ -2148,6 +2162,116 @@ let questionHistory = {
     mediumBoss: [],
     finalBoss: [],
 };
+
+const SAVE_KEY = "exchangeCitadelSave_v1";
+
+function saveGameState(){
+    const saveData = {
+        room,
+        bossHealth,
+        bossCheckpoint,
+        correctAnswers,
+        totalAttempts,
+        maxStreak,
+        streak,
+        username,
+        studentEmail,
+        runID,
+        conceptMemory,
+        masteryState,
+        adaptiveMode,
+        tagHistory,
+        lastTypes,
+        usedQuestions,
+        questionHistory,
+        rapidGuessHistory,
+        rapidGuessWarnings,
+        rapidGuessLocked,
+        remediationState,
+        detourActive,
+        detourReturnRoom,
+        savedAt: Date.now(),
+
+        artifacts: {
+            vaultLedger: localStorage.getItem("vaultLedger") === "true",
+            vaultCharter: localStorage.getItem("vaultCharter") === "true",
+            vaultPen: localStorage.getItem("vaultPen") === "true"
+        }
+    };
+
+    localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
+    localStorage.setItem("gauntletRoom", String(room));
+
+    const autosave = document.getElementById("autosave");
+    if(autosave){
+        autosave.innerText = "💾 Route Saved Locally";
+    }
+}
+
+function loadSavedGame(){
+    const rawSave = localStorage.getItem(SAVE_KEY);
+    if(!rawSave) return false;
+
+    try {
+        const saveData = JSON.parse(rawSave);
+
+        room = Number(saveData.room || 1);
+        bossHealth = Number(saveData.bossHealth || 3);
+        bossCheckpoint = Number(saveData.bossCheckpoint || 1);
+        correctAnswers = Number(saveData.correctAnswers || 0);
+        totalAttempts = Number(saveData.totalAttempts || 0);
+        maxStreak = Number(saveData.maxStreak || 0);
+        streak = Number(saveData.streak || 0);
+
+        username = saveData.username || username || "";
+        studentEmail = saveData.studentEmail || studentEmail || "";
+        runID = saveData.runID || runID || "";
+
+        conceptMemory = saveData.conceptMemory || {};
+        masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, recent: [] };
+        if(!masteryState.byTag) masteryState.byTag = {};
+        if(!masteryState.byObjective) masteryState.byObjective = {};
+        if(!masteryState.recent) masteryState.recent = [];
+
+        adaptiveMode = saveData.adaptiveMode || "support";
+        tagHistory = saveData.tagHistory || [];
+        lastTypes = saveData.lastTypes || [];
+
+        usedQuestions = saveData.usedQuestions || usedQuestions;
+        questionHistory = saveData.questionHistory || questionHistory;
+
+        rapidGuessHistory = saveData.rapidGuessHistory || [];
+        rapidGuessWarnings = Number(saveData.rapidGuessWarnings || 0);
+        rapidGuessLocked = !!saveData.rapidGuessLocked;
+
+        remediationState = saveData.remediationState || remediationState;
+        detourActive = !!saveData.detourActive;
+        detourReturnRoom = saveData.detourReturnRoom || null;
+
+        if(saveData.artifacts?.vaultLedger) localStorage.setItem("vaultLedger", "true");
+        if(saveData.artifacts?.vaultCharter) localStorage.setItem("vaultCharter", "true");
+        if(saveData.artifacts?.vaultPen) localStorage.setItem("vaultPen", "true");
+
+        return true;
+    } catch(error){
+        console.warn("Saved game could not be loaded:", error);
+        localStorage.removeItem(SAVE_KEY);
+        return false;
+    }
+}
+
+function clearSavedGame(){
+    localStorage.removeItem(SAVE_KEY);
+    localStorage.removeItem("gauntletRoom");
+    localStorage.removeItem("vaultLedger");
+    localStorage.removeItem("vaultCharter");
+    localStorage.removeItem("vaultPen");
+
+    ["vaultLedger", "vaultCharter", "vaultPen"].forEach(id => {
+        const slot = document.getElementById(id);
+        if(slot) slot.classList.remove("unlocked");
+    });
+}
 
 function generatePseudonymFromEmail(email) {
     const adjectives = [
@@ -2883,6 +3007,28 @@ const emailInput = document.getElementById("emailInput");
 if (savedEmail && emailInput) {
     emailInput.value = savedEmail;
 }
+
+function hasSavedGame(){
+    return !!localStorage.getItem(SAVE_KEY);
+}
+
+function showContinueButtonIfSaved(){
+    const btn = document.getElementById("continueRunBtn");
+    if(!btn) return;
+
+    btn.style.display = hasSavedGame() ? "block" : "none";
+}
+
+function startNewRun(){
+    clearSavedGame();
+    startGame(false);
+}
+
+function continueSavedRun(){
+    startGame(true);
+}
+
+showContinueButtonIfSaved();
 // =============================================
 // GAME INITIALIZATION — PARTIAL CUSTOMIZATION
 // =============================================
@@ -2911,7 +3057,7 @@ if (savedEmail && emailInput) {
 // - incorrect scoring
 // - progression bugs
 // =============================================
-function startGame() {
+function startGame(shouldResume = false) {
     let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
 
     if (!inputEmail) {
@@ -2926,12 +3072,15 @@ function startGame() {
         return;
     }
 
-    bossCheckpoint = 1;
-
     studentEmail = inputEmail;
     username = generatePseudonymFromEmail(studentEmail);
 
-    runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    const hasSavedRun = shouldResume ? loadSavedGame() : false;
+
+    if(!hasSavedRun){
+        bossCheckpoint = 1;
+        runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+    }
 
     localStorage.setItem("gauntletEmail", studentEmail);
     localStorage.setItem("gauntletUser", username);
@@ -2940,7 +3089,7 @@ function startGame() {
     sendGameData({
         runID: runID,
         game: "The Exchange Citadel",
-        event: "start",
+        event: hasSavedRun ? "resume" : "start",
         user: username,
         email: studentEmail
     });
@@ -2949,40 +3098,42 @@ function startGame() {
 // RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
 // =============================================
 // Resets all progression, scoring, and adaptive tracking
-    room = 1;
-    bossHealth = 3;
-    streak = 0;
-    maxStreak = 0;
-    totalAttempts = 0;
-    correctAnswers = 0;
-    bossPool = [];
-    calcBag = [];
-    conceptMemory = {};
-    masteryState = { byTag: {}, byObjective: {}, recent: [] };
-    tagHistory = [];
-    lastTypes = [];
-    adaptiveMode = "support";
-    resetRemediationState();
-	rapidGuessHistory = [];
-	rapidGuessWarnings = 0;
-	rapidGuessLocked = false;
+    if(!hasSavedRun){
+        room = 1;
+        bossHealth = 3;
+        streak = 0;
+        maxStreak = 0;
+        totalAttempts = 0;
+        correctAnswers = 0;
+        bossPool = [];
+        calcBag = [];
+        conceptMemory = {};
+        masteryState = { byTag: {}, byObjective: {}, recent: [] };
+        tagHistory = [];
+        lastTypes = [];
+        adaptiveMode = "support";
+        resetRemediationState();
+        rapidGuessHistory = [];
+        rapidGuessWarnings = 0;
+        rapidGuessLocked = false;
 
-    localStorage.removeItem("gauntletRoom");
+        localStorage.removeItem("gauntletRoom");
 
-    // Exchange Citadel artifact keys — keep these matched to your actual Exchange Citadel IDs.
-	localStorage.removeItem("vaultLedger");
-	localStorage.removeItem("vaultCharter");
-	localStorage.removeItem("vaultPen");
-	
-    questionHistory = {
-        easy: [], medium: [], hard: [], elite: [], calculation: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
-    };
+        // Exchange Citadel artifact keys — keep these matched to your actual Exchange Citadel IDs.
+        localStorage.removeItem("vaultLedger");
+        localStorage.removeItem("vaultCharter");
+        localStorage.removeItem("vaultPen");
 
-    usedQuestions = {
-        easy: [], medium: [], hard: [], elite: [],
-        easyBoss: [], mediumBoss: [], finalBoss: []
-    };
+        questionHistory = {
+            easy: [], medium: [], hard: [], elite: [], calculation: [],
+            easyBoss: [], mediumBoss: [], finalBoss: []
+        };
+
+        usedQuestions = {
+            easy: [], medium: [], hard: [], elite: [],
+            easyBoss: [], mediumBoss: [], finalBoss: []
+        };
+    }
     
 // =============================================
 // UI INITIALIZATION — SAFE TO CUSTOMIZE
@@ -2999,17 +3150,17 @@ function startGame() {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-if(localStorage.getItem("vaultLedger")){
-    document.getElementById("vaultLedger").classList.add("unlocked");
-}
+    if(localStorage.getItem("vaultLedger")){
+        document.getElementById("vaultLedger").classList.add("unlocked");
+    }
 
-if(localStorage.getItem("vaultCharter")){
-    document.getElementById("vaultCharter").classList.add("unlocked");
-}    
+    if(localStorage.getItem("vaultCharter")){
+        document.getElementById("vaultCharter").classList.add("unlocked");
+    }    
 
-if(localStorage.getItem("vaultPen")){
-    document.getElementById("vaultPen").classList.add("unlocked");
-}
+    if(localStorage.getItem("vaultPen")){
+        document.getElementById("vaultPen").classList.add("unlocked");
+    }
   
 // Start game loop: music + timer + first question
     bgMusic.play().catch(e => console.log("Audio started"));
@@ -3026,7 +3177,12 @@ if(localStorage.getItem("vaultPen")){
 document.getElementById("emailInput").addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
-        startGame();
+
+        if(hasSavedGame()){
+            continueSavedRun();
+        } else {
+            startNewRun();
+        }
     }
 });
 
@@ -4580,6 +4736,7 @@ if(remediationState.active){
             msgElement.innerHTML =
                 `<span class='fade-out-text'>Control returns. Now prove your command under pressure.</span>`;
 
+            saveGameState();
             displayQuestion();
             return;
         }
@@ -4605,6 +4762,7 @@ if(remediationState.active){
             msgElement.innerHTML =
                 `<span class='fade-out-text'>The concept is contained. One final proof.</span>`;
 
+            saveGameState();
             displayQuestion();
             return;
         }
@@ -4619,7 +4777,7 @@ if(remediationState.active){
         `<span class='fade-out-text'>Recovery confirmed. Return to the Citadel.</span>`;
 
     room = returnRoom;
-    localStorage.setItem("gauntletRoom", room);
+    saveGameState();
 
     setTimeout(loadQuestion, TIMING.normal);
     return;
@@ -4642,6 +4800,7 @@ if(remediationState.active){
         triggerBossShake();
         
         if (bossHealth > 0) {
+           saveGameState();
            setTimeout(loadQuestion, TIMING.boss);
            return;
         }
@@ -4661,18 +4820,21 @@ if(remediationState.active){
 if(room === 10){
     document.getElementById("vaultLedger").classList.add("unlocked");
     localStorage.setItem("vaultLedger", "true");
+    saveGameState();
     showArtifact(artifacts.ledger.img, artifacts.ledger.title, artifacts.ledger.text);
 }
 
 if(room === 20){
     document.getElementById("vaultCharter").classList.add("unlocked");
     localStorage.setItem("vaultCharter", "true");
+    saveGameState();
     showArtifact(artifacts.charter.img, artifacts.charter.title, artifacts.charter.text);
 }
 
 if(room === 30){
     document.getElementById("vaultPen").classList.add("unlocked");
     localStorage.setItem("vaultPen", "true");
+    saveGameState();
     showArtifact(artifacts.pen.img, artifacts.pen.title, artifacts.pen.text);
 }
 
@@ -4688,7 +4850,7 @@ if(room === 30){
     // AND it wasn't a Boss Room (or a Detour).
    msgElement.innerHTML = "";
    room++;
-   localStorage.setItem("gauntletRoom", room);
+   saveGameState();
    showHallwayTransition(currentQuestion.feedback);
    return;
     }      
@@ -4774,6 +4936,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
         msgElement.innerHTML =
             `<span class='fade-out-text'>${remediationMessage}</span>`;
 
+        saveGameState();
         displayQuestion();
         return;
     }
@@ -4791,7 +4954,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
 // Never fall back behind the most recently cleared boss gate
 	room = Math.max(bossCheckpoint, newRoom);
 
-    localStorage.setItem("gauntletRoom", room);
+    saveGameState();
 
     alert(`Incorrect! You trip in the darkness and tumble back to Room ${room}.`);
 
@@ -5043,7 +5206,7 @@ else if (bossRoom === 30) {
    `;
     
     // logic to ensure Room 30 triggers the end game, while 10 and 20 trigger the next level
-    let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; loadQuestion();";
+    let nextAction = bossRoom === 30 ? "handleVictory()" : "room++; saveGameState(); loadQuestion();";
     let buttonLabel = bossRoom === 30 ? "FINALIZE THE CITADEL CONQUEST →" : `CONTINUE TO ROOM ${bossRoom + 1} →`;
 
 aContainer.innerHTML = `
@@ -5075,7 +5238,7 @@ document.getElementById("continueBtn").onclick = () => {
         handleVictory();
     } else {
         room++;
-        localStorage.setItem("gauntletRoom", room);
+        saveGameState();
         loadQuestion();
     }
 };
@@ -5158,6 +5321,8 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================     
 function handleVictory() {
+    clearSavedGame();
+
     bgMusic.pause();
     bossMusic.pause();
     if (typeof sfxVictory !== 'undefined') {
@@ -5453,6 +5618,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
