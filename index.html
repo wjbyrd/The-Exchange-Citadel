@@ -417,6 +417,7 @@ h2 {
 
 /* Exchange Citadel override */
 .exchange-citadel #message,
+.command-citadel #message,
 .citadel #message {
     color: #c4b5fd;
     font-size: 17px;
@@ -1856,7 +1857,7 @@ Edit appearance freely.
 Respect structure strictly.
 
 ========================================= -->
-<body class="command-citadel">
+<body class="exchange-citadel">
 <!-- Screen reader announcements (accessibility — do not remove) -->    
   <div id="srAnnouncements"
      aria-live="assertive"
@@ -2117,13 +2118,15 @@ let remediationState = {
     stage: null,
     tag: null,
     objective: null,
+    skill: null,
+    commonError: null,
     sourceType: null,
     returnRoom: null,
     originQuestionId: null,
     careless: false
 };
 let conceptMemory = {};
-let masteryState = { byTag: {}, byObjective: {}, recent: [] };
+let masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
 let adaptiveMode = "support";
 // =============================================
 // RAPID GUESSING / BUTTON-MASHING DETECTOR
@@ -2164,6 +2167,11 @@ let questionHistory = {
 };
 
 const SAVE_KEY = "exchangeCitadelSave_v1";
+const REALM_MISSION_KEY = "citadel";
+const REALM_STARTED_KEY = "macroHub_citadel_started";
+const REALM_COMPLETE_KEY = "macroHub_citadel_complete";
+const REALM_STATUS_KEY = "macroHub_citadel_status";
+const REALM_ROOM_KEY = "macroHub_citadel_room";
 
 function saveGameState(){
     const saveData = {
@@ -2201,6 +2209,9 @@ function saveGameState(){
 
     localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
     localStorage.setItem("gauntletRoom", String(room));
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+    localStorage.setItem(REALM_STATUS_KEY, "contested");
+    localStorage.setItem(REALM_ROOM_KEY, String(room));
 
     const autosave = document.getElementById("autosave");
     if(autosave){
@@ -2228,9 +2239,10 @@ function loadSavedGame(){
         runID = saveData.runID || runID || "";
 
         conceptMemory = saveData.conceptMemory || {};
-        masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, recent: [] };
+        masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
         if(!masteryState.byTag) masteryState.byTag = {};
         if(!masteryState.byObjective) masteryState.byObjective = {};
+        if(!masteryState.bySkill) masteryState.bySkill = {};
         if(!masteryState.recent) masteryState.recent = [];
 
         adaptiveMode = saveData.adaptiveMode || "support";
@@ -2374,6 +2386,51 @@ function getTypeBucket(tag, type){
         };
     }
     return tagBucket.byType[key];
+}
+
+function getSkillKey(question){
+    return question?.primarySkill || question?.repairSkill || inferSkill(question) || null;
+}
+
+function getSkillBucket(question){
+    const skill = getSkillKey(question);
+    if(!skill) return null;
+
+    if(!masteryState.bySkill){
+        masteryState.bySkill = {};
+    }
+
+    if(!masteryState.bySkill[skill]){
+        masteryState.bySkill[skill] = {
+            attempts: 0,
+            correct: 0,
+            avgTime: 0,
+            byType: {}
+        };
+    }
+
+    return masteryState.bySkill[skill];
+}
+
+function inferSkill(question){
+    if(!question) return null;
+
+    const q = (question.q || "").toLowerCase();
+    const tag = (question.tag || "").toLowerCase();
+    const objective = (question.objective || "").toLowerCase();
+
+    if(tag.includes("identity") || tag.includes("accounting") || objective.includes("6.1") || q.includes("s = i + nco") || q.includes("nx = nco") || q.includes("y = c + i + g + nx")) return "open_economy_identities";
+    if(tag.includes("saving") || tag.includes("investment") || tag.includes("capital") || tag.includes("nco") || objective.includes("6.2") || q.includes("net capital outflow") || q.includes("capital flow")) return "saving_investment_capital_flows";
+    if(tag.includes("small_open") || tag.includes("world_interest") || tag.includes("r_star") || objective.includes("6.3") || q.includes("small open economy") || q.includes("world interest rate")) return "small_open_world_interest_rate";
+    if(tag.includes("trade") || tag.includes("net_exports") || tag === "nx" || objective.includes("6.4") || q.includes("trade surplus") || q.includes("trade deficit") || q.includes("net exports")) return "trade_balance_net_exports";
+    if(tag.includes("exchange") || tag.includes("currency") || q.includes("real exchange rate") || q.includes("nominal exchange rate") || q.includes("appreciat") || q.includes("depreciat")) return "exchange_rate_adjustment";
+    if(tag.includes("policy") || tag.includes("fiscal") || tag.includes("tariff") || tag.includes("quota") || objective.includes("6.5") || q.includes("budget deficit") || q.includes("trade policy") || q.includes("capital flight")) return "open_economy_policy_effects";
+    if(tag.includes("mundell") || tag.includes("mf") || tag.includes("open_economy_model") || objective.includes("14.1") || q.includes("mundell") || q.includes("is*") || q.includes("lm*")) return "mundell_fleming_model";
+    if(tag.includes("interest_differential") || tag.includes("risk_premium") || tag.includes("capital_mobility") || objective.includes("14.2") || q.includes("risk premium") || q.includes("interest rate differential")) return "interest_differential_capital_mobility";
+    if(tag.includes("fixed") || tag.includes("floating") || tag.includes("exchange_regime") || objective.includes("14.3") || q.includes("fixed exchange rate") || q.includes("floating exchange rate")) return "fixed_floating_exchange_regimes";
+    if(tag === "ad" || tag.includes("aggregate_demand") || tag.includes("price_level") || objective.includes("14.4") || q.includes("aggregate demand") || q.includes("price level")) return "small_open_aggregate_demand";
+
+    return tag || null;
 }
 	 
 function inferObjective(question){
@@ -2553,17 +2610,20 @@ function recordAdaptiveAttempt(question, isCorrect, responseTime){
     const tagBucket = getTagBucket(question.tag);
     const typeBucket = getTypeBucket(question.tag, question.type);
     const objectiveBucket = getObjectiveBucket(question);
+    const skillBucket = getSkillBucket(question);
 
     updateBucket(tagBucket, isCorrect, responseTime);
     updateBucket(typeBucket, isCorrect, responseTime);
     updateBucket(objectiveBucket, isCorrect, responseTime);
+    updateBucket(skillBucket, isCorrect, responseTime);
 
     masteryState.recent.push({
         correct: !!isCorrect,
         responseTime,
         tag: question.tag,
         type: question.type || "default",
-        objective: currentQuestion.objective || inferObjective(currentQuestion)
+        objective: currentQuestion.objective || inferObjective(currentQuestion),
+        skill: getSkillKey(question)
     });
 
     if(masteryState.recent.length > 20){
@@ -2675,6 +2735,8 @@ function resetRemediationState(){
         stage: null,
         tag: null,
         objective: null,
+        skill: null,
+        commonError: null,
         sourceType: null,
         returnRoom: null,
         originQuestionId: null,
@@ -2694,12 +2756,15 @@ function planRemediation(question, responseTime){
     const carelessMiss = responseTime < expected * 0.55 && (objectiveAccuracy === null || objectiveAccuracy >= 0.45);
     const repeatedObjectiveMiss = objectiveAttempts >= 2 && objectiveAccuracy !== null && objectiveAccuracy < 0.6;
     const slowStruggle = responseTime > expected * 1.2;
+    const skill = getSkillKey(question);
 
     return {
         active: true,
         stage: carelessMiss ? "bridge" : "repair",
         tag: question.tag,
         objective: currentQuestion.objective || inferObjective(currentQuestion),
+        skill: skill,
+        commonError: question.commonError || null,
         sourceType: question.type || "default",
         returnRoom: room,
         originQuestionId: question.id || null,
@@ -2715,10 +2780,18 @@ function getRemediationStageLabel(stage){
     return "Recovery Retest";
 }
 
-function getQuestionsMatchingNeed(pool, objectiveKey, tag, excludeIds = []){
+function getQuestionsMatchingNeed(pool, objectiveKey, tag, excludeIds = [], skillKey = null){
     if(!Array.isArray(pool) || pool.length === 0) return [];
 
     let candidates = pool.filter(q => !excludeIds.includes(q.id));
+
+    if(skillKey){
+        let skillMatches = candidates.filter(q =>
+            q.primarySkill === skillKey || q.repairSkill === skillKey || inferSkill(q) === skillKey
+        );
+        if(skillMatches.length > 0) return skillMatches;
+    }
+
     let objectiveMatches = candidates.filter(q => inferObjective(q) === objectiveKey);
     if(objectiveMatches.length > 0) return objectiveMatches;
 
@@ -2736,13 +2809,13 @@ function getRetestPoolName(){
     return "elite";
 }
 
-function pickRemediationFromBank(poolName, objectiveKey, tag, purpose = "confirm"){
+function pickRemediationFromBank(poolName, objectiveKey, tag, purpose = "confirm", skillKey = null){
     const pool = questionBanks[poolName] || [];
     const recentIds = (questionHistory[poolName] || []).slice(-10);
-    let candidates = getQuestionsMatchingNeed(pool, objectiveKey, tag, recentIds);
+    let candidates = getQuestionsMatchingNeed(pool, objectiveKey, tag, recentIds, skillKey);
 
     if(candidates.length === 0){
-        candidates = getQuestionsMatchingNeed(pool, objectiveKey, tag, []);
+        candidates = getQuestionsMatchingNeed(pool, objectiveKey, tag, [], skillKey);
     }
 
     if(candidates.length === 0) return null;
@@ -2771,23 +2844,23 @@ function getRemediationQuestion(state){
     const excludeIds = [state.originQuestionId].filter(Boolean);
 
     if(state.stage === "repair"){
-        const repairPool = easyConceptPools[state.tag] || [];
-        const repairCandidates = getQuestionsMatchingNeed(repairPool, state.objective, state.tag, excludeIds);
+        const repairPool = easyConceptPools[state.skill] || easyConceptPools[state.tag] || [];
+        const repairCandidates = getQuestionsMatchingNeed(repairPool, state.objective, state.tag, excludeIds, state.skill);
         if(repairCandidates.length > 0){
             return weightedPick(repairCandidates, { mode: "support", purpose: "repair" });
         }
     }
 
     if(state.stage === "bridge"){
-        const bridgePool = mediumConceptPools[state.tag] || [];
-        const bridgeCandidates = getQuestionsMatchingNeed(bridgePool, state.objective, state.tag, excludeIds);
+        const bridgePool = mediumConceptPools[state.skill] || mediumConceptPools[state.tag] || [];
+        const bridgeCandidates = getQuestionsMatchingNeed(bridgePool, state.objective, state.tag, excludeIds, state.skill);
         if(bridgeCandidates.length > 0){
             return weightedPick(bridgeCandidates, { mode: "support", purpose: "confirm" });
         }
     }
 
     const retestPoolName = getRetestPoolName();
-    return pickRemediationFromBank(retestPoolName, state.objective, state.tag, state.stage === "retest" ? "challenge" : "confirm");
+    return pickRemediationFromBank(retestPoolName, state.objective, state.tag, state.stage === "retest" ? "challenge" : "confirm", state.skill);
 }
 
 function weightedPick(pool, options = {}){
@@ -2986,6 +3059,63 @@ pen:{
     text:"With a single stroke, trade can be reconciled, deficits explained, and exchange restored. The world ledger bends toward balance."
 }
 };
+
+function getRecoveryLine(stage){
+  if(stage === "repair"){
+    return "Route audit opened. The Skybroker is isolating the broken exchange path.";
+  }
+
+  if(stage === "bridge"){
+    return "Bridge route active. Track the flow before the Citadel lets you advance.";
+  }
+
+  if(stage === "retest"){
+    return "Retest route opened. Same weakness. Cleaner exchange logic required.";
+  }
+
+  if(stage === "miss"){
+    return "The route is still unstable. Repair the weakness before advancing.";
+  }
+
+  return "Recovery confirmed. Return to the Citadel.";
+}
+
+function getCitadelBossName(){
+  if(room === 10) return "Keeper of Account Identities";
+  if(room === 20) return "Trade Chancellor";
+  if(room === 30) return "Emperor of Exchange";
+  return "The Exchange Citadel";
+}
+
+function getCitadelBossLine({ isCorrect, tag, type, objective, streak, bossHealth, responseTime }){
+  const bossName = getCitadelBossName();
+
+  if(isCorrect && streak >= 5){
+    return `${bossName}: The route holds. Now prove the capital flow was not luck.`;
+  }
+
+  if(isCorrect && bossHealth <= 2){
+    return `${bossName}: Clean exchange. The Citadel gates are cracking.`;
+  }
+
+  if(!isCorrect && responseTime < 5000){
+    return `${bossName}: Fast crossing. Bad crossing. The border rejects it.`;
+  }
+
+  if(!isCorrect && (tag === "identity" || tag === "trade" || tag === "exchange" || tag === "policy" || tag === "mundell" || tag === "fixed" || tag === "floating" || tag === "ad")){
+    return `${bossName}: The direction matters. Misread the flow and the whole Citadel goes crooked.`;
+  }
+
+  if(!isCorrect && tag){
+    return `${bossName}: Weakness logged: ${tag}. The Citadel will circle back.`;
+  }
+
+  if(isCorrect){
+    return `${bossName}: Correct. One clean route does not conquer the exchange.`;
+  }
+
+  return `${bossName}: The checkpoint holds. Try again.`;
+}
   
 // =============================================
 // USERNAME RESTORE — SAFE TO MODIFY
@@ -3087,6 +3217,9 @@ function startGame(shouldResume = false) {
     localStorage.setItem("gauntletEmail", studentEmail);
     localStorage.setItem("gauntletUser", username);
     localStorage.setItem("gauntletRunID", runID);
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+    localStorage.setItem(REALM_STATUS_KEY, "contested");
+    localStorage.setItem(REALM_ROOM_KEY, String(room));
 
     sendGameData({
         runID: runID,
@@ -3110,7 +3243,7 @@ function startGame(shouldResume = false) {
         bossPool = [];
         calcBag = [];
         conceptMemory = {};
-        masteryState = { byTag: {}, byObjective: {}, recent: [] };
+        masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
         tagHistory = [];
         lastTypes = [];
         adaptiveMode = "support";
@@ -3125,6 +3258,9 @@ function startGame(shouldResume = false) {
         localStorage.removeItem("vaultLedger");
         localStorage.removeItem("vaultCharter");
         localStorage.removeItem("vaultPen");
+        localStorage.removeItem(REALM_COMPLETE_KEY);
+        localStorage.setItem(REALM_STATUS_KEY, "contested");
+        localStorage.setItem(REALM_ROOM_KEY, "1");
 
         questionHistory = {
             easy: [], medium: [], hard: [], elite: [], calculation: [],
@@ -4628,6 +4764,7 @@ if(rapidGuess.triggered && !rapidGuessLocked){
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
+        skill: getSkillKey(currentQuestion) || "",
         responseTime: responseTime,
         attempt: totalAttempts ?? 0,
         streak: streak ?? 0,
@@ -4682,6 +4819,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
         objective: currentQuestion.objective || inferObjective(currentQuestion),
+        skill: getSkillKey(currentQuestion) || "",
         responseTime: responseTime,
 	    attempt: totalAttempts ?? 0,
 		streak: streak ?? 0,
@@ -4736,7 +4874,7 @@ if(remediationState.active){
                 currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
             msgElement.innerHTML =
-                `<span class='fade-out-text'>Control returns. Now prove your command under pressure.</span>`;
+                `<span class='fade-out-text'>${getRecoveryLine("bridge")}</span>`;
 
             saveGameState();
             displayQuestion();
@@ -4762,7 +4900,7 @@ if(remediationState.active){
                 currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
             msgElement.innerHTML =
-                `<span class='fade-out-text'>The concept is contained. One final proof.</span>`;
+                `<span class='fade-out-text'>${getRecoveryLine("retest")}</span>`;
 
             saveGameState();
             displayQuestion();
@@ -4776,7 +4914,7 @@ if(remediationState.active){
     adaptiveMode = "support";
 
     msgElement.innerHTML =
-        `<span class='fade-out-text'>Recovery confirmed. Return to the Citadel.</span>`;
+        `<span class='fade-out-text'>${getRecoveryLine("complete")}</span>`;
 
     room = returnRoom;
     saveGameState();
@@ -4798,7 +4936,7 @@ if(remediationState.active){
         if(isBossRoom){
         bossHealth--;
         
-        msgElement.innerHTML = `<span style='color:#f87171;font-weight:bold;'>⚔ HIT! Boss Health: ${bossHealth}/3</span>`;
+        msgElement.innerHTML = `<span style='color:#f87171;font-weight:bold;'>⚔ HIT! Boss Health: ${bossHealth}/3</span><br><span class='fade-out-text'>${getCitadelBossLine({ isCorrect, tag: currentQuestion.tag, type: currentQuestion.type, objective: currentQuestion.objective || inferObjective(currentQuestion), streak, bossHealth, responseTime })}</span>`;
         triggerBossShake();
         
         if (bossHealth > 0) {
@@ -4887,6 +5025,10 @@ if(room === 30){
             (conceptMemory[currentQuestion.tag] || 0) + rushPenalty;
     }
 
+    if(isBossRoom){
+        msgElement.innerHTML = `<span class='fade-out-text'>${getCitadelBossLine({ isCorrect, tag: currentQuestion.tag, type: currentQuestion.type, objective: currentQuestion.objective || inferObjective(currentQuestion), streak, bossHealth, responseTime })}</span>`;
+    }
+
     // --- IF STUDENT MISSES DURING ACTIVE REMEDIATION ---
 if(remediationState.active){
     const remediationPrompt = getRemediationQuestion(remediationState);
@@ -4902,7 +5044,7 @@ if(remediationState.active){
             currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
 
         msgElement.innerHTML =
-            `<span class='fade-out-text'>Your control is still unstable. Repair the weakness before advancing.</span>`;
+            `<span class='fade-out-text'>${getRecoveryLine("miss")}</span>`;
 
         displayQuestion();
         return;
@@ -5323,6 +5465,11 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================     
 function handleVictory() {
+    localStorage.setItem(REALM_STARTED_KEY, "true");
+    localStorage.setItem(REALM_COMPLETE_KEY, "true");
+    localStorage.setItem(REALM_STATUS_KEY, "restored");
+    localStorage.setItem(REALM_ROOM_KEY, "30");
+
     clearSavedGame();
 
     bgMusic.pause();
@@ -5571,7 +5718,7 @@ function sendGameData(data) {
     timestamp: new Date().toISOString(),
     runID: data.runID || localStorage.getItem("gauntletRunID") || "",
     token: data.token || "",
-    version: "Citadel-ms-telemetry-v1",
+    version: "ExchangeCitadel-ms-telemetry-v3.5",
     userAgent: navigator.userAgent || "",
     game: data.game || "The Exchange Citadel",
     event: data.event || "",
@@ -5583,6 +5730,7 @@ function sendGameData(data) {
     tag: data.tag || "",
     type: data.type || "",
     objective: data.objective || "",
+    skill: data.skill || data.primarySkill || "",
     responseTime: Number(data.responseTime ?? data.responseTimeMs ?? 0),
     attempt: Number(data.attempt ?? 0),
     streak: Number(data.streak ?? 0),
@@ -5620,6 +5768,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
