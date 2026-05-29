@@ -85,7 +85,7 @@ body {
     overflow-x: hidden;
     color: #f5f3ff;
 
-    background: url('question_background_image.png');
+    background: url('question_background_image');
     background-size: cover;
     background-position: center;
 }
@@ -955,7 +955,7 @@ button:active {
         rgba(5,3,18,0.24),
         rgba(5,3,18,0.58)
     ),
-    url('start screen image.png');
+    url('start screen image');
 
   background-size: cover;
   background-position: center;
@@ -986,7 +986,7 @@ button:active {
         rgba(5,3,18,0.62),
         rgba(5,3,18,0.82)
     ),
-    url('hallway1.png');
+    url('hallway1');
 
   background-size: cover;
   background-position: center;
@@ -1946,8 +1946,8 @@ or simplify this section.
     <div class="main-panel">
         <div id="gameShell">
             <div id="wizardBox">
-                <div id="wizardName">The Skybroker</div>
-                <img src="skybroker.png" id="wizardImage">
+                <div id="wizardName">The Custodian</div>
+                <img src="custodian.png" id="wizardImage">
             </div>
 
             <!-- GAME -->
@@ -3062,7 +3062,7 @@ pen:{
 
 function getRecoveryLine(stage){
   if(stage === "repair"){
-    return "Route audit opened. The Skybroker is isolating the broken exchange path.";
+    return "Route audit opened. The Custodian is isolating the broken exchange path.";
   }
 
   if(stage === "bridge"){
@@ -5155,15 +5155,15 @@ function handleStreakVisuals() {
     let streakColor = "#f0c86a";
 
     if (streak === 5) {
-        streakMsg = `<span class="streak"><img src="streakcoin.png" class="streak-icon">COIN OF PASSAGE</span>`;
+        streakMsg = `<span class="streak"><img src="streakcoin" class="streak-icon">COIN OF PASSAGE</span>`;
         streakColor = "#f0c86a";
     }
     else if (streak === 10) {
-        streakMsg = `<span class="streak"><img src="streakbill.png" class="streak-icon">BILL OF LADING</span>`;
+        streakMsg = `<span class="streak"><img src="streakbill" class="streak-icon">BILL OF LADING</span>`;
         streakColor = "#f5e6b8";
     }
     else if (streak === 20) {
-        streakMsg = `<span class="streak"><img src="streakquill.png" class="streak-icon">PARITY QUILL</span>`;
+        streakMsg = `<span class="streak"><img src="streakquill" class="streak-icon">PARITY QUILL</span>`;
         streakColor = "#c4b5fd";
     }
 
@@ -5696,7 +5696,7 @@ function copyResults() {
         Best Streak: ${maxStreak}
         Total Questions: ${totalAttempts}
         Code: ${code}
-        Verified by The Skybroker`;
+        Verified by The Custodian`;
 
     navigator.clipboard.writeText(shareText).then(() => {
         const btn = document.getElementById("shareBtn");
