@@ -4324,23 +4324,7 @@ function rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + m
 // Breaking this = repeated questions or bad difficulty scaling
      
 function randomQuestion(poolName) {
-    // --- SPECIAL CALCULATED ROOMS (26-29) ---
-    // These ensure the student practices specific math skills before the boss
-if (room >= 26 && room <= 29){
-    let generators = [
-        getMonopolyCalc,
-        getEfficiencyTrap,
-        getBertrandTrap,
-        getSpilloverChain,
-        getCournotTrap,
-        getPriceDisc
-    ];
-
-    let pick = generators[Math.floor(Math.random() * generators.length)];
-    return pick();
-}
-
-    let pool = questionBanks[poolName]
+    let pool = questionBanks[poolName];
 
     // Safety check in case poolName is invalid
     if (!pool) return null;
@@ -4352,17 +4336,19 @@ if (room >= 26 && room <= 29){
         ...usedQuestions.easyBoss,
         ...usedQuestions.mediumBoss,
         ...usedQuestions.finalBoss,
+        ...usedQuestions.legendaryBoss,
     ];
 
     let available = pool.filter(q => !used.includes(q.id));
 
-    if(available.length === 0){
-        usedQuestions[poolName] = []
-        available = pool
+    if (available.length === 0) {
+        usedQuestions[poolName] = [];
+        available = pool;
     }
 
     // Avoid three identical question types in a row
     let filtered = available;
+
     if (lastTypes.length >= 2) {
         let last1 = lastTypes[lastTypes.length - 1];
         let last2 = lastTypes[lastTypes.length - 2];
@@ -4375,17 +4361,16 @@ if (room >= 26 && room <= 29){
 
     let question = filtered[Math.floor(Math.random() * filtered.length)];
 
-usedQuestions[poolName].push(question.id)
+    usedQuestions[poolName].push(question.id);
 
-// Track types
-lastTypes.push(question.type)
-if(lastTypes.length > 3){
-lastTypes.shift()
-}
+    // Track types
+    lastTypes.push(question.type);
+    if (lastTypes.length > 3) {
+        lastTypes.shift();
+    }
 
     return question;
 }
-
 function pickConceptQuestion(pool){
     if(!pool._remaining || pool._remaining.length === 0){
         pool._remaining = shuffle([...pool]);
@@ -4779,14 +4764,14 @@ if (isBoss) {
 // QUESTION SELECTION
 // =============================
 
-if(diff === "calculation"){
+if(diff === "elite"){
     const generator = pickCalcGenerator();
     currentQuestion = shuffleOptions(generator());
 }
 else if(adjustedDiff === "elite"){
     currentQuestion = shuffleOptions(
         getAdaptiveQuestion("elite", strongestTag || weakestTag, {
-            mode: "challenge",
+            mode: "standard",
             preferredTypes: ELITE_PREFERRED_TYPES,
             purpose
         })
@@ -4795,7 +4780,7 @@ else if(adjustedDiff === "elite"){
 else if(adjustedDiff === "hard"){
     currentQuestion = shuffleOptions(
         getAdaptiveQuestion("hard", strongestTag || weakestTag, {
-            mode: strongestTag ? "challenge" : "support",
+            mode: sta ? "challenge" : "support",
             preferredTypes: ELITE_PREFERRED_TYPES,
             purpose
         })
