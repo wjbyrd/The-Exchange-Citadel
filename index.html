@@ -2443,6 +2443,47 @@ let timedModeTimerInterval = null;
 let timedHighestRoom = 1;
 let timedSetbacks = 0;
 
+// =============================================
+// HUB ACHIEVEMENT TRACKING
+// These keys are read by the Macro Test Prep hub.
+// Keep this small and boring. Boring means it works.
+// =============================================
+let resumedSavedRunThisSession = false;
+let bossMistakeCountThisRun = 0;
+let bossesDefeatedThisRun = 0;
+
+function addRealmStat(key, amount = 1){
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+    localStorage.setItem(key, String((Number.isFinite(current) ? current : 0) + amount));
+}
+
+function setRealmFlag(key){
+    localStorage.setItem(key, "true");
+}
+
+function updateRealmMaxStat(key, value){
+    const numericValue = Number(value || 0);
+    const current = parseInt(localStorage.getItem(key) || "0", 10);
+
+    if(Number.isFinite(numericValue) && numericValue > (Number.isFinite(current) ? current : 0)){
+        localStorage.setItem(key, String(numericValue));
+    }
+}
+
+function recordTimedTrialAchievementStats(accuracy, reachedRoom){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
+
+    updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
+    updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
+    updateRealmMaxStat("macroHub_engine_timedBestRoom", safeRoom);
+    updateRealmMaxStat("macroHub_engine_timedBestAccuracy", safeAccuracy);
+
+    if(safeRoom >= 30 && safeAccuracy >= 80){
+        setRealmFlag("macroHub_engine_trial_by_clock_complete");
+    }
+}
+
 function modeAllowsSave(){ return gameMode === "standard" || gameMode === "legendary"; }
 function modeAllowsRealmProgress(){ return gameMode === "standard"; }
 function getSaveKey(){ return `${SAVE_KEY}_${gameMode || "standard"}`; }
@@ -2476,6 +2517,10 @@ function saveGameState(){
         rapidGuessWarnings,
         rapidGuessLocked,
         savedAt: Date.now(),
+		achievementTracking: {
+        bossMistakeCountThisRun,
+        bossesDefeatedThisRun
+       },
 
 	artifacts: {
  	   vaultLedger: localStorage.getItem("vaultLedger") === "true",
@@ -2530,6 +2575,9 @@ function loadSavedGame(){
         rapidGuessHistory = saveData.rapidGuessHistory || [];
         rapidGuessWarnings = Number(saveData.rapidGuessWarnings || 0);
         rapidGuessLocked = !!saveData.rapidGuessLocked;
+
+		bossMistakeCountThisRun = Number(saveData.achievementTracking?.bossMistakeCountThisRun || 0);
+        bossesDefeatedThisRun = Number(saveData.achievementTracking?.bossesDefeatedThisRun || 0);
 
 		if(saveData.artifacts?.vaultLedger) localStorage.setItem("vaultLedger", "true");
 		if(saveData.artifacts?.vaultCharter) localStorage.setItem("vaultCharter", "true");
@@ -3436,10 +3484,48 @@ function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Men
 let activeModalConfirmAction = null; let activeModalCancelAction = null;
 function showGameModal({title="Citadel Warning",text="",confirmText="Continue",cancelText="",onConfirm=null,onCancel=null}={}){ const modal=document.getElementById("gameModal"),titleEl=document.getElementById("gameModalTitle"),textEl=document.getElementById("gameModalText"),confirmBtn=document.getElementById("gameModalConfirm"),cancelBtn=document.getElementById("gameModalCancel"); if(!modal||!titleEl||!textEl||!confirmBtn||!cancelBtn) return; activeModalConfirmAction=onConfirm; activeModalCancelAction=onCancel; titleEl.innerText=title; textEl.innerText=text; confirmBtn.innerText=confirmText; if(cancelText){cancelBtn.innerText=cancelText; cancelBtn.style.display="inline-block";} else cancelBtn.style.display="none"; modal.style.display="flex"; confirmBtn.onclick=function(){const action=activeModalConfirmAction; closeGameModal(); if(typeof action==="function") action();}; cancelBtn.onclick=function(){const action=activeModalCancelAction; closeGameModal(); if(typeof action==="function") action();}; }
 function closeGameModal(){ const modal=document.getElementById("gameModal"); if(modal) modal.style.display="none"; activeModalConfirmAction=null; activeModalCancelAction=null; }
-function endTimedAttemptEarly(){ stopTimedModeClock(); const accuracy=totalAttempts>0?Math.round((correctAnswers/totalAttempts)*100):0; localStorage.setItem("exchangeCitadelTimedLastRoom",String(room)); localStorage.setItem("exchangeCitadelTimedLastAccuracy",String(accuracy)); localStorage.setItem("exchangeCitadelTimedLastAttempts",String(totalAttempts)); localStorage.setItem("exchangeCitadelTimedLastStreak",String(maxStreak)); const bestRoom=Number(localStorage.getItem("exchangeCitadelTimedBestRoom")||0); if(room>bestRoom) localStorage.setItem("exchangeCitadelTimedBestRoom",String(room)); returnToModeSelectFromRun(); }
+
+function endTimedAttemptEarly(){
+	stopTimedModeClock();
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
+
+    localStorage.setItem("exchangeCitadelTimedLastRoom", String(reachedRoom));
+    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
+
+    recordTimedTrialAchievementStats(accuracy, reachedRoom);
+
+    returnToModeSelectFromRun();
+}
+
+function recordTimedTrialAchievementStats(accuracy, reachedRoom){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
+
+    updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
+    updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
+
+    updateRealmMaxStat("macroHub_citadel_timedBestRoom", safeRoom);
+    updateRealmMaxStat("macroHub_citadel_timedBestAccuracy", safeAccuracy);
+
+    if(safeRoom >= 30 && safeAccuracy >= 80){
+        setRealmFlag("macroHub_citadel_trial_by_clock_complete");
+    }
+}
+	 
 function showContinueButtonIfSaved(){ const btn=document.getElementById("continueRunBtn"); if(!btn) return; btn.style.display=hasSavedGame("standard")?"block":"none"; }
 function startNewRun(){ gameMode="standard"; clearSavedGame(); startGame(false); }
-function continueSavedRun(){ gameMode="standard"; startGame(true); }
+function continueSavedRun(){
+    gameMode = "standard";
+    resumedSavedRunThisSession = true;
+    startGame(true);
+}
 showContinueButtonIfSaved();
 // =============================================
 // GAME INITIALIZATION — PARTIAL CUSTOMIZATION
@@ -3487,7 +3573,10 @@ function startGame(shouldResume = false) {
     studentEmail = inputEmail;
     username = generatePseudonymFromEmail(studentEmail);
 
-    const hasSavedRun = shouldResume && modeAllowsSave() ? loadSavedGame() : false;
+    const hasSavedRun = shouldResume ? loadSavedGame() : false;
+    if(!hasSavedRun){
+    resumedSavedRunThisSession = false;
+}
 
     if(!hasSavedRun){
         bossCheckpoint = 1;
@@ -3536,6 +3625,8 @@ function startGame(shouldResume = false) {
         rapidGuessWarnings = 0;
         rapidGuessLocked = false;
 		chancellorIntroPlayed = false;
+		bossMistakeCountThisRun = 0;
+   	    bossesDefeatedThisRun = 0
 
         localStorage.removeItem("gauntletRoom");
 
@@ -3715,6 +3806,9 @@ function resetRunStateForNewMode(){
 	rapidGuessLocked=false;
 	timedHighestRoom=1;
 	timedSetbacks=0;
+	bossMistakeCountThisRun = 0;
+    bossesDefeatedThisRun = 0;
+    resumedSavedRunThisSession = false;
 	chancellorIntroPlayed=false;
 	resetRemediationState();
 	    questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
@@ -3792,6 +3886,8 @@ function endTimedModeRun(){
     localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
     localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
     localStorage.setItem("exchangeCitadelTimedLastSetbacks", String(timedSetbacks));
+
+	recordTimedTrialAchievementStats(accuracy, timedHighestRoom);
 
     sendGameData({
         runID: runID,
@@ -5058,7 +5154,9 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         },200);
 
 		correctAnswers++;
-        handleStreakVisuals();
+		addRealmStat("macroHub_totalCorrectAnswers", 1);
+		addRealmStat("macroHub_engine_correctTotal", 1);
+		handleStreakVisuals();
        
         // --- STAGED REMEDIATION SUCCESS PATH ---
 if(remediationState.active){
@@ -5168,6 +5266,10 @@ if(remediationState.active){
          });
            
          bossPool = [];
+
+		 if(gameMode === "standard"){
+         bossesDefeatedThisRun++;
+         }
            
         // Boss defeated (artifact unlocks)
 if(modeAllowsRealmProgress()){
@@ -5221,6 +5323,9 @@ if(modeAllowsRealmProgress()){
        
     if (isBossRoom) {
         sfxWrong.volume = 0.7;
+		if(gameMode === "standard"){
+ 		bossMistakeCountThisRun++;
+		}
     } else {
         sfxWrong.volume = 0.5;
     }
@@ -5705,6 +5810,11 @@ function handlePracticeModeComplete(){
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
+	if(gameMode === "exam"){
+    setRealmFlag("macroHub_citadel_exam_complete");
+    setRealmFlag("exchangeCitadelExamComplete");
+}
+
     sendGameData({
         runID,
         game: "The Exchange Citadel",
@@ -5840,6 +5950,17 @@ function handleVictory() {
     localStorage.setItem(REALM_COMPLETE_KEY, "true");
     localStorage.setItem(REALM_STATUS_KEY, "restored");
     localStorage.setItem(REALM_ROOM_KEY, "30");
+
+	localStorage.setItem(`macroHub_${REALM_MISSION_KEY}_artifactsCollected`, "3");
+
+	if(resumedSavedRunThisSession){
+    setRealmFlag(`macroHub_${REALM_MISSION_KEY}_resume_finish_complete`);
+    setRealmFlag("macroHub_returnAndRebuild_complete");
+	}
+
+	if(bossesDefeatedThisRun >= 3 && bossMistakeCountThisRun === 0){
+    setRealmFlag(`macroHub_${REALM_MISSION_KEY}_perfect_calibration_complete`);
+	}
 
     clearSavedGame();
 
