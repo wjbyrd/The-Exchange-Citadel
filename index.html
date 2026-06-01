@@ -2470,20 +2470,6 @@ function updateRealmMaxStat(key, value){
     }
 }
 
-function recordTimedTrialAchievementStats(accuracy, reachedRoom){
-    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
-    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
-
-    updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
-    updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
-    updateRealmMaxStat("macroHub_engine_timedBestRoom", safeRoom);
-    updateRealmMaxStat("macroHub_engine_timedBestAccuracy", safeAccuracy);
-
-    if(safeRoom >= 30 && safeAccuracy >= 80){
-        setRealmFlag("macroHub_engine_trial_by_clock_complete");
-    }
-}
-
 function modeAllowsSave(){ return gameMode === "standard" || gameMode === "legendary"; }
 function modeAllowsRealmProgress(){ return gameMode === "standard"; }
 function getSaveKey(){ return `${SAVE_KEY}_${gameMode || "standard"}`; }
@@ -5155,7 +5141,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 
 		correctAnswers++;
 		addRealmStat("macroHub_totalCorrectAnswers", 1);
-		addRealmStat("macroHub_engine_correctTotal", 1);
+		addRealmStat("macroHub_citadel_correctTotal", 1);
 		handleStreakVisuals();
        
         // --- STAGED REMEDIATION SUCCESS PATH ---
