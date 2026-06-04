@@ -9,7 +9,23 @@ This file is divided into TWO zones:
    - Question banks
    - Boss names/images
    - Text (wizard, areas, artifacts)
-   - Visual themes
+   - Visual themesfunction endTimedAttemptEarly(){
+    stopTimedModeClock();
+
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    localStorage.setItem("exchangeCitadelTimedLastRoom", String(room));
+    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(accuracy));
+    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
+
+    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
+    recordTimedTrialAchievementStats(accuracy, reachedRoom);
+
+    returnToModeSelectFromRun();
+}
 
 2. DO NOT TOUCH (Core Engine)
    - Adaptive logic
@@ -72,24 +88,38 @@ You can change:
 Do NOT rename IDs (#gameBox, #mazeTrack, etc.)
 or you will break JavaScript connections.
 ========================================= */
+/* =========================================
+   1. VISUAL DESIGN — THE EXCHANGE CITADEL
+========================================= */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
     min-height: 100vh;
-
     display: flex;
     justify-content: center;
     align-items: center;
-
     overflow-x: hidden;
     color: #eef8ff;
-
     background: url('question_background_image.png');
     background-size: cover;
     background-position: center;
 }
-    
+
+/* Macro Review overlay — onyx, ivory, restrained gold */
+body::after{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+        radial-gradient(circle at center,
+            rgba(245, 214, 130, 0.09),
+            rgba(30, 24, 18, 0.34) 48%,
+            rgba(3, 5, 12, 0.82) 100%);
+    pointer-events:none;
+    z-index:-1;
+}
+
 .dungeon-container {
     position: relative;
     display: flex;
@@ -102,15 +132,19 @@ body {
     margin-top: 20px;
 }
 
+/* CENTER BLOCK */   		
 .start-content{
-  width: 100%;
-  max-width: 420px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;   
-  text-align:center;    
+    width: 100%;
+    max-width: 460px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;   
+    text-align:center;
+    padding: 28px 30px;
+    border-radius: 18px;
 }
 
+/* TITLE — sharper, colder */	
 .title{
   font-size:64px;
   letter-spacing:4px;
@@ -123,6 +157,7 @@ body {
     0 3px 8px rgba(0,0,0,0.9);
 }
 
+/* SUBTITLE — shift to blue tone */	
 .subtitle{
   font-size:34px;
   margin-bottom:35px;
@@ -131,18 +166,23 @@ body {
   color:#72d7ff;
   text-shadow:
     0 0 10px rgba(185,135,70,0.45),
-    0 2px 6px rgba(0,0,0,0.85);
+    0 0 34px rgba(42,23,165,0.55),
+    0 3px 8px rgba(0,0,0,0.9);
 }
 
+/* TAGLINE */	
 .tagline{
   margin-bottom:30px;
   font-style:italic;
   opacity:0.88;
   text-align:center;
   color:#c7ecff;
-  text-shadow: 0 2px 6px rgba(0,0,0,0.85);
+  text-shadow: 
+	  0 2px 6px rgba(0,0,0,0.85),
+      0 2px 6px rgba(0,0,0,0.88);
 }
 
+/* INPUT — looks like a console panel now */	
 .name-input{
   width:100%;
   max-width:320px;
@@ -179,7 +219,8 @@ body {
   border-color: rgba(248,217,129,0.62);
   color: #f8d981;
 }
-	
+
+/* PLACEHOLDER */	
 #emailInput::placeholder,
 #username::placeholder{
     color: rgba(216,199,160,0.52);
