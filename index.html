@@ -9,23 +9,7 @@ This file is divided into TWO zones:
    - Question banks
    - Boss names/images
    - Text (wizard, areas, artifacts)
-   - Visual themesfunction endTimedAttemptEarly(){
-    stopTimedModeClock();
-
-    const accuracy = totalAttempts > 0
-        ? Math.round((correctAnswers / totalAttempts) * 100)
-        : 0;
-
-    localStorage.setItem("exchangeCitadelTimedLastRoom", String(room));
-    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(accuracy));
-    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
-    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
-
-    const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
-    recordTimedTrialAchievementStats(accuracy, reachedRoom);
-
-    returnToModeSelectFromRun();
-}
+   - Visual themes
 
 2. DO NOT TOUCH (Core Engine)
    - Adaptive logic
@@ -1703,9 +1687,8 @@ Every pixel matters.
   inset:0;
   z-index:110;
   display:none;
-  align-items:flex-start;
+  align-items:center;
   justify-content:center;
-  overflow-y:auto;
   padding:30px;
   background:
     linear-gradient(rgba(2,6,23,.32), rgba(2,6,23,.78)),
@@ -2512,6 +2495,12 @@ const REALM_STARTED_KEY = "macroHub_citadel_started";
 const REALM_COMPLETE_KEY = "macroHub_citadel_complete";
 const REALM_STATUS_KEY = "macroHub_citadel_status";
 const REALM_ROOM_KEY = "macroHub_citadel_room";
+const MACRO_TOTAL_CORRECT_KEY = "macroHub_totalCorrectAnswers";
+const MACRO_BEST_STREAK_KEY = "macroHub_bestStreak";
+const MACRO_EXAM_COMPLETE_KEY = "macroHub_examDrillCompleted";
+const MACRO_TRIAL_BY_CLOCK_KEY = "macroHub_trialByClock_complete";
+const MACRO_PERFECT_CALIBRATION_KEY = "macroHub_perfectCalibration_complete";
+const MACRO_RETURN_AND_REBUILD_KEY = "macroHub_returnAndRebuild_complete";
 
 let gameMode = "standard";
 let timedModeDurationMs = 10 * 60 * 1000;
@@ -2547,12 +2536,111 @@ function updateRealmMaxStat(key, value){
     }
 }
 
-function modeAllowsSave(){ return gameMode === "standard" || gameMode === "legendary"; }
-function modeAllowsRealmProgress(){ return gameMode === "standard"; }
-function getSaveKey(){ return `${SAVE_KEY}_${gameMode || "standard"}`; }
-function isBossRoomForMode(r){ if(gameMode === "exam" || gameMode === "timed") return false; return r === 10 || r === 20 || r === 30; }
-function getModeDisplayName(){ if(gameMode === "timed") return "Timed Trial"; if(gameMode === "exam") return "Exam Drill"; if(gameMode === "legendary") return "Legendary Mode"; return "Standard Campaign"; }
+function getMissionAchievementPrefix(){
+    return `macroHub_${REALM_MISSION_KEY}`;
+}
 
+function markMissionLegendaryComplete(){
+    localStorage.setItem(`${getMissionAchievementPrefix()}_legendaryComplete`, "true");
+    localStorage.setItem(`${getMissionAchievementPrefix()}_legendary_complete`, "true");
+}
+
+function setMissionArtifactCount(count){
+    localStorage.setItem(`${getMissionAchievementPrefix()}_artifactsCollected`, String(count));
+}
+
+function updateMissionArtifactCountFromVault(){
+    const artifactCount = ["vaultLedger", "vaultCharter", "vaultPen"]
+        .filter(key => localStorage.getItem(key) === "true").length;
+
+    setMissionArtifactCount(artifactCount);
+}
+
+function recordTimedTrialAchievementStats(accuracy, reachedRoom){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
+
+    updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
+    updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
+
+    updateRealmMaxStat("macroHub_timedBestRoom", safeRoom);
+    updateRealmMaxStat("macroHub_timedBestAccuracy", safeAccuracy);
+
+    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestRoom`, safeRoom);
+    updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestAccuracy`, safeAccuracy);
+
+    if(safeRoom >= 30 && safeAccuracy >= 80){
+        setRealmFlag(MACRO_TRIAL_BY_CLOCK_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_trial_by_clock_complete`);
+    }
+}
+
+function recordMacroCorrectAnswer(){
+    addRealmStat(MACRO_TOTAL_CORRECT_KEY, 1);
+    addRealmStat(`${getMissionAchievementPrefix()}_correctTotal`, 1);
+}
+
+function recordMacroStreak(value){
+    updateRealmMaxStat(MACRO_BEST_STREAK_KEY, value);
+    updateRealmMaxStat(`${getMissionAchievementPrefix()}_bestStreak`, value);
+}
+
+function markExamDrillCompleted(){
+    setRealmFlag(MACRO_EXAM_COMPLETE_KEY);
+    localStorage.setItem(`${getMissionAchievementPrefix()}_examDrillCompleted`, "true");
+}
+
+function recordBossMistakeForAchievements(){
+    if(gameMode === "standard" && isBossRoomForMode(room)){
+        bossMistakeCountThisRun++;
+    }
+}
+
+function recordBossDefeatForAchievements(){
+    if(gameMode === "standard"){
+        bossesDefeatedThisRun++;
+    }
+}
+
+function checkPerfectCalibrationAchievement(){
+    if(gameMode === "standard" && bossesDefeatedThisRun >= 3 && bossMistakeCountThisRun === 0){
+        setRealmFlag(MACRO_PERFECT_CALIBRATION_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_perfect_calibration_complete`);
+    }
+}
+
+function checkReturnAndRebuildAchievement(){
+    if(gameMode === "standard" && resumedSavedRunThisSession){
+        setRealmFlag(MACRO_RETURN_AND_REBUILD_KEY);
+        setRealmFlag(`${getMissionAchievementPrefix()}_resume_finish_complete`);
+    }
+}
+
+function modeAllowsSave(){
+    return gameMode === "standard" || gameMode === "legendary";
+}
+
+function modeAllowsRealmProgress(){
+    return gameMode === "standard";
+}
+
+function getSaveKey(){
+    return `${SAVE_KEY}_${gameMode || "standard"}`;
+}
+
+function isBossRoomForMode(r){
+    if(gameMode === "exam" || gameMode === "timed") return false;
+    if(gameMode === "bossRush") return true;
+    return r === 10 || r === 20 || r === 30;
+}
+
+function getModeDisplayName(){
+    if(gameMode === "timed") return "Timed Trial";
+    if(gameMode === "exam") return "Exam Drill";
+    if(gameMode === "bossRush") return "Boss Rush";
+    if(gameMode === "legendary") return "Legendary Mode";
+    return "Standard Campaign";
+}
 
 function saveGameState(){
     if(!modeAllowsSave()) return;
@@ -5217,8 +5305,8 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         },200);
 
 		correctAnswers++;
-		addRealmStat("macroHub_totalCorrectAnswers", 1);
-		addRealmStat("macroHub_citadel_correctTotal", 1);
+		recordMacroCorrectAnswer();
+		recordMacroStreak(streak);
 		handleStreakVisuals();
        
         // --- STAGED REMEDIATION SUCCESS PATH ---
@@ -5319,6 +5407,7 @@ if(remediationState.active){
            return;
         }
          // Boss defeated
+		 recordBossDefeatForAchievements();
          sendGameData({
             runID: runID,
 			game: "The Exchange Citadel",
@@ -5384,14 +5473,12 @@ if(modeAllowsRealmProgress()){
 // ❌ WRONG ANSWER BLOCK — ALL FAILURE LOGIC
 // =============================================
        
-    if (isBossRoom) {
-        sfxWrong.volume = 0.7;
-		if(gameMode === "standard"){
- 		bossMistakeCountThisRun++;
-		}
-    } else {
-        sfxWrong.volume = 0.5;
-    }
+if (isBossRoom) {
+    sfxWrong.volume = 0.7;
+    recordBossMistakeForAchievements();
+} else {
+    sfxWrong.volume = 0.5;
+}
 
     sfxWrong.currentTime = 0;
     sfxWrong.play().catch(() => {});
@@ -5535,12 +5622,16 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
 // Safe to customize artifact visuals/text only
 function unlockArtifact(key) {
     const id = "vault" + key.charAt(0).toUpperCase() + key.slice(1);
-    document.getElementById(id).classList.add("unlocked");
-    localStorage.setItem(id, "true");
-    saveGameState();
+    const slot = document.getElementById(id);
+
+    if(slot){
+        slot.classList.add("unlocked");
+        localStorage.setItem(id, "true");
+        updateMissionArtifactCountFromVault();
+    }
+
     showArtifact(artifacts[key].img, artifacts[key].title, artifacts[key].text);
 }
-    
 // =============================================
 // STREAK FEEDBACK SYSTEM — SAFE TO CUSTOMIZE
 // =============================================
@@ -5794,8 +5885,7 @@ document.getElementById("continueBtn").onclick = () => {
 
 function handleLegendaryVictory(){
     stopTimedModeClock();
-    localStorage.setItem("macroHub_citadel_legendary_complete", "true");
-    localStorage.setItem("exchangeCitadelLegendaryComplete", "true");
+    markMissionLegendaryComplete();
     clearSavedGame();
 
     bgMusic.pause();
@@ -5873,9 +5963,8 @@ function handlePracticeModeComplete(){
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
-	if(gameMode === "exam"){
-    setRealmFlag("macroHub_citadel_exam_complete");
-    setRealmFlag("exchangeCitadelExamComplete");
+if(gameMode === "exam"){
+    markExamDrillCompleted();
 }
 
     sendGameData({
@@ -6014,16 +6103,9 @@ function handleVictory() {
     localStorage.setItem(REALM_STATUS_KEY, "restored");
     localStorage.setItem(REALM_ROOM_KEY, "30");
 
-	localStorage.setItem(`macroHub_${REALM_MISSION_KEY}_artifactsCollected`, "3");
-
-	if(resumedSavedRunThisSession){
-    setRealmFlag(`macroHub_${REALM_MISSION_KEY}_resume_finish_complete`);
-    setRealmFlag("macroHub_returnAndRebuild_complete");
-	}
-
-	if(bossesDefeatedThisRun >= 3 && bossMistakeCountThisRun === 0){
-    setRealmFlag(`macroHub_${REALM_MISSION_KEY}_perfect_calibration_complete`);
-	}
+	setMissionArtifactCount(3);
+	checkReturnAndRebuildAchievement();
+	checkPerfectCalibrationAchievement();
 
     clearSavedGame();
 
