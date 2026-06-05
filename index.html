@@ -2133,58 +2133,61 @@ Every pixel matters.
 }
 
 /* =========================================
-   TOUCH DEVICE FIX — KILL STICKY MOBILE HOVER
+   TOUCH DEVICE FIX — ANSWER BUTTONS ONLY
 ========================================= */
 
 button {
-  -webkit-tap-highlight-color: transparent;
-  touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
 }
 
 @media (hover: none), (pointer: coarse) {
 
-  button:hover,
-  .answers button:hover,
-  .fullscreenBtn:hover,
-  .continue-btn:hover,
-  .return-menu-btn:hover,
-  .mode-card:hover,
-  .sound-toggle:hover {
-    transform: none;
-  }
+    .answers button:hover {
+        background: linear-gradient(180deg,
+            rgba(50,76,58,0.98),
+            rgba(12,24,20,0.98));
 
-  .answers button:hover {
-    background: linear-gradient(180deg,
-      rgba(50,76,58,0.98),
-      rgba(12,24,20,0.98));
+        border-color: rgba(214,177,92,0.34);
 
-    border-color: rgba(214,177,92,0.34);
+        box-shadow:
+            0 0 10px rgba(214,177,92,0.16),
+            0 0 18px rgba(65,95,78,0.16),
+            inset 0 0 14px rgba(0,0,0,0.7);
 
-    box-shadow:
-      0 0 10px rgba(214,177,92,0.16),
-      0 0 18px rgba(65,95,78,0.16),
-      inset 0 0 14px rgba(0,0,0,0.7);
-  }
+        transform: none;
+    }
 
-  .answers button:active {
-    background: linear-gradient(180deg,
-      rgba(68,105,76,0.98),
-      rgba(24,46,34,0.98));
+    .answers button:active {
+        background: linear-gradient(180deg,
+            rgba(68,105,76,0.98),
+            rgba(24,46,34,0.98));
 
-    border-color: rgba(240,199,94,0.68);
+        border-color: rgba(240,199,94,0.68);
 
-    box-shadow:
-      0 0 18px rgba(214,177,92,0.38),
-      0 0 34px rgba(65,120,82,0.35),
-      inset 0 0 14px rgba(0,0,0,0.68);
+        box-shadow:
+            0 0 18px rgba(214,177,92,0.38),
+            0 0 34px rgba(65,120,82,0.35),
+            inset 0 0 14px rgba(0,0,0,0.68);
 
-    transform: scale(0.98);
-  }
+        transform: scale(0.98);
+    }
 
-  .answers button:focus,
-  .answers button:focus-visible {
-    outline: none;
-  }
+    .answers button:focus,
+    .answers button:focus-visible {
+        outline: none;
+    }
+}
+
+/* =========================================
+   MOBILE CLEANUP — SOUND BUTTON OFF SCREEN
+========================================= */
+
+@media (max-width: 768px), (hover: none) and (pointer: coarse) {
+    #soundToggle,
+    .sound-toggle {
+        display: none !important;
+    }
 }
 	
 </style>
