@@ -2500,7 +2500,8 @@ const hallwayImages = [
 ];
 
 let soundEnabled = true;
-
+const SOUND_PREF_KEY = "exchangeCitadelSoundEnabled";
+	 
 function updateSoundToggle(){
   const button = document.getElementById("soundToggle");
   if(!button) return;
@@ -2516,22 +2517,24 @@ function setAllGameAudioMuted(isMuted){
 }
 
 function toggleGameSound(){
-    soundEnabled = !soundEnabled;
+  soundEnabled = !soundEnabled;
 
-    localStorage.setItem("gauntletSoundEnabled", soundEnabled ? "true" : "false");
-    setAllGameAudioMuted(!soundEnabled);
-    updateSoundToggle();
+  localStorage.setItem(SOUND_PREF_KEY, soundEnabled ? "true" : "false");
+  setAllGameAudioMuted(!soundEnabled);
+  updateSoundToggle();
 
-    if(soundEnabled){
-        resumeCurrentMusic();
-    } else {
-        pauseAllGameMusic();
-    }
+  if(soundEnabled){
+      resumeCurrentMusic();
+  } else {
+      pauseAllGameMusic();
+  }
 }
 
 function restoreSoundSetting(){
-  const saved = localStorage.getItem("gauntletSoundEnabled");
+  const saved = localStorage.getItem(SOUND_PREF_KEY);
+
   soundEnabled = saved !== "false";
+
   setAllGameAudioMuted(!soundEnabled);
   updateSoundToggle();
 }
