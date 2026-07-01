@@ -2259,6 +2259,460 @@ body.game-active #soundToggle {
     transform: none !important;
 }
 	
+/* =========================================
+   SCORE ATTACK MODE ADDITION — SCORE HUD + FLOATING POINTS
+   Inspect here if you want to change:
+   - score display styling
+   - floating +100 / -75 animations
+   - colors, placement, and animation speed
+
+   Logic lives in JavaScript under:
+   "SCORE ATTACK MODE ADDITION — CONFIG + STATE"
+========================================= */
+
+.score-attack-hud{
+  margin: 8px auto 10px;
+  padding: 8px 14px;
+  width: fit-content;
+  max-width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(11,34,56,0.88), rgba(2,6,23,0.96));
+  border: 1px solid rgba(247,217,130,0.50);
+  box-shadow:
+    0 0 16px rgba(56,189,248,0.24),
+    0 0 26px rgba(247,217,130,0.18),
+    inset 0 0 12px rgba(0,0,0,0.74);
+}
+
+.score-attack-label,
+.score-attack-best-label{
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #c7ecff;
+}
+
+.score-attack-value{
+  min-width: 72px;
+  text-align: right;
+  font-size: 24px;
+  font-weight: 900;
+  color: #f7d982;
+  text-shadow:
+    0 0 12px rgba(247,217,130,0.70),
+    0 0 18px rgba(56,189,248,0.24);
+}
+
+.score-attack-best{
+  min-width: 56px;
+  text-align: right;
+  font-size: 18px;
+  font-weight: 800;
+  color: #e0f2fe;
+  text-shadow:
+    0 0 10px rgba(56,189,248,0.46);
+}
+
+#scoreFloatLayer{
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 50;
+}
+
+.score-float{
+  position: absolute;
+  left: 50%;
+  top: var(--score-float-top, 42%);
+  transform: translateX(-50%);
+  font-size: 25px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  animation: scoreFloatUp 1.2s ease-out forwards;
+  text-shadow:
+    0 0 10px rgba(0,0,0,0.96),
+    0 0 18px rgba(56,189,248,0.42);
+}
+
+.score-float.positive{ color: #f7d982; }
+.score-float.negative{ color: #f87171; }
+.score-float.neutral{ color: #c7ecff; }
+
+@keyframes scoreFloatUp{
+  0%{ opacity: 0; transform: translate(-50%, 12px) scale(.85); }
+  15%{ opacity: 1; transform: translate(-50%, 0) scale(1.08); }
+  100%{ opacity: 0; transform: translate(-50%, -58px) scale(1); }
+}
+
+@media(max-width:768px){
+  .score-attack-hud{ margin: 6px auto; padding: 6px 10px; gap: 7px; }
+  .score-attack-label,
+  .score-attack-best-label{ font-size: 9px; letter-spacing: 1.4px; }
+  .score-attack-value{ min-width: 56px; font-size: 19px; }
+  .score-attack-best{ min-width: 44px; font-size: 15px; }
+  .score-float{ font-size: 20px; }
+}
+
+
+/* =========================================
+   14. SOUND ON/OFF — THE MARKET GATE
+========================================= */
+
+.sound-toggle{
+  position:fixed;
+  right:28px;
+  bottom:24px;
+  z-index:999;
+  padding:10px 13px;
+  border-radius:999px;
+  border:1px solid rgba(56,189,248,0.30);
+  background: linear-gradient(
+      180deg,
+      rgba(11,34,56,0.72),
+      rgba(2,6,23,0.82)
+  );
+  color:rgba(224,242,254,0.78);
+  cursor:pointer;
+  font-size:11px;
+  letter-spacing:.12em;
+  text-transform:uppercase;
+  box-shadow:
+      0 0 18px rgba(0,0,0,.48),
+      0 0 18px rgba(56,189,248,0.14),
+      inset 0 0 10px rgba(0,0,0,0.72);
+  backdrop-filter: blur(3px);
+  transition:
+      color .18s ease,
+      border-color .18s ease,
+      background .18s ease,
+      box-shadow .18s ease,
+      transform .18s ease;
+}
+
+.sound-toggle:hover{
+  color:#f7d982;
+  border-color:rgba(247,217,130,0.56);
+  background: linear-gradient(
+      180deg,
+      rgba(19,57,86,0.84),
+      rgba(4,14,28,0.90)
+  );
+  box-shadow:
+      0 0 22px rgba(0,0,0,.52),
+      0 0 20px rgba(56,189,248,0.22),
+      0 0 26px rgba(247,217,130,0.14),
+      inset 0 0 10px rgba(0,0,0,0.74);
+  transform: translateY(-1px);
+}
+
+/* =========================================
+   TOUCH DEVICE FIX — ANSWER BUTTONS ONLY
+========================================= */
+
+button {
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+@media (hover: none), (pointer: coarse) {
+
+    .answers button:hover {
+        background: linear-gradient(180deg,
+            rgba(50,76,58,0.98),
+            rgba(12,24,20,0.98));
+
+        border-color: rgba(214,177,92,0.34);
+
+        box-shadow:
+            0 0 10px rgba(214,177,92,0.16),
+            0 0 18px rgba(65,95,78,0.16),
+            inset 0 0 14px rgba(0,0,0,0.7);
+
+        transform: none;
+    }
+
+    .answers button:active {
+        background: linear-gradient(180deg,
+            rgba(68,105,76,0.98),
+            rgba(24,46,34,0.98));
+
+        border-color: rgba(240,199,94,0.68);
+
+        box-shadow:
+            0 0 18px rgba(214,177,92,0.38),
+            0 0 34px rgba(65,120,82,0.35),
+            inset 0 0 14px rgba(0,0,0,0.68);
+
+        transform: scale(0.98);
+    }
+
+    .answers button:focus,
+    .answers button:focus-visible {
+        outline: none;
+    }
+}
+
+/* =========================================
+   FIXED GAME CONTROLS — ONLY DURING ACTIVE RUN
+========================================= */
+
+body:not(.game-active) #returnMenuBtn,
+body:not(.game-active) #soundToggle {
+    display: none !important;
+}
+
+body.game-active #returnMenuBtn,
+body.game-active #soundToggle {
+    display: block !important;
+}
+
+/* Battle Menu: fixed upper right. Small. Not a parade float. */
+#returnMenuBtn.return-menu-btn {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    right: 10px !important;
+    left: auto !important;
+    bottom: auto !important;
+
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+
+    z-index: 3000 !important;
+
+    padding: 7px 11px !important;
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+    line-height: 1 !important;
+    border-radius: 999px !important;
+
+    background: rgba(0,0,0,0.62) !important;
+    color: rgba(255,255,255,0.88) !important;
+    border: 1px solid rgba(56,189,248,0.48) !important;
+
+    box-shadow:
+        0 0 14px rgba(56,189,248,0.24),
+        0 0 18px rgba(0,0,0,0.55) !important;
+
+    transform: none !important;
+}
+
+/* Sound: fixed upper left so it does not fight the Battle Menu. */
+#soundToggle.sound-toggle {
+    position: fixed !important;
+    top: calc(env(safe-area-inset-top, 0px) + 10px) !important;
+    left: 10px !important;
+    right: auto !important;
+    bottom: auto !important;
+
+    width: auto !important;
+    max-width: none !important;
+    height: auto !important;
+
+    z-index: 3000 !important;
+
+    padding: 7px 10px !important;
+    font-size: 10px !important;
+    letter-spacing: 1px !important;
+    line-height: 1 !important;
+    border-radius: 999px !important;
+
+    background: rgba(0,0,0,0.62) !important;
+    color: rgba(255,255,255,0.78) !important;
+    border: 1px solid rgba(255,255,255,0.22) !important;
+
+    box-shadow:
+        0 0 14px rgba(0,0,0,0.55) !important;
+
+    transform: none !important;
+}
+
+#returnMenuBtn:hover,
+#soundToggle:hover {
+    transform: none !important;
+}
+
+/* =========================================
+   15. POST-BATTLE MASTERY REPORT
+   Student-facing diagnostic after a completed run.
+========================================= */
+.mastery-report-screen{
+    text-align:left;
+    padding:24px;
+    color:#eef8ff;
+}
+
+.mastery-report-title{
+    text-align:center;
+    color:#f7d982;
+    font-size:32px;
+    letter-spacing:2px;
+    margin:0 0 8px 0;
+    text-shadow:
+        0 0 16px rgba(247,217,130,0.70),
+        0 0 30px rgba(56,189,248,0.28),
+        0 3px 8px rgba(0,0,0,0.92);
+}
+
+.mastery-report-subtitle{
+    text-align:center;
+    color:#c7ecff;
+    font-style:italic;
+    margin:0 auto 18px auto;
+    max-width:680px;
+    line-height:1.45;
+}
+
+.mastery-summary-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(145px, 1fr));
+    gap:10px;
+    margin:18px 0;
+}
+
+.mastery-stat-card,
+.mastery-section{
+    background:
+        radial-gradient(circle at top,
+            rgba(56,189,248,0.14),
+            rgba(11,34,56,0.82) 45%,
+            rgba(2,6,23,0.96));
+    border:1px solid rgba(247,217,130,0.28);
+    border-radius:12px;
+    box-shadow:
+        0 0 18px rgba(0,0,0,0.62),
+        inset 0 0 20px rgba(0,0,0,0.52);
+}
+
+.mastery-stat-card{
+    padding:12px;
+    text-align:center;
+}
+
+.mastery-stat-label{
+    display:block;
+    color:#c7ecff;
+    font-size:11px;
+    letter-spacing:1.5px;
+    text-transform:uppercase;
+    margin-bottom:6px;
+}
+
+.mastery-stat-value{
+    display:block;
+    color:#f7d982;
+    font-size:24px;
+    font-weight:900;
+    text-shadow:0 0 10px rgba(247,217,130,0.40);
+}
+
+.mastery-section{
+    padding:16px;
+    margin:14px 0;
+}
+
+.mastery-section h3{
+    margin:0 0 12px 0;
+    color:#f7d982;
+    letter-spacing:1px;
+    text-shadow:0 0 10px rgba(247,217,130,0.34);
+}
+
+.mastery-verdict{
+    border-left:3px solid #f7d982;
+    padding:14px 16px;
+    margin:14px 0;
+    background:rgba(2,6,23,0.54);
+    border-radius:10px;
+    color:#e0f2fe;
+    line-height:1.5;
+}
+
+.mastery-row{
+    padding:10px 0;
+    border-top:1px solid rgba(224,242,254,0.12);
+}
+
+.mastery-row:first-child{
+    border-top:none;
+}
+
+.mastery-row-main{
+    display:flex;
+    justify-content:space-between;
+    gap:14px;
+    align-items:flex-start;
+}
+
+.mastery-row-name{
+    color:#eef8ff;
+    font-weight:700;
+    line-height:1.25;
+}
+
+.mastery-row-score{
+    color:#f7d982;
+    white-space:nowrap;
+    font-weight:800;
+}
+
+.mastery-row-meta{
+    display:block;
+    margin-top:5px;
+    color:rgba(199,236,255,0.72);
+    font-size:12px;
+    line-height:1.35;
+}
+
+.mastery-bar{
+    height:8px;
+    margin-top:8px;
+    border-radius:999px;
+    background:rgba(2,6,23,0.82);
+    overflow:hidden;
+    border:1px solid rgba(56,189,248,0.18);
+}
+
+.mastery-bar-fill{
+    height:100%;
+    width:0%;
+    border-radius:999px;
+    background:linear-gradient(90deg, #b91c1c, #38bdf8, #f7d982);
+    box-shadow:0 0 10px rgba(56,189,248,0.38);
+}
+
+.mastery-empty{
+    color:rgba(224,242,254,0.74);
+    font-style:italic;
+    margin:0;
+}
+
+.mastery-actions{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    margin-top:20px;
+}
+
+.mastery-actions button{
+    min-width:150px;
+}
+
+@media(max-width:768px){
+    .mastery-report-screen{ padding:14px; }
+    .mastery-report-title{ font-size:24px; }
+    .mastery-row-main{ flex-direction:column; gap:4px; }
+    .mastery-row-score{ white-space:normal; }
+}
+
 </style>
 </head>
 
@@ -2348,6 +2802,7 @@ Respect structure strictly.
       <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.png" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
       <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.png" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
       <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.png" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Citadel tests chained open-economy policy judgment.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.png" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
     </div>
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
@@ -2426,6 +2881,19 @@ or simplify this section.
                 <div id="progressBar">
                     <div id="progressFill"></div>
                 </div>
+
+                <!-- SCORE ATTACK MODE ADDITION:
+                     Visible only in Score Attack mode. Shows current score and saved best score. -->
+                <div id="scoreAttackHud" class="score-attack-hud" style="display:none;" aria-live="polite">
+                    <span class="score-attack-label">Score</span>
+                    <span id="scoreAttackDisplay" class="score-attack-value">0</span>
+                    <span class="score-attack-best-label">Best</span>
+                    <span id="scoreAttackBestDisplay" class="score-attack-best">0</span>
+                </div>
+
+                <!-- SCORE ATTACK MODE ADDITION:
+                     Floating +100, Speed +40, Streak +250, Wrong -75 text is injected here. -->
+                <div id="scoreFloatLayer" aria-hidden="true"></div>
 
                 <div id="streakDisplay"></div>
                 <div id="timedModeHud" class="timed-mode-hud" style="display:none;">
@@ -2708,6 +3176,46 @@ let timedHighestRoom = 1;
 let timedSetbacks = 0;
 
 // =============================================
+// SCORE ATTACK MODE ADDITION — CONFIG + STATE
+// This scoring layer is intentionally separate from:
+// - adaptive engine
+// - realm completion
+// - artifact unlocks
+//
+// Change point values here. Do not bury score math in answer().
+// =============================================
+const SCORE_ATTACK_STORAGE_PREFIX = "exchangeCitadelScoreAttack";
+
+const SCORE_ATTACK_CONFIG = {
+    correct: 100,
+    wrongPenalty: -75,
+    rapidMissPenalty: -125,
+    speedBonuses: [
+        { maxMs: 8000, points: 40, label: "Speed" },
+        { maxMs: 15000, points: 25, label: "Speed" },
+        { maxMs: 25000, points: 10, label: "Speed" }
+    ],
+    streakBonuses: [
+        { minStreak: 15, points: 250, label: "Streak" },
+        { minStreak: 10, points: 150, label: "Streak" },
+        { minStreak: 5, points: 50, label: "Streak" },
+        { minStreak: 3, points: 20, label: "Streak" },
+        { minStreak: 2, points: 10, label: "Streak" }
+    ],
+
+    // SCORE ATTACK MODE ADDITION:
+    // Short pause after points appear but before normal feedback/progression continues.
+    // Correct answers get a little more time because they can stack Correct + Speed + Streak.
+    resolveDelayCorrectMs: 725,
+    resolveDelayWrongMs: 625
+};
+
+let scoreAttackScore = 0;
+let scoreAttackBestScore = Number(localStorage.getItem(`${SCORE_ATTACK_STORAGE_PREFIX}_bestScore`) || 0);
+let scoreAttackEvents = [];
+let activeScoreFloatCount = 0;
+
+// =============================================
 // HUB ACHIEVEMENT TRACKING
 // These keys are read by the Macro Test Prep hub.
 // Keep this small and boring. Boring means it works.
@@ -2835,9 +3343,178 @@ function isBossRoomForMode(r){
 function getModeDisplayName(){
     if(gameMode === "timed") return "Timed Trial";
     if(gameMode === "exam") return "Exam Drill";
+    if(gameMode === "score") return "Score Attack";
     if(gameMode === "bossRush") return "Boss Rush";
     if(gameMode === "legendary") return "Legendary Mode";
     return "Standard Campaign";
+}
+
+// =============================================
+// SCORE ATTACK MODE ADDITION — SCORING HELPERS
+// These helpers keep Score Attack self-contained.
+// Main answer() only calls:
+// - applyScoreAttackForAnswer(...)
+// - applyScoreAttackRapidGuessPenalty(...)
+// =============================================
+
+function modeUsesScoreAttack(){
+    return gameMode === "score";
+}
+
+function resetScoreAttackState(){
+    scoreAttackScore = 0;
+    scoreAttackEvents = [];
+    activeScoreFloatCount = 0;
+    scoreAttackBestScore = Number(localStorage.getItem(`${SCORE_ATTACK_STORAGE_PREFIX}_bestScore`) || 0);
+    updateScoreAttackHud();
+}
+
+function getScoreAttackSpeedBonus(responseTime){
+    const bonus = SCORE_ATTACK_CONFIG.speedBonuses.find(item => responseTime <= item.maxMs);
+    return bonus ? bonus.points : 0;
+}
+
+function getScoreAttackStreakBonus(currentStreak){
+    const bonus = SCORE_ATTACK_CONFIG.streakBonuses.find(item => currentStreak >= item.minStreak);
+    return bonus ? bonus.points : 0;
+}
+
+function applyScoreAttackEvent(label, amount){
+    if(!modeUsesScoreAttack()) return;
+
+    const numericAmount = Number(amount || 0);
+    if(!Number.isFinite(numericAmount) || numericAmount === 0) return;
+
+    scoreAttackScore += numericAmount;
+
+    // No negative scoreboard. Punishment hurts, but it does not turn into comedy.
+    if(scoreAttackScore < 0){
+        scoreAttackScore = 0;
+    }
+
+    scoreAttackEvents.push({
+        label,
+        amount: numericAmount,
+        scoreAfter: scoreAttackScore,
+        room,
+        questionId: currentQuestion?.id || 0,
+        time: Date.now()
+    });
+
+    if(scoreAttackEvents.length > 120){
+        scoreAttackEvents.shift();
+    }
+
+    if(scoreAttackScore > scoreAttackBestScore){
+        scoreAttackBestScore = scoreAttackScore;
+        localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_bestScore`, String(scoreAttackBestScore));
+    }
+
+    updateScoreAttackHud();
+    showScoreAttackFloat(label, numericAmount);
+}
+
+function applyScoreAttackForAnswer(isCorrect, responseTime){
+    if(!modeUsesScoreAttack()) return;
+
+    if(isCorrect){
+        applyScoreAttackEvent("Correct", SCORE_ATTACK_CONFIG.correct);
+
+        const speedBonus = getScoreAttackSpeedBonus(responseTime);
+        if(speedBonus > 0){
+            applyScoreAttackEvent("Speed", speedBonus);
+        }
+
+        const streakBonus = getScoreAttackStreakBonus(streak);
+        if(streakBonus > 0){
+            applyScoreAttackEvent("Streak", streakBonus);
+        }
+
+        return;
+    }
+
+    const penalty = responseTime < 4000
+        ? SCORE_ATTACK_CONFIG.rapidMissPenalty
+        : SCORE_ATTACK_CONFIG.wrongPenalty;
+
+    applyScoreAttackEvent(responseTime < 4000 ? "Rapid Miss" : "Wrong", penalty);
+}
+
+function applyScoreAttackRapidGuessPenalty(){
+    if(!modeUsesScoreAttack()) return;
+
+    applyScoreAttackEvent("Rapid Guess", SCORE_ATTACK_CONFIG.rapidMissPenalty);
+}
+
+// SCORE ATTACK MODE ADDITION:
+// This creates the tiny arcade-style "score resolve" beat.
+// It lets +100 / Speed / Streak / Wrong penalties breathe before feedback appears.
+function getScoreAttackResolveDelay(isCorrect){
+    if(!modeUsesScoreAttack()) return 0;
+
+    return isCorrect
+        ? SCORE_ATTACK_CONFIG.resolveDelayCorrectMs
+        : SCORE_ATTACK_CONFIG.resolveDelayWrongMs;
+}
+
+function waitForScoreAttackResolve(isCorrect){
+    const delay = getScoreAttackResolveDelay(isCorrect);
+
+    if(!delay || delay <= 0){
+        return Promise.resolve();
+    }
+
+    return new Promise(resolve => setTimeout(resolve, delay));
+}
+
+function updateScoreAttackHud(){
+    const hud = document.getElementById("scoreAttackHud");
+    const scoreDisplay = document.getElementById("scoreAttackDisplay");
+    const bestDisplay = document.getElementById("scoreAttackBestDisplay");
+
+    if(!hud || !scoreDisplay || !bestDisplay) return;
+
+    hud.style.display = modeUsesScoreAttack() ? "flex" : "none";
+    scoreDisplay.innerText = String(scoreAttackScore);
+    bestDisplay.innerText = String(scoreAttackBestScore);
+}
+
+function showScoreAttackFloat(label, amount){
+    const layer = document.getElementById("scoreFloatLayer");
+    if(!layer) return;
+
+    const item = document.createElement("div");
+    const sign = amount > 0 ? "+" : "";
+    const typeClass = amount > 0 ? "positive" : amount < 0 ? "negative" : "neutral";
+
+    activeScoreFloatCount++;
+    const stackOffset = Math.min(activeScoreFloatCount - 1, 4) * 30;
+
+    item.className = `score-float ${typeClass}`;
+    item.style.setProperty("--score-float-top", `calc(38% + ${stackOffset}px)`);
+    item.innerText = `${label} ${sign}${amount}`;
+
+    layer.appendChild(item);
+
+    setTimeout(() => {
+        item.remove();
+        activeScoreFloatCount = Math.max(0, activeScoreFloatCount - 1);
+    }, 1200);
+}
+
+function storeScoreAttackFinalStats(accuracy, totalTimeMs){
+    if(!modeUsesScoreAttack()) return;
+
+    localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_lastScore`, String(scoreAttackScore));
+    localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_lastAccuracy`, String(accuracy));
+    localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_lastAttempts`, String(totalAttempts));
+    localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_lastStreak`, String(maxStreak));
+    localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_lastTimeMs`, String(totalTimeMs));
+
+    if(scoreAttackScore > scoreAttackBestScore){
+        scoreAttackBestScore = scoreAttackScore;
+        localStorage.setItem(`${SCORE_ATTACK_STORAGE_PREFIX}_bestScore`, String(scoreAttackBestScore));
+    }
 }
 
 function saveGameState(){
@@ -3864,7 +4541,7 @@ function returnToModeSelectFromRun(){
     if(modeScreen) modeScreen.style.display = "flex";
 }
 	 
-function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Standard Campaign progress will be saved. Timed Trial and Exam Drill attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(gameMode === "standard" || gameMode === "legendary") saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
+function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Standard Campaign progress will be saved. Timed Trial, Exam Drill, and Score Attack attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(gameMode === "standard" || gameMode === "legendary") saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
 let activeModalConfirmAction = null; let activeModalCancelAction = null;
 function showGameModal({title="Citadel Warning",text="",confirmText="Continue",cancelText="",onConfirm=null,onCancel=null}={}){ const modal=document.getElementById("gameModal"),titleEl=document.getElementById("gameModalTitle"),textEl=document.getElementById("gameModalText"),confirmBtn=document.getElementById("gameModalConfirm"),cancelBtn=document.getElementById("gameModalCancel"); if(!modal||!titleEl||!textEl||!confirmBtn||!cancelBtn) return; activeModalConfirmAction=onConfirm; activeModalCancelAction=onCancel; titleEl.innerText=title; textEl.innerText=text; confirmBtn.innerText=confirmText; if(cancelText){cancelBtn.innerText=cancelText; cancelBtn.style.display="inline-block";} else cancelBtn.style.display="none"; modal.style.display="flex"; confirmBtn.onclick=function(){const action=activeModalConfirmAction; closeGameModal(); if(typeof action==="function") action();}; cancelBtn.onclick=function(){const action=activeModalCancelAction; closeGameModal(); if(typeof action==="function") action();}; }
 function closeGameModal(){ const modal=document.getElementById("gameModal"); if(modal) modal.style.display="none"; activeModalConfirmAction=null; activeModalCancelAction=null; }
@@ -4010,7 +4687,8 @@ function startGame(shouldResume = false) {
         rapidGuessLocked = false;
 		chancellorIntroPlayed = false;
 		bossMistakeCountThisRun = 0;
-   	    bossesDefeatedThisRun = 0
+   	    bossesDefeatedThisRun = 0;
+        resetScoreAttackState();
 
         localStorage.removeItem("gauntletRoom");
 
@@ -4195,12 +4873,41 @@ function resetRunStateForNewMode(){
 	bossMistakeCountThisRun = 0;
     bossesDefeatedThisRun = 0;
     resumedSavedRunThisSession = false;
+    resetScoreAttackState();
 	chancellorIntroPlayed=false;
 	resetRemediationState();
 	    questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
 	    usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
 	    if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultLedger");localStorage.removeItem("vaultCharter");localStorage.removeItem("vaultPen");}
 	}
+
+function initializeRunForMode(mode){
+    gameMode = mode || "standard";
+
+    const autosave = document.getElementById("autosave");
+    if(autosave){
+        autosave.innerText = gameMode === "timed"
+            ? "⏱ Timed Trial Active"
+            : gameMode === "exam"
+                ? "✎ Exam Drill Active"
+                : gameMode === "score"
+                    ? "🏆 Score Attack Active"
+                    : gameMode === "legendary"
+                        ? "🔥 Legendary Mode Active"
+                        : gameMode === "bossRush"
+                            ? "⚔ Boss Rush Active"
+                            : "💾 Progress Saved Locally";
+    }
+
+    if(gameMode === "timed"){
+        startTimedModeClock();
+    } else {
+        stopTimedModeClock();
+    }
+
+    updateScoreAttackHud();
+}
+
 function startTimedModeClock(){
     timedModeEndTime = Date.now() + timedModeDurationMs;
 
@@ -5409,7 +6116,7 @@ function checkRapidGuessing(isCorrect, responseTime){
 //
 // Check for artifact names and CHANGE
      
-function answer(choice) {
+async function answer(choice) {
     // --- GLOBAL MEMORY DECAY ---
     for(let tag in conceptMemory){
     conceptMemory[tag] *= 0.95;
@@ -5435,6 +6142,10 @@ if(rapidGuess.triggered && !rapidGuessLocked){
     rapidGuessWarnings++;
     adaptiveMode = "non-engaged";
 
+    // SCORE ATTACK MODE ADDITION:
+    // Rapid guessing gets punished even when the normal lockout stops progression.
+    applyScoreAttackRapidGuessPenalty();
+
     setAnswerButtonsDisabled(true);
 
     msgElement.innerHTML =
@@ -5456,7 +6167,9 @@ if(rapidGuess.triggered && !rapidGuessLocked){
         attempt: totalAttempts ?? 0,
         streak: streak ?? 0,
         elapsedTime: startTime ? (Date.now() - startTime) : 0,
-        adaptiveMode: adaptiveMode
+        adaptiveMode: adaptiveMode,
+        score: scoreAttackScore,
+        bestScore: scoreAttackBestScore
     });
 
     // Give them a clean restart after the warning.
@@ -5492,6 +6205,11 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         streak = 0;
     }
    
+    // SCORE ATTACK MODE ADDITION:
+    // Apply score after streak updates, because streak bonus depends on the new streak value.
+    // This does not affect progression, adaptive logic, bosses, or hub completion.
+    applyScoreAttackForAnswer(isCorrect, responseTime);
+
     // =============================================
     // 🔥 TRACK EVERYTHING (ONE LOCATION ONLY)
     // =============================================
@@ -5513,6 +6231,14 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 		elapsedTime: startTime ? (Date.now() - startTime) : 0,
         adaptiveMode: adaptiveMode
     });
+
+    // SCORE ATTACK MODE ADDITION:
+    // Pause only in Score Attack so the player can actually read the score result
+    // before normal feedback, boss hits, hallway transitions, or wrong-turn feedback.
+    if(modeUsesScoreAttack()){
+        setAnswerButtonsDisabled(true);
+        await waitForScoreAttackResolve(isCorrect);
+    }
 
     // =============================================
     // ✅ CORRECT ANSWER LOGIC
@@ -6162,9 +6888,9 @@ function handleLegendaryVictory(){
         verificationCode
     });
 
-    let judgment = "Legendary Citadel run confirmed. You handled money, banks, inflation, interest rates, and policy transmission under pressure.";
+    let judgment = "Legendary Citadel run confirmed. You handled open-economy identities, capital flows, exchange rates, policy regimes, and Mundell-Fleming chains under pressure.";
     if(accuracy >= 90){
-        judgment = "Legendary mastery confirmed. You did not just recognize terms. You audited the whole national record.";
+        judgment = "Legendary mastery confirmed. You did not just name the model. You traced the open-economy chain across trade, capital flows, exchange rates, and policy.";
     } else if(accuracy < 75){
         judgment = "You survived Legendary Mode, but the Citadel left marks. Completion counts. Mastery still needs another run.";
     }
@@ -6186,6 +6912,7 @@ function handleLegendaryVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
 
@@ -6241,6 +6968,7 @@ if(gameMode === "exam"){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
 
@@ -6324,10 +7052,92 @@ function generateCode(name, acc, streak, total){
 // This is a PRESENTATION layer, not a logic layer.
 // =============================================   
 	 
+function handleScoreAttackVictory(){
+    stopTimedModeClock();
+
+    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const timeString = formatTime(totalTimeMs);
+    const accuracy = totalAttempts > 0
+        ? Math.round((correctAnswers / totalAttempts) * 100)
+        : 0;
+
+    storeScoreAttackFinalStats(accuracy, totalTimeMs);
+
+    sendGameData({
+        runID: runID,
+        game: "The Exchange Citadel",
+        event: "score_complete",
+        user: username,
+        email: studentEmail,
+        room: room,
+        questionId: 0,
+        correct: 1,
+        tag: "",
+        type: "",
+        objective: "",
+        responseTime: 0,
+        attempt: totalAttempts,
+        streak: streak,
+        elapsedTime: totalTimeMs,
+        adaptiveMode: "score_complete",
+        totalTime: totalTimeMs,
+        accuracy: accuracy / 100,
+        maxStreak: maxStreak,
+        totalAttempts: totalAttempts,
+        score: scoreAttackScore,
+        bestScore: scoreAttackBestScore,
+        scoreEvents: JSON.stringify(scoreAttackEvents)
+    });
+
+    let scoreLine = "Respectable. The Citadel recorded the run.";
+    if(scoreAttackScore >= 9250){
+        scoreLine = "Maximum score. Clean run. No wasted motion. The Citadel opens the upper ledger.";
+    } else if(scoreAttackScore >= 8000){
+        scoreLine = "Elite scoring run. Fast, accurate, and mean.";
+    } else if(scoreAttackScore < 4000){
+        scoreLine = "You finished, but the scoreboard is not impressed. Run it back.";
+    }
+
+    document.getElementById("bossMessage").innerText = "";
+    document.getElementById("formulaHint").innerText = "";
+    document.getElementById("artifactDrop").style.display = "none";
+    document.getElementById("questionImageBox").style.display = "none";
+
+    document.getElementById("question").innerHTML = `
+        <span class="boss-title">SCORE ATTACK COMPLETE</span>
+        <div class="boss-q">
+            ${scoreLine}<br><br>
+            Final Score: <strong>${scoreAttackScore}</strong><br>
+            Best Score: <strong>${scoreAttackBestScore}</strong><br>
+            Accuracy: ${accuracy}%<br>
+            Total Attempts: ${totalAttempts}<br>
+            Best Streak: ${maxStreak}<br>
+            Total Time: ${timeString}
+        </div>
+    `;
+
+    document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
+        <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
+        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
+    `;
+
+    document.getElementById("message").innerText = "Score saved locally. Standard campaign progress was not changed.";
+}
+
+
+function restartScoreAttackMode(){
+    gameMode = "score";
+    resetRunStateForNewMode();
+    startSelectedMode("score");
+}
+
 function handleVictory() {
     if(!modeAllowsRealmProgress()){
         if(gameMode === "legendary"){
             handleLegendaryVictory();
+        } else if(gameMode === "score"){
+            handleScoreAttackVictory();
         } else {
             handlePracticeModeComplete();
         }
@@ -6448,6 +7258,9 @@ function handleVictory() {
                 <button id="shareBtn" onclick="copyResults()" style="background:#4ade80; color:black; font-weight:bold; padding:12px 24px; border:none; border-radius:6px; cursor:pointer;">
                     Copy Results
                 </button>
+                <button onclick="showMasteryReportScreen()" style="background:#1d4d73; color:#f8d981; border:1px solid rgba(248,217,129,0.55); padding:12px 24px; border-radius:6px; cursor:pointer; font-weight:bold;">
+                    View Mastery Report
+                </button>
                 <button onclick="location.reload()" style="background:transparent; color:white; border:1px solid white; padding:12px 24px; border-radius:6px; cursor:pointer;">
                     Run Citadel Again
                 </button>
@@ -6559,6 +7372,601 @@ function formatTime(ms) {
 //
 // Removing those will break this function.
 // =============================================     
+// =============================================
+// POST-BATTLE MASTERY REPORT
+// Student-facing diagnostic built from masteryState.
+// Uses existing tag, objective, skill, type, accuracy, and response-time data.
+// No answer keys. No question IDs. No nonsense.
+// =============================================
+let latestResultsScreenHTML = "";
+
+const EXCHANGE_CITADEL_OBJECTIVE_LABELS = (typeof objectiveLabels !== "undefined") ? objectiveLabels : {};
+
+function escapeHTML(value){
+    return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function titleCase(value){
+    return String(value || "")
+        .replace(/_/g, " ")
+        .replace(/-/g, " ")
+        .replace(/\s+/g, " ")
+        .trim()
+        .replace(/\b\w/g, letter => letter.toUpperCase());
+}
+
+function formatMasteryLabel(key){
+    if(!key) return "Unlabeled Concept";
+
+    const text = String(key);
+    const exactLabel = EXCHANGE_CITADEL_OBJECTIVE_LABELS[text];
+
+    if(exactLabel){
+        return /^LO\d+\.\d+$/.test(text)
+            ? `${text} — ${exactLabel}`
+            : exactLabel;
+    }
+
+    const objectiveMatch = text.match(/^(LO\d+\.\d+)/);
+    if(objectiveMatch && EXCHANGE_CITADEL_OBJECTIVE_LABELS[objectiveMatch[1]]){
+        const suffix = text
+            .replace(objectiveMatch[1], "")
+            .replace(/^_+/, "")
+            .replace(/_/g, " ")
+            .trim();
+
+        return suffix
+            ? `${objectiveMatch[1]} — ${EXCHANGE_CITADEL_OBJECTIVE_LABELS[objectiveMatch[1]]}: ${titleCase(suffix)}`
+            : `${objectiveMatch[1]} — ${EXCHANGE_CITADEL_OBJECTIVE_LABELS[objectiveMatch[1]]}`;
+    }
+
+    return titleCase(text);
+}
+
+function formatPercent(value){
+    if(value === null || value === undefined || !Number.isFinite(Number(value))) return "—";
+    return `${Math.round(Number(value) * 100)}%`;
+}
+
+function formatSeconds(ms){
+    const numeric = Number(ms || 0);
+    if(!Number.isFinite(numeric) || numeric <= 0) return "—";
+    return `${Math.round(numeric / 1000)}s`;
+}
+
+function getBucketEntry(key, bucket, category = "concept"){
+    if(!bucket || !bucket.attempts){
+        return null;
+    }
+
+    const attempts = Number(bucket.attempts || 0);
+    const correct = Number(bucket.correct || 0);
+    const accuracy = attempts ? correct / attempts : null;
+    const typeForTiming = category === "type" ? key : "default";
+    const target = getTypeTargetMs(typeForTiming);
+    const avgTime = Number(bucket.avgTime || 0);
+    const timeRatio = avgTime && target ? avgTime / target : 1;
+    const fluency = accuracy === null
+        ? 0
+        : accuracy - clamp((timeRatio - 1) * 0.25, 0, 0.35);
+
+    return {
+        key,
+        label: formatMasteryLabel(key),
+        category,
+        attempts,
+        correct,
+        accuracy,
+        avgTime,
+        timeRatio,
+        fluency
+    };
+}
+
+function getEntriesFromBuckets(source, category = "concept"){
+    return Object.entries(source || {})
+        .map(([key, bucket]) => getBucketEntry(key, bucket, category))
+        .filter(Boolean);
+}
+
+function getTypeMasteryEntries(){
+    const typeBuckets = {};
+
+    Object.values(masteryState.byTag || {}).forEach(tagBucket => {
+        Object.entries(tagBucket.byType || {}).forEach(([type, bucket]) => {
+            if(!typeBuckets[type]){
+                typeBuckets[type] = { attempts: 0, correct: 0, avgTime: 0 };
+            }
+
+            const oldAttempts = typeBuckets[type].attempts;
+            const newAttempts = oldAttempts + Number(bucket.attempts || 0);
+
+            typeBuckets[type].correct += Number(bucket.correct || 0);
+            typeBuckets[type].avgTime = newAttempts
+                ? ((typeBuckets[type].avgTime * oldAttempts) + (Number(bucket.avgTime || 0) * Number(bucket.attempts || 0))) / newAttempts
+                : 0;
+            typeBuckets[type].attempts = newAttempts;
+        });
+    });
+
+    return getEntriesFromBuckets(typeBuckets, "type");
+}
+
+function sortStrongest(entries){
+    return [...entries]
+        .filter(entry => entry.attempts >= 2)
+        .sort((a,b) => (b.accuracy - a.accuracy) || (b.fluency - a.fluency) || (b.attempts - a.attempts));
+}
+
+function sortWeakest(entries){
+    const enoughData = entries.filter(entry => entry.attempts >= 2);
+    const pool = enoughData.length ? enoughData : entries;
+
+    return [...pool]
+        .sort((a,b) => (a.accuracy - b.accuracy) || (a.fluency - b.fluency) || (b.avgTime - a.avgTime));
+}
+
+function hasMeaningfulWeakness(entries, accuracyThreshold = 0.85){
+    return (entries || []).some(entry => {
+        if(!entry || entry.attempts < 2) return false;
+
+        const accuracy = entry.accuracy === null || entry.accuracy === undefined
+            ? 1
+            : Number(entry.accuracy);
+
+        return accuracy < accuracyThreshold || entry.timeRatio > 1.35;
+    });
+}
+
+function renderMasteryRows(entries, emptyText){
+    if(!entries || entries.length === 0){
+        return `<p class="mastery-empty">${escapeHTML(emptyText)}</p>`;
+    }
+
+    return entries.map(entry => {
+        const pct = Math.max(0, Math.min(100, Math.round((entry.accuracy || 0) * 100)));
+        const pace = entry.timeRatio > 1.25
+            ? "Slow response pattern"
+            : entry.timeRatio < 0.65
+                ? "Fast response pattern"
+                : "Stable pace";
+
+        return `
+            <div class="mastery-row">
+                <div class="mastery-row-main">
+                    <span class="mastery-row-name">${escapeHTML(entry.label)}</span>
+                    <span class="mastery-row-score">${formatPercent(entry.accuracy)} · ${entry.correct}/${entry.attempts}</span>
+                </div>
+                <span class="mastery-row-meta">Average response: ${formatSeconds(entry.avgTime)} · ${pace}</span>
+                <div class="mastery-bar"><div class="mastery-bar-fill" style="width:${pct}%"></div></div>
+            </div>
+        `;
+    }).join("");
+}
+
+function renderMasteryDiagnosticSection({
+    weaknessTitle,
+    signalTitle,
+    entries,
+    hasWeakness,
+    weaknessEmptyText,
+    cleanText
+}){
+    const title = hasWeakness ? weaknessTitle : signalTitle;
+    const body = hasWeakness
+        ? renderMasteryRows(entries, weaknessEmptyText)
+        : `<p class="mastery-empty">${escapeHTML(cleanText)}</p>`;
+
+    return `
+        <div class="mastery-section">
+            <h3>${escapeHTML(title)}</h3>
+            ${body}
+        </div>
+    `;
+}
+
+function getRecentBehaviorSignals(){
+    const recent = masteryState.recent || [];
+    let fastMisses = 0;
+    let slowCorrects = 0;
+    let recentCorrect = 0;
+    let recentTimeTotal = 0;
+
+    recent.forEach(item => {
+        const target = getTypeTargetMs(item.type || "default");
+        const responseTime = Number(item.responseTime || 0);
+
+        if(item.correct) recentCorrect++;
+        if(responseTime) recentTimeTotal += responseTime;
+
+        if(!item.correct && responseTime > 0 && responseTime < target * 0.55){
+            fastMisses++;
+        }
+
+        if(item.correct && responseTime > target * 1.20){
+            slowCorrects++;
+        }
+    });
+
+    return {
+        count: recent.length,
+        accuracy: recent.length ? recentCorrect / recent.length : null,
+        avgTime: recent.length ? recentTimeTotal / recent.length : 0,
+        fastMisses,
+        slowCorrects
+    };
+}
+
+
+function getMasteryReportModeName(){
+    if(gameMode === "timed-complete") return "Timed Trial";
+    if(gameMode === "score") return "Score Attack";
+    if(gameMode === "legendary") return "Legendary Mode";
+    if(gameMode === "exam") return "Exam Drill";
+    return getModeDisplayName();
+}
+
+function getMasteryReportData(){
+    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
+    const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
+    const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
+    const skillEntries = getEntriesFromBuckets(masteryState.bySkill || {}, "skill");
+    const typeEntries = getTypeMasteryEntries();
+    const behavior = getRecentBehaviorSignals();
+
+    const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
+    const weakestObjectives = sortWeakest(objectiveEntries).slice(0, 4);
+    const weakestTypes = sortWeakest(typeEntries).slice(0, 3);
+    const weakestSkills = sortWeakest(skillEntries).slice(0, 3);
+
+    const hasObjectiveWeakness = hasMeaningfulWeakness(objectiveEntries, 0.85);
+    const hasTypeWeakness = hasMeaningfulWeakness(typeEntries, 0.85);
+    const hasSkillWeakness = hasMeaningfulWeakness(skillEntries, 0.85);
+    const hasBehaviorWeakness = behavior.fastMisses >= 2 || behavior.slowCorrects >= 3;
+    const noMajorWeakness = totalAttempts >= 8
+        && accuracy >= 0.85
+        && !hasObjectiveWeakness
+        && !hasTypeWeakness
+        && !hasSkillWeakness
+        && !hasBehaviorWeakness;
+
+    let verdict = "The Custodian found enough signal to build a report. Use it. Ignoring it would be malpractice with extra steps.";
+
+    if(totalAttempts < 5){
+        verdict = "The report is limited because this run has very few attempts. The Citadel needs more evidence before it can judge mastery with confidence.";
+    } else if(noMajorWeakness){
+        verdict = "No major weakness detected. That does not mean the Citadel is done with you. It means the next useful signal comes from harder pressure: Legendary Mode first, Score Attack after that.";
+    } else if(accuracy >= 0.90){
+        verdict = "Strong command. You cleared the Citadel with high accuracy. The weak signals below show where the next pressure test should focus.";
+    } else if(accuracy >= 0.75){
+        verdict = "Battle-ready, but not bulletproof. The weak areas below are where points will leak on an exam.";
+    } else {
+        verdict = "Unstable command. You finished, but the Citadel exposed weak signals. Hit the listed areas before chasing speed or Legendary Mode.";
+    }
+
+    const nextSteps = [];
+
+    if(noMajorWeakness){
+        nextSteps.push("Enter Legendary Mode next. The current run did not expose a major weak point, so harder multi-step and trap-heavy questions are the right next test.");
+        nextSteps.push("Use Score Attack after Legendary Mode feels stable. Speed pressure is useful only after mastery survives harder questions.");
+    } else {
+        if(hasObjectiveWeakness && weakestObjectives[0]){
+            nextSteps.push(`Review ${weakestObjectives[0].label}. That objective showed the weakest mastery signal.`);
+        }
+
+        if(hasTypeWeakness && weakestTypes[0]){
+            nextSteps.push(`Practice ${weakestTypes[0].label} questions. That question form caused the most trouble.`);
+        }
+
+        if(hasSkillWeakness && weakestSkills[0]){
+            nextSteps.push(`Drill ${weakestSkills[0].label}. That skill needs cleaner repetition.`);
+        }
+
+        if(behavior.fastMisses >= 2){
+            nextSteps.push("Slow down on traps and graph-style items. Fast misses are not fluency. They are just wrong answers with confidence.");
+        } else if(behavior.slowCorrects >= 3){
+            nextSteps.push("You can get answers right, but some correct responses were slow. Build speed only after the reasoning is automatic.");
+        }
+    }
+
+    if(nextSteps.length === 0){
+        nextSteps.push("Run a harder mode next. The current evidence does not show a major weak point. Make the Citadel earn its paycheck.");
+    }
+
+    return {
+        mode: getMasteryReportModeName(),
+        accuracy,
+        totalTimeMs,
+        timeString: formatTime(totalTimeMs),
+        totalAttempts,
+        correctAnswers,
+        maxStreak,
+        score: modeUsesScoreAttack() ? scoreAttackScore : null,
+        strongest,
+        weakestObjectives,
+        weakestTypes,
+        weakestSkills,
+        hasObjectiveWeakness,
+        hasTypeWeakness,
+        hasSkillWeakness,
+        noMajorWeakness,
+        behavior,
+        verdict,
+        nextSteps
+    };
+}
+
+function showMasteryReportScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return;
+
+    if(!document.getElementById("masteryReportScreen")){
+        latestResultsScreenHTML = gameBox.innerHTML;
+    }
+
+    const report = getMasteryReportData();
+    const scoreCard = report.score !== null
+        ? `<div class="mastery-stat-card"><span class="mastery-stat-label">Score</span><span class="mastery-stat-value">${report.score}</span></div>`
+        : "";
+
+    gameBox.innerHTML = `
+        <div id="masteryReportScreen" class="mastery-report-screen">
+            <h1 class="mastery-report-title">THE CUSTODIAN'S REPORT</h1>
+            <p class="mastery-report-subtitle">Post-battle mastery readout for The Exchange Citadel. This is the signal behind the score.</p>
+
+            <div class="mastery-summary-grid">
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Mode</span><span class="mastery-stat-value">${escapeHTML(report.mode)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Accuracy</span><span class="mastery-stat-value">${formatPercent(report.accuracy)}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Correct</span><span class="mastery-stat-value">${report.correctAnswers}/${report.totalAttempts}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Best Streak</span><span class="mastery-stat-value">${report.maxStreak}</span></div>
+                <div class="mastery-stat-card"><span class="mastery-stat-label">Time</span><span class="mastery-stat-value">${escapeHTML(report.timeString)}</span></div>
+                ${scoreCard}
+            </div>
+
+            <div class="mastery-verdict">${escapeHTML(report.verdict)}</div>
+
+            <div class="mastery-section">
+                <h3>Strongest Signals</h3>
+                ${renderMasteryRows(report.strongest, "No clear strength signal yet. The run did not create enough repeated evidence.")}
+            </div>
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Learning Objectives",
+                signalTitle: "Objective Signals",
+                entries: report.weakestObjectives,
+                hasWeakness: report.hasObjectiveWeakness,
+                weaknessEmptyText: "No objective weakness was detected. Either the run was clean, or there was not enough data.",
+                cleanText: "No major objective weakness detected. Push into Legendary Mode to see whether the signal holds under harder multi-step pressure."
+            })}
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Question Forms",
+                signalTitle: "Question Form Signals",
+                entries: report.weakestTypes,
+                hasWeakness: report.hasTypeWeakness,
+                weaknessEmptyText: "No question-type weakness was detected.",
+                cleanText: "No major question-form weakness detected. The next useful test is harder prompts, closer traps, and less obvious wording."
+            })}
+
+            ${renderMasteryDiagnosticSection({
+                weaknessTitle: "Weakest Skills",
+                signalTitle: "Skill Signals",
+                entries: report.weakestSkills,
+                hasWeakness: report.hasSkillWeakness,
+                weaknessEmptyText: "No skill weakness was detected.",
+                cleanText: "No major skill weakness detected. That is your cue to stop farming safe questions and enter Legendary Mode."
+            })}
+
+            <div class="mastery-section">
+                <h3>Behavior Signals</h3>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Recent Accuracy</span>
+                        <span class="mastery-row-score">${formatPercent(report.behavior.accuracy)}</span>
+                    </div>
+                    <span class="mastery-row-meta">Based on the last ${report.behavior.count} tracked attempts.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Fast Misses</span>
+                        <span class="mastery-row-score">${report.behavior.fastMisses}</span>
+                    </div>
+                    <span class="mastery-row-meta">Fast wrong answers suggest careless reading or trap selection.</span>
+                </div>
+                <div class="mastery-row">
+                    <div class="mastery-row-main">
+                        <span class="mastery-row-name">Slow Corrects</span>
+                        <span class="mastery-row-score">${report.behavior.slowCorrects}</span>
+                    </div>
+                    <span class="mastery-row-meta">Slow correct answers suggest understanding is present but not automatic yet.</span>
+                </div>
+            </div>
+
+            <div class="mastery-section">
+                <h3>Next Moves</h3>
+                ${report.nextSteps.map(step => `<div class="mastery-row"><span class="mastery-row-name">${escapeHTML(step)}</span></div>`).join("")}
+            </div>
+
+            <div class="mastery-actions">
+                <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
+                ${report.noMajorWeakness && gameMode !== "legendary" ? `<button class="continue-btn" onclick="startSelectedMode('legendary')">Enter Legendary Mode</button>` : ""}
+                <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
+                <button class="continue-btn secondary-modal-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
+            </div>
+        </div>
+    `;
+}
+
+function restoreResultsScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox || !latestResultsScreenHTML) return;
+
+    gameBox.innerHTML = latestResultsScreenHTML;
+
+    const line = document.getElementById("archivistLine");
+    if(line){
+        line.style.opacity = 1;
+    }
+}
+
+function copyMasteryReport(){
+    const report = getMasteryReportData();
+
+    const lines = [
+        "The Exchange Citadel — Custodian's Mastery Report",
+        `Student: ${username}`,
+        `Mode: ${report.mode}`,
+        `Accuracy: ${formatPercent(report.accuracy)} (${report.correctAnswers}/${report.totalAttempts})`,
+        `Best Streak: ${report.maxStreak}`,
+        `Time: ${report.timeString}`,
+        report.score !== null ? `Score: ${report.score}` : null,
+        "",
+        "Strongest Signals:",
+        ...(report.strongest.length ? report.strongest.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No clear strength signal yet."]),
+        "",
+        report.hasObjectiveWeakness ? "Weakest Learning Objectives:" : "Objective Signals:",
+        ...(report.hasObjectiveWeakness && report.weakestObjectives.length ? report.weakestObjectives.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major objective weakness detected. Try Legendary Mode next."]),
+        "",
+        report.hasTypeWeakness ? "Weakest Question Forms:" : "Question Form Signals:",
+        ...(report.hasTypeWeakness && report.weakestTypes.length ? report.weakestTypes.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major question-form weakness detected."]),
+        "",
+        report.hasSkillWeakness ? "Weakest Skills:" : "Skill Signals:",
+        ...(report.hasSkillWeakness && report.weakestSkills.length ? report.weakestSkills.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major skill weakness detected."]),
+        "",
+        "Next Moves:",
+        ...report.nextSteps.map(step => `- ${step}`)
+    ].filter(line => line !== null);
+
+    const text = lines.join("\n");
+
+    function markCopied(){
+        const btn = Array.from(document.querySelectorAll("button"))
+            .find(button => button.innerText === "Copy Report" || button.innerText === "Copied!");
+
+        if(!btn) return;
+        const original = btn.innerText;
+        btn.innerText = "Copied!";
+        setTimeout(() => { btn.innerText = original; }, 1800);
+    }
+
+    if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(text).then(markCopied);
+        return;
+    }
+
+    const temp = document.createElement("textarea");
+    temp.value = text;
+    document.body.appendChild(temp);
+    temp.select();
+    document.execCommand("copy");
+    temp.remove();
+    markCopied();
+}
+
+
+
+
+// =============================
+// UTILITIES
+// =============================
+     
+// =============================================
+// ARRAY SHUFFLE UTILITY — SAFE TO USE, DO NOT MODIFY
+// =============================================
+// Fisher-Yates shuffle algorithm.
+//
+// Used to randomize:
+// - question order
+// - calculation generators
+// - any randomized sequences
+//
+// DO NOT MODIFY unless you understand:
+// - uniform randomness
+// - bias in random selection
+//
+// Breaking this = predictable patterns in questions
+// =============================================     
+function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+    return arr;
+}     
+
+// =============================================
+// HIGH SCORE TRACKING — OPTIONAL FEATURE
+// =============================================
+// Stores top completion times in browser (localStorage)
+//
+// - Saves name, time, and date
+// - Sorts fastest → slowest
+// - Keeps top 5 results only
+//
+// SAFE TO EDIT:
+// - number of scores kept (slice)
+// - displayed fields (name/date)
+//
+// WARNING:
+// Clearing browser data will erase scores.
+// =============================================
+function updateHighScores(newTimeMs) {
+    let scores = JSON.parse(localStorage.getItem("gauntletHighScores")) || [];
+    scores.push({ name: username, time: newTimeMs, date: new Date().toLocaleDateString() });
+    
+    // Sort by time (lowest/fastest first) and keep top 5
+    scores.sort((a, b) => a.time - b.time);
+    scores = scores.slice(0, 5);
+    
+    localStorage.setItem("gauntletHighScores", JSON.stringify(scores));
+    return scores;
+}
+
+// =============================================
+// TIME FORMATTER — SAFE UTILITY
+// =============================================
+// Converts milliseconds → readable format (Xm Ys)
+//
+// Used for:
+// - victory screen
+// - performance tracking
+//
+// Safe to modify format if desired.
+// =============================================     
+function formatTime(ms) {
+    let mins = Math.floor(ms / 60000);
+    let secs = Math.floor((ms / 1000) % 60);
+    return `${mins}m ${secs}s`;
+}
+
+// =============================================
+// RESULT SHARING — SAFE TO CUSTOMIZE
+// =============================================
+// Copies player performance summary to clipboard.
+//
+// Includes:
+// - name
+// - time
+// - accuracy
+// - streak
+// - verification code
+//
+// SAFE TO EDIT:
+// - text format
+// - labels ("Adventurer", etc.)
+// - button feedback message
+//
+// WARNING:
+// Requires element IDs:
+// - "vCode"
+// - "shareBtn"
+//
+// Removing those will break this function.
+// =============================================
+
 function copyResults() {
     const totalTimeMs = Date.now() - startTime;
     const timeString = formatTime(totalTimeMs);
