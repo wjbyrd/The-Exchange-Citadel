@@ -85,7 +85,7 @@ body {
     align-items: center;
     overflow-x: hidden;
     color: #eef8ff;
-    background: url('question_background_image.png');
+    background: url('question_background_image.webp');
     background-size: cover;
     background-position: center;
 }
@@ -966,7 +966,7 @@ button:active {
         rgba(2,6,23,0.22),
         rgba(2,6,23,0.46)
     ),
-    url('start screen image.png');
+    url('start screen image.webp');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -993,7 +993,7 @@ button:active {
         rgba(2,6,23,0.64),
         rgba(2,6,23,0.74)
     ),
-    url('hallway1.png');
+    url('hallway1.webp');
 
   background-size: cover;
   background-position: center;
@@ -1722,7 +1722,7 @@ Every pixel matters.
   padding:30px;
   background:
     linear-gradient(rgba(2,6,23,.32), rgba(2,6,23,.78)),
-    url('start screen image.png');
+    url('start screen image.webp');
   background-size:cover;
   background-position:center;
 }
@@ -2798,11 +2798,11 @@ Respect structure strictly.
 <h1 class="mode-title">CHOOSE YOUR CITADEL RUN</h1>
 <p class="mode-subtitle">Select how you want to enter The Exchange Citadel.</p>
     <div class="mode-grid">
-      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="mode_standard.png" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full campaign across open-economy identities, exchange rates, policy effects, and Mundell-Fleming logic.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.png" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.png" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.png" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Citadel tests chained open-economy policy judgment.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.png" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full campaign across open-economy identities, exchange rates, policy effects, and Mundell-Fleming logic.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Citadel tests chained open-economy policy judgment.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
     </div>
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
@@ -2848,15 +2848,15 @@ or simplify this section.
             <h3>Acquired Artifacts</h3>
             <div class="vaultRow">
                 <div id="vaultLedger" class="artifactSlot">
-                    <img src="ledger.png" alt="Policy Key">
+                    <img src="ledger.webp" alt="Policy Key">
                     <span>National Ledger</span>
                 </div>
                 <div id="vaultCharter" class="artifactSlot">
-                    <img src="charter.png" alt="Policy Charter">
+                    <img src="charter.webp" alt="Policy Charter">
                     <span>Policy Charter</span>
                 </div>
                 <div id="vaultPen" class="artifactSlot">
-                    <img src="pen.png" alt="Pen of Exchange">
+                    <img src="pen.webp" alt="Pen of Exchange">
                     <span>Pen of Exchange</span>
                 </div>
             </div>
@@ -2869,7 +2869,7 @@ or simplify this section.
         <div id="gameShell">
             <div id="wizardBox">
                 <div id="wizardName">The Custodian</div>
-                <img src="custodian.png" id="wizardImage">
+                <img src="custodian.webp" id="wizardImage">
             </div>
 
             <!-- GAME -->
@@ -2961,9 +2961,9 @@ const sfxWrong = new Audio('mistake.wav');
       sfxWrong.volume = 0.4;
     
 const hallwayImages = [
-    "hallway1.png",
-    "hallway2.png",
-    "hallway3.png"
+    "hallway1.webp",
+    "hallway2.webp",
+    "hallway3.webp"
 ];
 
 let soundEnabled = true;
@@ -4449,17 +4449,17 @@ const TIMING = {
      
 const artifacts = {
 ledger:{
-    img:"ledger.png",
+    img:"ledger.webp",
     title:"National Ledger",
     text:"The National Ledger locks the first identities into place: output, domestic spending, saving, investment, net exports, and net capital outflow."
 },
 charter:{
-    img:"charter.png",
+    img:"charter.webp",
     title:"Policy Charter",
     text:"The Policy Charter marks command over fiscal policy, investment shifts, capital flows, real exchange rates, trade balances, tariffs, and currency adjustment."
 },
 pen:{
-    img:"pen.png",
+    img:"pen.webp",
     title:"Pen of Exchange",
     text:"The Pen of Exchange restores final authority over Mundell-Fleming logic, fixed and floating exchange-rate regimes, the impossible trinity, and open-economy aggregate demand."
 }
@@ -4766,7 +4766,7 @@ function showCustodianIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="custodian.png" class="bossIcon custodianGlow chancellor-dialogue-img">
+                <img src="custodian.webp" class="bossIcon custodianGlow chancellor-dialogue-img">
                 <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
                 <div class="chancellor-dialogue">
@@ -4789,7 +4789,7 @@ function showCustodianIntro(step = 1){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro">
-            <img src="custodian.png" class="bossIcon custodianGlow">
+            <img src="custodian.webp" class="bossIcon custodianGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
             <div class="chancellor-dialogue">
@@ -4839,7 +4839,7 @@ function showCustodianSuspenseIntro(){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro chancellor-suspense">
-            <img src="custodian.png" class="bossIcon custodianGlow">
+            <img src="custodian.webp" class="bossIcon custodianGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
             <div class="chancellor-intro-line">Final authority revealed.</div>
         </div>
@@ -5612,9 +5612,9 @@ function updateMazeTrack() {
             box.innerText = "🟨";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="keeper.png" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="chancellor.png" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="custodian.png" class="boss-icon">';box.classList.add("boss30");}
+            if (i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon">';box.classList.add("boss10");}
+            else if (i === 20){box.innerHTML = '<img src="chancellor.webp" class="boss-icon">';box.classList.add("boss20");}
+            else if (i === 30){box.innerHTML = '<img src="custodian.webp" class="boss-icon">';box.classList.add("boss30");}
             else box.innerText = "🟪";
         }
         
@@ -5896,15 +5896,15 @@ if (isBoss) {
     let bossClass = "";
 
     if (room === 10) {
-        bossImage = "keeper.png";
+        bossImage = "keeper.webp";
         bossClass = "keeperGlow";
     }
     else if (room === 20) {
-        bossImage = "chancellor.png";
+        bossImage = "chancellor.webp";
         bossClass = "chancellorGlow";
     }
     else {
-        bossImage = "custodian.png";
+        bossImage = "custodian.webp";
         bossClass = "custodianGlow";
     }
 
