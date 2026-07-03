@@ -7424,6 +7424,18 @@ function sortWeakest(entries){
         .sort((a,b) => (a.accuracy - b.accuracy) || (a.fluency - b.fluency) || (b.avgTime - a.avgTime));
 }
 
+function getMeaningfulWeakEntries(entries, accuracyThreshold = 0.85){
+    return sortWeakest(entries)
+        .filter(entry => entry && entry.attempts >= 2)
+        .filter(entry => {
+            const accuracy = entry.accuracy === null || entry.accuracy === undefined
+                ? 1
+                : Number(entry.accuracy);
+
+            return accuracy < accuracyThreshold || entry.timeRatio > 1.35;
+        });
+}
+
 function hasMeaningfulWeakness(entries, accuracyThreshold = 0.85){
     return (entries || []).some(entry => {
         if(!entry || entry.attempts < 2) return false;
@@ -7534,13 +7546,13 @@ function getMasteryReportData(){
     const behavior = getRecentBehaviorSignals();
 
     const strongest = sortStrongest([...objectiveEntries, ...tagEntries]).slice(0, 4);
-    const weakestObjectives = sortWeakest(objectiveEntries).slice(0, 4);
-    const weakestTypes = sortWeakest(typeEntries).slice(0, 3);
-    const weakestSkills = sortWeakest(skillEntries).slice(0, 3);
+    const weakestObjectives = getMeaningfulWeakEntries(objectiveEntries, 0.85).slice(0, 4);
+    const weakestTypes = getMeaningfulWeakEntries(typeEntries, 0.85).slice(0, 3);
+    const weakestSkills = getMeaningfulWeakEntries(skillEntries, 0.85).slice(0, 3);
 
-    const hasObjectiveWeakness = hasMeaningfulWeakness(objectiveEntries, 0.85);
-    const hasTypeWeakness = hasMeaningfulWeakness(typeEntries, 0.85);
-    const hasSkillWeakness = hasMeaningfulWeakness(skillEntries, 0.85);
+    const hasObjectiveWeakness = weakestObjectives.length > 0;
+    const hasTypeWeakness = weakestTypes.length > 0;
+    const hasSkillWeakness = weakestSkills.length > 0;
     const hasBehaviorWeakness = behavior.fastMisses >= 2 || behavior.slowCorrects >= 3;
     const noMajorWeakness = totalAttempts >= 8
         && accuracy >= 0.85
@@ -7556,7 +7568,7 @@ function getMasteryReportData(){
     } else if(noMajorWeakness){
         verdict = "No major weakness detected. That does not mean the Citadel is done with you. It means the next useful signal comes from harder pressure: Legendary Mode first, Score Attack after that.";
     } else if(accuracy >= 0.90){
-        verdict = "Strong command. You cleared the Citadel with high accuracy. The weak signals below show where the next pressure test should focus.";
+        verdict = "Strong command. You cleared the Citadel with high accuracy. The signals below show where the next pressure test should focus, without pretending perfect categories are weaknesses.";
     } else if(accuracy >= 0.75){
         verdict = "Battle-ready, but not bulletproof. The weak areas below are where points will leak on an exam.";
     } else {
@@ -7964,6 +7976,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
