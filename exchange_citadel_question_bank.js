@@ -2149,7 +2149,7 @@ window.questionBanks = {
     },
     {
       "id": 119,
-      "q": "A tariff directly increases demand for domestic goods. In the Chapter 6 small-open-economy model, the final effect on the trade balance is...",
+      "q": "A tariff directly increases demand for domestic goods. In a small-open-economy model, the final effect on the trade balance is...",
       "options": [
         "offset by real appreciation",
         "a guaranteed permanent surplus",
@@ -3981,25 +3981,25 @@ window.questionBanks = {
       "feedback": "The real exchange rate moves to keep NX equal to S - I.",
       "commonError": "assuming tariffs mechanically fix deficits"
     },
-    {
-      "id": 224,
-      "q": "capital flight causes a currency depreciation and higher NX. Why is 'higher NX means better economy' a bad conclusion?",
-      "options": [
-        "the higher NX reflects financial stress and capital outflow, not a clean productivity gain",
-        "higher NX always means stronger welfare",
-        "capital flight causes appreciation",
-        "NX is unrelated to capital flows"
-      ],
-      "a": 0,
-      "tag": "capital_flight",
-      "type": "trap",
-      "objective": "LO6.5",
-      "difficulty": "hard",
-      "conceptCluster": "capital_flight_exchange_rate",
-      "primarySkill": "capital_flight_exchange_rate",
-      "repairSkill": "capital_flight_exchange_rate",
-      "feedback": "Capital flight can raise NX through depreciation while still signaling a crisis."
-    },
+ {
+   "id": 224,
+   "q": "Capital flight causes a currency depreciation and higher NX. Why is 'higher NX means better economy' a bad conclusion?",
+   "options": [
+     "the rise in NX may reflect crisis-driven depreciation and capital outflow rather than stronger fundamentals",
+     "the rise in NX mainly shows that domestic goods have become more expensive to foreign buyers",
+     "the rise in NX means investment demand has increased enough to offset the capital outflow",
+     "the rise in NX proves that households are consuming more imported goods"
+   ],
+   "a": 0,
+   "tag": "capital_flight",
+   "type": "trap",
+   "objective": "LO6.5",
+   "difficulty": "hard",
+   "conceptCluster": "capital_flight_exchange_rate",
+   "primarySkill": "capital_flight_exchange_rate",
+   "repairSkill": "capital_flight_exchange_rate",
+   "feedback": "Capital flight can raise NX through depreciation while still signaling financial stress or crisis conditions."
+ }
     {
       "id": 225,
       "q": "Refer to the image above. A domestic fiscal expansion most likely moves equilibrium from E to...",
@@ -4234,7 +4234,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with floating exchange rates, contractionary fiscal policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with floating exchange rates, and contractionary fiscal policy, which chain is correct?",
       "options": [
         "IS* shifts left, the exchange rate depreciates, NX rises, and Y is offset",
         "LM* shifts left, the exchange rate appreciates, NX falls, and Y falls strongly",
@@ -4253,7 +4253,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with floating exchange rates, expansionary monetary policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with floating exchange rates, and expansionary monetary policy, which chain is correct?",
       "options": [
         "LM* shifts right, the exchange rate depreciates, NX rises, and Y rises",
         "IS* shifts right, the exchange rate appreciates, NX falls, and Y is unchanged",
@@ -4272,7 +4272,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with floating exchange rates, contractionary monetary policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with floating exchange rates, and contractionary monetary policy, which chain is correct?",
       "options": [
         "LM* shifts left, the exchange rate appreciates, NX falls, and Y falls",
         "IS* shifts left, the exchange rate depreciates, NX rises, and Y is unchanged",
@@ -4291,7 +4291,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with fixed exchange rates, expansionary fiscal policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with fixed exchange rates, and expansionary fiscal policy, which chain is correct?",
       "options": [
         "IS* shifts right and the central bank expands M to defend the peg, amplifying Y",
         "IS* shifts right but appreciation fully crowds out NX as under floating rates",
@@ -4310,7 +4310,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with fixed exchange rates, expansionary monetary policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with fixed exchange rates, and expansionary monetary policy, which chain is correct?",
       "options": [
         "pressure for depreciation forces reversal if the peg is defended, so the policy loses independence",
         "LM* remains right because fixed exchange rates strengthen monetary autonomy",
@@ -4329,7 +4329,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with fixed exchange rates, contractionary monetary policy, which chain is correct?",
+      "q": "In a Mundell-Fleming model with fixed exchange rates, and contractionary monetary policy, which chain is correct?",
       "options": [
         "pressure for appreciation forces reversal if the peg is defended, so the policy loses independence",
         "LM* remains left because fixed exchange rates strengthen monetary autonomy",
@@ -4348,7 +4348,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In Mundell-Fleming with floating exchange rates, an import quota, which chain is correct?",
+      "q": "In a Mundell-Fleming model with floating exchange rates, and an import quota, which chain is correct?",
       "options": [
         "IS* shifts right at first, but appreciation offsets the output effect",
         "LM* shifts right and output rises permanently",
@@ -4367,7 +4367,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In the small-open-economy AD derivation, the price level falls. What is the full chain?",
+      "q": "In the small-open-economy aggregate demand derivation, the price level falls. What is the full chain?",
       "options": [
         "M/P rises, LM* shifts right, e falls/depreciates, NX rises, and Y rises",
         "M/P moves the opposite way, so Y moves the opposite way",
@@ -4387,7 +4387,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "In the small-open-economy AD derivation, the price level rises. What is the full chain?",
+      "q": "In the small-open-economy aggregate demand derivation, the price level rises. What is the full chain?",
       "options": [
         "M/P falls, LM* shifts left, e rises/appreciates, NX falls, and Y falls",
         "M/P moves the opposite way, so Y moves the opposite way",
@@ -4467,7 +4467,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "fiscal expansion raises the domestic interest rate. Which result fits the model?",
+      "q": "Fiscal expansion raises the domestic interest rate. Which result fits the model?",
       "options": [
         "investment falls and capital-flow/exchange-rate pressure reduces NX",
         "investment rises because all fiscal expansions increase private investment",
@@ -4486,7 +4486,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "monetary expansion lowers the interest rate. Which result fits the model?",
+      "q": "Monetary expansion lowers the interest rate. Which result fits the model?",
       "options": [
         "investment rises and capital-flow/exchange-rate pressure affects NX",
         "investment falls because money supply crowds out capital",
@@ -4505,7 +4505,7 @@ window.questionBanks = {
       "difficulty": "hard"
     },
     {
-      "q": "investment demand rises. Which result fits the model?",
+      "q": "Investment demand rises. Which result fits the model?",
       "options": [
         "the interest rate rises, partly crowding out other investment and affecting capital flows",
         "the interest rate is pinned at r* exactly as in a small open economy",
@@ -9395,7 +9395,7 @@ window.questionBanks = {
     },
     {
       "id": 3016,
-      "q": "Refer to the image above. Lower P moves the MF equilibrium toward...",
+      "q": "Refer to the image above. A lower P moves the Mundell-Fleming equilibrium toward...",
       "options": [
         "higher Y and lower e",
         "lower Y and higher e",
@@ -9415,11 +9415,11 @@ window.questionBanks = {
     },
     {
       "id": 3017,
-      "q": "Why does open-economy AD slope downward?",
+      "q": "Why does open-economy aggregate demand curve slope downward?",
       "options": [
         "lower P raises M/P, depreciates the currency, raises NX, and raises Y",
         "lower P shifts IS* left",
-        "higher P raises NX",
+        "higher P raises NX, appreciates the currency, raises M/P, and lowers Y",
         "r* falls automatically"
       ],
       "a": 0,
@@ -13941,7 +13941,7 @@ function getRealExchangeRateCalc(){
   const Pf = ecChoice([80,100,120,150]);
   const epsRaw = e * P / Pf;
   const eps = Number.isInteger(epsRaw) ? String(epsRaw) : epsRaw.toFixed(2).replace(/0$/,'').replace(/0$/,'');
-  return makeECGeneratedQuestion(83000 + ecRand(1,999), `ε = eP/P*. If e=${e}, P=${P}, and P*=${Pf}, what is ε?`, eps, [String(e), String((P/Pf).toFixed(2)), String((e*P).toFixed(0))], "real_exchange_rate", "calculation", "LO6.4", "calculate_real_exchange_rate", `ε = ${e} × ${P} / ${Pf} = ${eps}.`, "ε = eP/P*.");
+  return makeECGeneratedQuestion(83000 + ecRand(1,999), `If e=${e}, P=${P}, and P*=${Pf}, what is ε?`, eps, [String(e), String((P/Pf).toFixed(2)), String((e*P).toFixed(0))], "real_exchange_rate", "calculation", "LO6.4", "calculate_real_exchange_rate", `ε = ${e} × ${P} / ${Pf} = ${eps}.`, "ε = eP/P*.");
 }
 function getNominalExchangeRateCalc(){
   const eps = ecChoice([0.75,1,1.25,1.5,2]);
