@@ -323,6 +323,80 @@ body::after{
   box-shadow:
     0 0 14px rgba(56,189,248,0.16),
     0 0 28px rgba(0,0,0,0.65);
+  cursor: zoom-in;
+}
+
+#questionImageBox .graph-zoom-note{
+  margin-top: 6px;
+  font-size: 12px;
+  color: rgba(245,243,255,0.72);
+  font-style: italic;
+}
+
+#graphLightbox{
+  position: fixed;
+  inset: 0;
+  z-index: 5000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 26px;
+  box-sizing: border-box;
+  background: rgba(2,6,23,0.88);
+  backdrop-filter: blur(5px);
+}
+
+#graphLightbox.active{
+  display: flex;
+}
+
+#graphLightbox img{
+  width: min(96vw, 1180px);
+  max-height: 88vh;
+  object-fit: contain;
+  border-radius: 12px;
+  background: #fff;
+  border: 1px solid rgba(240,200,106,0.52);
+  box-shadow:
+    0 0 28px rgba(196,181,253,0.34),
+    0 0 70px rgba(0,0,0,0.86);
+}
+
+#graphLightboxClose{
+  position: fixed;
+  top: calc(env(safe-area-inset-top, 0px) + 14px);
+  right: 16px;
+  z-index: 5001;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  margin: 0;
+  border-radius: 50%;
+  font-size: 28px;
+  line-height: 38px;
+  color: #fff7d6;
+  background: rgba(20,10,38,0.94);
+  border: 1px solid rgba(240,200,106,0.62);
+  box-shadow:
+    0 0 20px rgba(196,181,253,0.34),
+    inset 0 0 12px rgba(0,0,0,0.78);
+}
+
+@media(max-width:768px){
+  #questionImageBox img{
+    width: min(100%, 520px);
+    max-height: 36vh;
+    object-fit: contain;
+  }
+
+  #graphLightbox{
+    padding: 12px;
+  }
+
+  #graphLightbox img{
+    width: 98vw;
+    max-height: 86vh;
+  }
 }
 
 	
@@ -2927,6 +3001,12 @@ or simplify this section.
   <div class="game-modal-card"><h2 id="gameModalTitle">Citadel Warning</h2><p id="gameModalText"></p><div class="game-modal-actions"><button id="gameModalConfirm" class="continue-btn">Continue</button><button id="gameModalCancel" class="continue-btn secondary-modal-btn" style="display:none;">Cancel</button></div></div>
 </div>
 
+
+<div id="graphLightbox" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Expanded question graph">
+  <button id="graphLightboxClose" type="button" aria-label="Close expanded graph">×</button>
+  <img id="graphLightboxImg" alt="Expanded question graph">
+</div>
+
 <!-- =========================================
    2. GAME ELEMENTS (CHANGE ELEMENTS WITH NEW GAME)
 ========================================= -->
@@ -3008,6 +3088,50 @@ function restoreSoundSetting(){
 }
 
 restoreSoundSetting();
+
+
+// =============================================
+// QUESTION GRAPH LIGHTBOX
+// Click any question graph to enlarge it. Click the X, backdrop, or Escape to close.
+// =============================================
+function openGraphLightbox(src, altText){
+    const lightbox = document.getElementById("graphLightbox");
+    const lightboxImg = document.getElementById("graphLightboxImg");
+    if(!lightbox || !lightboxImg || !src) return;
+
+    lightboxImg.src = src;
+    lightboxImg.alt = altText || "Expanded question graph";
+    lightbox.classList.add("active");
+    lightbox.setAttribute("aria-hidden", "false");
+}
+
+function closeGraphLightbox(){
+    const lightbox = document.getElementById("graphLightbox");
+    const lightboxImg = document.getElementById("graphLightboxImg");
+    if(!lightbox) return;
+
+    lightbox.classList.remove("active");
+    lightbox.setAttribute("aria-hidden", "true");
+    if(lightboxImg) lightboxImg.removeAttribute("src");
+}
+
+document.addEventListener("click", function(event){
+    const graphImg = event.target.closest("#questionImageBox img");
+    if(graphImg){
+        openGraphLightbox(graphImg.src, graphImg.alt);
+        return;
+    }
+
+    if(event.target.id === "graphLightbox" || event.target.id === "graphLightboxClose"){
+        closeGraphLightbox();
+    }
+});
+
+document.addEventListener("keydown", function(event){
+    if(event.key === "Escape"){
+        closeGraphLightbox();
+    }
+});
   
 function setGameControlsVisible(isVisible){
     document.body.classList.toggle("game-active", !!isVisible);
@@ -5649,7 +5773,7 @@ if (isBoss) {
     currentQuestion = shuffleOptions(bossPool[3 - bossHealth]);
 
     if (currentQuestion.image) {
-        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+        imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
         imageBox.style.display = "block";
     } else {
         imageBox.innerHTML = "";
@@ -5766,7 +5890,7 @@ else{
 }
 		
 if(currentQuestion.image){
-    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph">`;
+    imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
     imageBox.style.display = "block";
 }
 
@@ -7840,6 +7964,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
