@@ -5757,8 +5757,13 @@ if (isBoss) {
             if (usedQuestions[diff]) usedQuestions[diff] = [];
             candidatePool = [...bank];
         }
-
-        bossPool = shuffle([...candidatePool]).slice(0, 3);
+		if (diff === "legendaryBoss") {
+   		    bossPool = shuffle([...candidatePool]).slice(0, 3);
+		} else {
+		    bossPool = [...candidatePool]
+   		        .sort((a, b) => a.id - b.id)
+                .slice(0, 3);
+        }
 
         if (usedQuestions[diff]) {
             bossPool.forEach(q => {
