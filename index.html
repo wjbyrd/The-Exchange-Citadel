@@ -1,3 +1,4 @@
+<!-- EXCHANGE CITADEL — NATIONAL ENGINE UPGRADE PORT 20260715_1 -->
 <!-- =====================================================
 GAUNTLET ENGINE — MASTER TEMPLATE
 
@@ -3229,6 +3230,8 @@ let remediationState = {
     stage: null,
     tag: null,
     objective: null,
+    skill: null,
+    commonError: null,
     sourceType: null,
     returnRoom: null,
     originQuestionId: null,
@@ -4179,6 +4182,66 @@ function getStrongestTag(){
     return strongestTag;
 }
 
+
+function getBossObjectiveKey(question){
+    if(!question) return null;
+    const rawObjective = question.objective || inferObjective(question);
+    if(!rawObjective) return null;
+    const match = String(rawObjective).match(/^LO\d+\.\d+/);
+    return match ? match[0] : rawObjective;
+}
+
+function getObjectiveFamilyStats(objectiveKey){
+    let attempts = 0;
+    let correct = 0;
+    let weightedTime = 0;
+    Object.keys(masteryState.byObjective || {}).forEach(key => {
+        if(key === objectiveKey || key.startsWith(objectiveKey + "_")){
+            const bucket = masteryState.byObjective[key];
+            if(!bucket) return;
+            attempts += bucket.attempts || 0;
+            correct += bucket.correct || 0;
+            weightedTime += (bucket.avgTime || 0) * (bucket.attempts || 0);
+        }
+    });
+    return {
+        attempts,
+        correct,
+        accuracy: attempts ? correct / attempts : null,
+        avgTime: attempts ? weightedTime / attempts : 0
+    };
+}
+
+function getWeakestBossObjective(bank){
+    if(!Array.isArray(bank) || bank.length === 0) return null;
+    const objectives = [...new Set(bank.map(q => getBossObjectiveKey(q)).filter(Boolean))];
+    const eligibleObjectives = objectives.filter(obj =>
+        bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
+    );
+    if(eligibleObjectives.length === 0) return null;
+    let weakestObjective = null;
+    let weakestScore = -Infinity;
+    eligibleObjectives.forEach(obj => {
+        const stats = getObjectiveFamilyStats(obj);
+        let score = 0.25;
+        if(stats.accuracy !== null){
+            score = (1 - stats.accuracy) * 2;
+            score += Math.min(stats.attempts, 5) * 0.08;
+        }
+        const recentMisses = (masteryState.recent || []).filter(item => {
+            const itemObjective = item.objective || "";
+            return (itemObjective === obj || itemObjective.startsWith(obj + "_")) && !item.correct;
+        }).length;
+        score += recentMisses * 0.25;
+        if(stats.avgTime && stats.avgTime > TYPE_TIME_TARGETS.default) score += 0.15;
+        if(score > weakestScore){
+            weakestScore = score;
+            weakestObjective = obj;
+        }
+    });
+    return weakestObjective || eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+}
+
 function getSelectionProfile(){
     const recent = getRecentPerformance(8);
     const strongestTag = getStrongestTag();
@@ -4215,13 +4278,14 @@ function shouldTriggerDetour(question){
         || (typeBucket && typeBucket.attempts >= 2 && typeAccuracy !== null && typeAccuracy < 0.6)
         || (objectiveAccuracy !== null && objectiveAccuracy < 0.5 && getObjectiveBucket(question).attempts >= 2);
 }
-
 function resetRemediationState(){
     remediationState = {
         active: false,
         stage: null,
         tag: null,
         objective: null,
+        skill: null,
+        commonError: null,
         sourceType: null,
         returnRoom: null,
         originQuestionId: null,
@@ -4322,7 +4386,6 @@ function pickRemediationFromBank(poolName, objectiveKey, tag, purpose = "confirm
 
     return picked;
 }
-
 function getRemediationQuestion(state){
     if(!state || !state.active) return null;
 
@@ -4347,9 +4410,11 @@ function getRemediationQuestion(state){
             }
         }
 
-        const allRepairPool = Object.values(microSkillRepairPools).reduce((all, pool) => all.concat(pool), []);
+        const repairPool = microSkillRepairPools[state.skill] || [];
+        const allRepairPool = Object.values(microSkillRepairPools || {})
+            .reduce((all, pool) => all.concat(pool), []);
         const repairCandidates = getQuestionsMatchingNeed(
-            allRepairPool,
+            repairPool.length ? repairPool : allRepairPool,
             state.objective,
             state.tag,
             excludeIds,
@@ -4684,7 +4749,7 @@ function returnToModeSelectFromRun(){
     if(modeScreen) modeScreen.style.display = "flex";
 }
 	 
-function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Standard Campaign progress will be saved. Timed Trial, Exam Drill, and Score Attack attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(gameMode === "standard" || gameMode === "legendary") saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
+function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Standard Campaign progress will be saved. Timed Trial, Exam Drill, and Score Attack attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(modeAllowsSave()) saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
 let activeModalConfirmAction = null; let activeModalCancelAction = null;
 function showGameModal({title="Citadel Warning",text="",confirmText="Continue",cancelText="",onConfirm=null,onCancel=null}={}){ const modal=document.getElementById("gameModal"),titleEl=document.getElementById("gameModalTitle"),textEl=document.getElementById("gameModalText"),confirmBtn=document.getElementById("gameModalConfirm"),cancelBtn=document.getElementById("gameModalCancel"); if(!modal||!titleEl||!textEl||!confirmBtn||!cancelBtn) return; activeModalConfirmAction=onConfirm; activeModalCancelAction=onCancel; titleEl.innerText=title; textEl.innerText=text; confirmBtn.innerText=confirmText; if(cancelText){cancelBtn.innerText=cancelText; cancelBtn.style.display="inline-block";} else cancelBtn.style.display="none"; modal.style.display="flex"; confirmBtn.onclick=function(){const action=activeModalConfirmAction; closeGameModal(); if(typeof action==="function") action();}; cancelBtn.onclick=function(){const action=activeModalCancelAction; closeGameModal(); if(typeof action==="function") action();}; }
 function closeGameModal(){ const modal=document.getElementById("gameModal"); if(modal) modal.style.display="none"; activeModalConfirmAction=null; activeModalCancelAction=null; }
@@ -4984,6 +5049,7 @@ function resetRunStateForNewMode(){
     room=1;
 	bossHealth=3;
 	bossPool=[];
+    if(typeof calcBag !== "undefined") calcBag = [];
 	bossCheckpoint=1;
 	correctAnswers=0;
 	totalAttempts=0;
@@ -5152,7 +5218,23 @@ function restartTimedMode(){
     resetRunStateForNewMode();
     startSelectedMode("timed");
 }
-function getDifficultyForMode(){if(gameMode==="exam"||gameMode==="timed")return(room<=10)?"easy":(room<=20)?"medium":"hard";if(gameMode==="legendary")return(room===10||room===20||room===30)?"legendaryBoss":"legendary";return(room<=9)?"easy":(room===10)?"easyBoss":(room<=19)?"medium":(room===20)?"mediumBoss":(room<=29)?"hard":"finalBoss";}
+function getDifficultyForMode(){
+    if(gameMode === "exam" || gameMode === "timed"){
+        return (room <= 10) ? "easy" : (room <= 20) ? "medium" : "hard";
+    }
+    if(gameMode === "legendary"){
+        return (room === 10 || room === 20 || room === 30) ? "legendaryBoss" : "legendary";
+    }
+    if(gameMode === "bossRush"){
+        return (room <= 10) ? "easyBoss" : (room <= 20) ? "mediumBoss" : "finalBoss";
+    }
+    return (room <= 9) ? "easy"
+         : (room === 10) ? "easyBoss"
+         : (room <= 19) ? "medium"
+         : (room === 20) ? "mediumBoss"
+         : (room <= 29) ? "hard"
+         : "finalBoss";
+}
 
 // =============================================
 // INPUT SHORTCUT — SAFE TO KEEP OR REMOVE
@@ -5701,9 +5783,10 @@ if((gameMode === "timed" || gameMode === "exam") && room > 30){
     gameBox.classList.toggle("boss-mode", isBoss);
    
     // 2. UI & Progress Updates
-    document.getElementById("progressFill").style.width = (room / 30 * 100) + "%";
-    document.getElementById("areaDisplay").innerText = `${getAreaName(room)} (${room}/30)`;
-    document.getElementById("srAnnouncements").innerText = `Entering ${getAreaName(room)}. Room ${room} of 30.`;
+    document.getElementById("progressFill").style.width = (Math.min(room, 30) / 30 * 100) + "%";
+    const roomCap = (gameMode === "timed" || gameMode === "exam") ? Math.min(room, 30) : room;
+    document.getElementById("areaDisplay").innerText = `${getModeDisplayName()} — ${getAreaName(roomCap)} (${roomCap}/30)`;
+    document.getElementById("srAnnouncements").innerText = `Entering ${getModeDisplayName()}. ${getAreaName(roomCap)}. Room ${roomCap} of 30.`;
 
   // 3. Select the Question
 if (isBoss) {
@@ -5713,42 +5796,46 @@ if (isBoss) {
         return;
     }
 	
-    // 1. If it's a new fight, build a three-question boss pool
+    // 1. If it's a new fight, build a three-question boss pool by learning objective.
     if (bossHealth === 3 || !bossPool || bossPool.length === 0) {
-        const bank = [...questionBanks[diff]];
-        let chosenTag = getWeakestTag();
-
-        const bossTags = [...new Set(bank.map(q => q.tag).filter(Boolean))];
-
-        const eligibleTags = bossTags.filter(tag =>
-            bank.filter(q => q.tag === tag).length >= 3
-        );
-
-        let candidatePool = chosenTag
-            ? bank.filter(q => q.tag === chosenTag)
+        const bank = [...(questionBanks[diff] || [])];
+        const chosenObjective = getWeakestBossObjective(bank);
+        let candidatePool = chosenObjective
+            ? bank.filter(q => getBossObjectiveKey(q) === chosenObjective)
             : [];
 
-        // If the weakest tag cannot support a full boss set,
-        // choose a valid boss theme instead.
-        if (candidatePool.length < 3 && eligibleTags.length > 0) {
-            const randomTag = eligibleTags[Math.floor(Math.random() * eligibleTags.length)];
-            candidatePool = bank.filter(q => q.tag === randomTag);
+        const unusedObjectivePool = candidatePool.filter(q => {
+            if(!q) return false;
+            if(usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
+            return true;
+        });
+        if(unusedObjectivePool.length >= 3) candidatePool = unusedObjectivePool;
+
+        if(candidatePool.length < 3){
+            const eligibleObjectives = [...new Set(
+                bank.map(q => getBossObjectiveKey(q)).filter(Boolean)
+            )].filter(objective =>
+                bank.filter(q => getBossObjectiveKey(q) === objective).length >= 3
+            );
+            if(eligibleObjectives.length > 0){
+                const randomObjective = eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
+                candidatePool = bank.filter(q => getBossObjectiveKey(q) === randomObjective);
+            }
         }
 
-        // Last-resort fallback: use unused questions from this difficulty.
-        if (candidatePool.length < 3) {
+        if(candidatePool.length < 3){
             candidatePool = bank.filter(q => {
-                if (!q) return false;
-                if (usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
+                if(!q) return false;
+                if(usedQuestions[diff] && usedQuestions[diff].includes(q.id)) return false;
                 return true;
             });
         }
 
-        // If used-question filtering leaves too few, reset and use the whole bank.
-        if (candidatePool.length < 3) {
-            if (usedQuestions[diff]) usedQuestions[diff] = [];
+        if(candidatePool.length < 3){
+            if(usedQuestions[diff]) usedQuestions[diff] = [];
             candidatePool = [...bank];
         }
+
 		if (diff === "legendaryBoss") {
    		    bossPool = shuffle([...candidatePool]).slice(0, 3);
 		} else {
@@ -5829,6 +5916,34 @@ if (isBoss) {
     const weakestTag = getWeakestTag();
     adaptiveMode = purpose;
 
+    if(gameMode === "legendary"){
+        adaptiveMode = "legendary";
+        currentQuestion = shuffleOptions(
+            getAdaptiveQuestion("legendary", strongestTag || weakestTag, {
+                mode: "challenge",
+                preferredTypes: ELITE_PREFERRED_TYPES,
+                purpose: "stretch"
+            })
+        );
+        if(currentQuestion.image){
+            imageBox.innerHTML = `<img src="${currentQuestion.image}" alt="Question graph" title="Click to enlarge"><div class="graph-zoom-note">Click graph to enlarge</div>`;
+            imageBox.style.display = "block";
+        } else {
+            imageBox.innerHTML = "";
+            imageBox.style.display = "none";
+        }
+        if(!currentQuestion.type) currentQuestion.type = "synthesis";
+        wizardSpeak(getWizardLine(currentQuestion.type));
+        bossMsg.innerText = (room === 9 || room === 19 || room === 29)
+            ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️"
+            : "";
+        bossMsg.style.color = "#f97316";
+        questionElement.innerHTML = `<div>${currentQuestion.q}</div>`;
+        document.getElementById("formulaHint").innerText = currentQuestion.hint ? "💡 Hint: " + currentQuestion.hint : "";
+        displayQuestion();
+        return;
+    }
+
     if(diff === "easy" && profile.mediumReady){
         adjustedDiff = "medium";
     }
@@ -5871,7 +5986,7 @@ else if(adjustedDiff === "elite"){
 else if(adjustedDiff === "hard"){
     currentQuestion = shuffleOptions(
         getAdaptiveQuestion("hard", strongestTag || weakestTag, {
-            mode: "challenge",
+            mode: strongestTag ? "challenge" : "support",
             preferredTypes: ELITE_PREFERRED_TYPES,
             purpose
         })
@@ -5902,8 +6017,8 @@ if(currentQuestion.image){
     wizardSpeak(wizardText);
 
     // --- UI ---
-    bossMsg.innerText = (room === 9 || room === 19 || room === 29)
-        ? "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️"
+    bossMsg.innerText = ((gameMode === "standard" || gameMode === "legendary") && (room === 9 || room === 19 || room === 29))
+        ? (gameMode === "legendary" ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️" : "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️")
         : "";
     bossMsg.style.color = "#ef4444";
 
@@ -6409,7 +6524,7 @@ if(remediationState.active){
 }
 
 // --- STAGED REMEDIATION TRIGGER ---
-if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
+if (gameMode !== "legendary" && !remediationState.active && currentQuestion.tag && shouldTriggerDetour(currentQuestion)) {
     remediationState = planRemediation(currentQuestion, responseTime) || remediationState;
     detourActive = true;
     detourReturnRoom = room;
@@ -7852,7 +7967,6 @@ function copyResults() {
         }, 2000);
     });
 }
-
 function sendGameData(data) {
   const payload = {
     timestamp: new Date().toISOString(),
@@ -7880,7 +7994,10 @@ function sendGameData(data) {
     accuracy: Number(data.accuracy ?? 0),
     maxStreak: Number(data.maxStreak ?? 0),
     totalAttempts: Number(data.totalAttempts ?? data.attempts ?? 0),
-    verificationCode: data.verificationCode || data.code || ""
+    verificationCode: data.verificationCode || data.code || "",
+    score: Number(data.score ?? scoreAttackScore ?? 0),
+    bestScore: Number(data.bestScore ?? scoreAttackBestScore ?? 0),
+    scoreEvents: data.scoreEvents || ""
   };
 
   fetch("https://default8de80de86d8a47cbb5bc7fb9b5bf1c.64.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/239b526e4b9f4c1997a009d53a32267a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQhDuP6P3K8mxdCKyBaMw6S0IPd8rBn8BUAEi_CtlxQ", {
