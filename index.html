@@ -3387,23 +3387,40 @@ function updateMissionArtifactCountFromVault(){
     setMissionArtifactCount(artifactCount);
 }
 
+
 function recordTimedTrialAchievementStats(accuracy, reachedRoom){
     const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
     const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
 
     updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
     updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
-
     updateRealmMaxStat("macroHub_timedBestRoom", safeRoom);
     updateRealmMaxStat("macroHub_timedBestAccuracy", safeAccuracy);
-
+    updateRealmMaxStat("macroHub_citadel_timedBestRoom", safeRoom);
+    updateRealmMaxStat("macroHub_citadel_timedBestAccuracy", safeAccuracy);
     updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestRoom`, safeRoom);
     updateRealmMaxStat(`${getMissionAchievementPrefix()}_timedBestAccuracy`, safeAccuracy);
 
     if(safeRoom >= 30 && safeAccuracy >= 80){
         setRealmFlag(MACRO_TRIAL_BY_CLOCK_KEY);
+        setRealmFlag("macroHub_citadel_trial_by_clock_complete");
         setRealmFlag(`${getMissionAchievementPrefix()}_trial_by_clock_complete`);
     }
+}
+
+function storeTimedTrialResult(accuracy, reachedRoom, finalRoom = room){
+    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
+    const safeReachedRoom = Math.max(1, Math.min(30, Number(reachedRoom) || 1));
+    const safeFinalRoom = Math.max(1, Math.min(30, Number(finalRoom) || 1));
+
+    localStorage.setItem("exchangeCitadelTimedLastRoom", String(safeFinalRoom));
+    localStorage.setItem("exchangeCitadelTimedLastHighestRoom", String(safeReachedRoom));
+    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(safeAccuracy));
+    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
+    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
+    localStorage.setItem("exchangeCitadelTimedLastSetbacks", String(timedSetbacks));
+
+    recordTimedTrialAchievementStats(safeAccuracy, safeReachedRoom);
 }
 
 function recordMacroCorrectAnswer(){
@@ -3672,17 +3689,16 @@ function saveGameState(){
         bossMistakeCountThisRun,
         bossesDefeatedThisRun
        },
-
-	artifacts: {
- 	   vaultLedger: localStorage.getItem("vaultLedger") === "true",
- 	   vaultCharter: localStorage.getItem("vaultCharter") === "true",
-  	  vaultPen: localStorage.getItem("vaultPen") === "true"
-	}
+        artifacts: modeAllowsRealmProgress() ? {
+            vaultLedger: localStorage.getItem("vaultLedger") === "true",
+            vaultCharter: localStorage.getItem("vaultCharter") === "true",
+            vaultPen: localStorage.getItem("vaultPen") === "true"
+        } : {}
     };
 
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
-    localStorage.setItem("gauntletRoom", String(room));
     if(modeAllowsRealmProgress()){
+        localStorage.setItem("gauntletRoom", String(room));
         localStorage.setItem(REALM_STARTED_KEY, "true");
         localStorage.setItem(REALM_STATUS_KEY, "contested");
         localStorage.setItem(REALM_ROOM_KEY, String(room));
@@ -3730,9 +3746,11 @@ function loadSavedGame(){
 		bossMistakeCountThisRun = Number(saveData.achievementTracking?.bossMistakeCountThisRun || 0);
         bossesDefeatedThisRun = Number(saveData.achievementTracking?.bossesDefeatedThisRun || 0);
 
-		if(saveData.artifacts?.vaultLedger) localStorage.setItem("vaultLedger", "true");
-		if(saveData.artifacts?.vaultCharter) localStorage.setItem("vaultCharter", "true");
-		if(saveData.artifacts?.vaultPen) localStorage.setItem("vaultPen", "true");
+        if(modeAllowsRealmProgress()){
+            if(saveData.artifacts?.vaultLedger) localStorage.setItem("vaultLedger", "true");
+            if(saveData.artifacts?.vaultCharter) localStorage.setItem("vaultCharter", "true");
+            if(saveData.artifacts?.vaultPen) localStorage.setItem("vaultPen", "true");
+        }
 
         return true;
     } catch(error){
@@ -3744,10 +3762,10 @@ function loadSavedGame(){
 
 function clearSavedGame(){
     localStorage.removeItem(getSaveKey());
-    if(modeAllowsSave()){
+    if(modeAllowsRealmProgress()){
         localStorage.removeItem("gauntletRoom");
         localStorage.removeItem("vaultLedger");
-        localStorage.removeItem("vaultRegentSeal");
+        localStorage.removeItem("vaultCharter");
         localStorage.removeItem("vaultPen");
     }
 }
@@ -4680,30 +4698,12 @@ function endTimedAttemptEarly(){
 
     const reachedRoom = Math.max(timedHighestRoom || 1, room || 1);
 
-    localStorage.setItem("exchangeCitadelTimedLastRoom", String(reachedRoom));
-    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(accuracy));
-    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
-    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
+    storeTimedTrialResult(accuracy, reachedRoom, room);
 
-    recordTimedTrialAchievementStats(accuracy, reachedRoom);
 
     returnToModeSelectFromRun();
 }
 
-function recordTimedTrialAchievementStats(accuracy, reachedRoom){
-    const safeAccuracy = Number.isFinite(Number(accuracy)) ? Number(accuracy) : 0;
-    const safeRoom = Number.isFinite(Number(reachedRoom)) ? Number(reachedRoom) : 0;
-
-    updateRealmMaxStat("exchangeCitadelTimedBestRoom", safeRoom);
-    updateRealmMaxStat("exchangeCitadelTimedBestAccuracy", safeAccuracy);
-
-    updateRealmMaxStat("macroHub_citadel_timedBestRoom", safeRoom);
-    updateRealmMaxStat("macroHub_citadel_timedBestAccuracy", safeAccuracy);
-
-    if(safeRoom >= 30 && safeAccuracy >= 80){
-        setRealmFlag("macroHub_citadel_trial_by_clock_complete");
-    }
-}
 	 
 function showContinueButtonIfSaved(){ const btn=document.getElementById("continueRunBtn"); if(!btn) return; btn.style.display=hasSavedGame("standard")?"block":"none"; }
 function startNewRun(){ gameMode="standard"; clearSavedGame(); startGame(false); }
@@ -4815,15 +4815,15 @@ function startGame(shouldResume = false) {
    	    bossesDefeatedThisRun = 0;
         resetScoreAttackState();
 
-        localStorage.removeItem("gauntletRoom");
-
-        // Exchange Citadel artifact keys — keep these matched to your actual Exchange Citadel IDs.
-        localStorage.removeItem("vaultLedger");
-        localStorage.removeItem("vaultCharter");
-        localStorage.removeItem("vaultPen");
-        localStorage.removeItem(REALM_COMPLETE_KEY);
-        localStorage.setItem(REALM_STATUS_KEY, "contested");
-        localStorage.setItem(REALM_ROOM_KEY, "1");
+        if(modeAllowsRealmProgress()){
+            localStorage.removeItem("gauntletRoom");
+            localStorage.removeItem("vaultLedger");
+            localStorage.removeItem("vaultCharter");
+            localStorage.removeItem("vaultPen");
+            localStorage.removeItem(REALM_COMPLETE_KEY);
+            localStorage.setItem(REALM_STATUS_KEY, "contested");
+            localStorage.setItem(REALM_ROOM_KEY, "1");
+        }
 
         questionHistory = {
             easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [],
@@ -4847,11 +4847,10 @@ function startGame(shouldResume = false) {
     document.querySelector(".top-panel").style.display = "flex";
     document.getElementById("gameShell").style.display = "flex";
     document.getElementById("gameBox").style.display = "block";
-    document.getElementById("artifactVault").style.display = "block";
+    document.getElementById("artifactVault").style.display = modeAllowsRealmProgress() ? "block" : "none";
     document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
     const timedHud = document.getElementById("timedModeHud");
     if(timedHud) timedHud.style.display = gameMode === "timed" ? "inline-flex" : "none";
-    if(gameMode === "timed") startTimedModeClock();
 
    // =============================================
    // VAULT RESTORE SYSTEM — SAFE WITH MATCHING IDS
@@ -4859,17 +4858,22 @@ function startGame(shouldResume = false) {
    // IMPORTANT:
    // localStorage keys must match the HTML element ids.
    // =============================================    
-	if(localStorage.getItem("vaultLedger")){
-  	  document.getElementById("vaultLedger").classList.add("unlocked");
-	}
+    ["vaultLedger", "vaultCharter", "vaultPen"].forEach(id => {
+        const slot = document.getElementById(id);
+        if(slot) slot.classList.remove("unlocked");
+    });
 
-	if(localStorage.getItem("vaultCharter")){
-	    document.getElementById("vaultCharter").classList.add("unlocked");
-	}
-
-	if(localStorage.getItem("vaultPen")){
- 	   document.getElementById("vaultPen").classList.add("unlocked");
-	}	
+    if(modeAllowsRealmProgress()){
+        if(localStorage.getItem("vaultLedger") === "true"){
+            document.getElementById("vaultLedger").classList.add("unlocked");
+        }
+        if(localStorage.getItem("vaultCharter") === "true"){
+            document.getElementById("vaultCharter").classList.add("unlocked");
+        }
+        if(localStorage.getItem("vaultPen") === "true"){
+            document.getElementById("vaultPen").classList.add("unlocked");
+        }
+    }
   
 // Start game loop: music + timer + first question
     initializeRunForMode(gameMode);
@@ -5003,7 +5007,6 @@ function resetRunStateForNewMode(){
 	resetRemediationState();
 	    questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
 	    usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
-	    if(gameMode!=="standard"){localStorage.removeItem("gauntletRoom");localStorage.removeItem("vaultLedger");localStorage.removeItem("vaultCharter");localStorage.removeItem("vaultPen");}
 	}
 
 function initializeRunForMode(mode){
@@ -5093,19 +5096,7 @@ function endTimedModeRun(){
         ? Math.round((correctAnswers / totalAttempts) * 100)
         : 0;
 
-    const bestRoom = Number(localStorage.getItem("exchangeCitadelTimedBestRoom") || 0);
-    if(timedHighestRoom > bestRoom){
-        localStorage.setItem("exchangeCitadelTimedBestRoom", String(timedHighestRoom));
-    }
-
-    localStorage.setItem("exchangeCitadelTimedLastRoom", String(room));
-    localStorage.setItem("exchangeCitadelTimedLastHighestRoom", String(timedHighestRoom));
-    localStorage.setItem("exchangeCitadelTimedLastAccuracy", String(accuracy));
-    localStorage.setItem("exchangeCitadelTimedLastAttempts", String(totalAttempts));
-    localStorage.setItem("exchangeCitadelTimedLastStreak", String(maxStreak));
-    localStorage.setItem("exchangeCitadelTimedLastSetbacks", String(timedSetbacks));
-
-	recordTimedTrialAchievementStats(accuracy, timedHighestRoom);
+    storeTimedTrialResult(accuracy, timedHighestRoom, room);
 
     sendGameData({
         runID: runID,
@@ -5148,6 +5139,7 @@ function endTimedModeRun(){
     `;
 
     document.getElementById("answers").innerHTML = `
+        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
@@ -5516,9 +5508,9 @@ function updateMazeTrack() {
             box.innerText = "🟨";
         } else {
             // Boss icons for future rooms
-            if (i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon">';box.classList.add("boss10");}
-            else if (i === 20){box.innerHTML = '<img src="chancellor.webp" class="boss-icon">';box.classList.add("boss20");}
-            else if (i === 30){box.innerHTML = '<img src="custodian.webp" class="boss-icon">';box.classList.add("boss30");}
+            if (isBossRoomForMode(i) && i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon">';box.classList.add("boss10");}
+            else if (isBossRoomForMode(i) && i === 20){box.innerHTML = '<img src="chancellor.webp" class="boss-icon">';box.classList.add("boss20");}
+            else if (isBossRoomForMode(i) && i === 30){box.innerHTML = '<img src="custodian.webp" class="boss-icon">';box.classList.add("boss30");}
             else box.innerText = "🟪";
         }
         
@@ -6042,7 +6034,7 @@ async function answer(choice) {
    
     totalAttempts++;
    
-    const isBossRoom = (room === 10 || room === 20 || room === 30);
+    const isBossRoom = isBossRoomForMode(room);
     const msgElement = document.getElementById("message");
     const wizard = document.getElementById("wizardImage");
 const isCorrect = (choice === currentQuestion.a);
@@ -6299,9 +6291,6 @@ if(remediationState.active){
            
          bossPool = [];
 
-		 if(gameMode === "standard"){
-         bossesDefeatedThisRun++;
-         }
            
         // Boss defeated (artifact unlocks)
 if(modeAllowsRealmProgress()){
@@ -6338,7 +6327,7 @@ if(modeAllowsRealmProgress()){
    room++;
    timedHighestRoom = Math.max(timedHighestRoom, Math.min(room, 30));
    saveGameState();
-   localStorage.setItem("gauntletRoom", room);
+   if(modeAllowsRealmProgress()) localStorage.setItem("gauntletRoom", String(room));
 
    if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
        endTimedModeRun();
@@ -6457,7 +6446,7 @@ if (!remediationState.active && currentQuestion.tag && shouldTriggerDetour(curre
     bossHealth = 3;
     bossPool = [];
 
-	let fallback = (room % 10 === 0 ? 3 : (room >= 21 ? 2 : 1));
+	let fallback = (isBossRoom ? 3 : (room >= 21 ? 2 : 1));
 	let newRoom = room - fallback;
 
 // Never fall back behind the most recently cleared boss gate
@@ -6847,6 +6836,9 @@ function handlePracticeModeComplete(){
 if(gameMode === "exam"){
     markExamDrillCompleted();
 }
+if(gameMode === "timed"){
+    storeTimedTrialResult(accuracy, Math.max(timedHighestRoom, 30), room);
+}
 
     sendGameData({
         runID,
@@ -7008,7 +7000,7 @@ function handleScoreAttackVictory(){
     });
 
     let scoreLine = "Respectable. The Citadel recorded the run.";
-    if(scoreAttackScore >= 9250){
+    if(scoreAttackScore >= 11590){
         scoreLine = "Maximum score. Clean run. No wasted motion. The Citadel opens the upper ledger.";
     } else if(scoreAttackScore >= 8000){
         scoreLine = "Elite scoring run. Fast, accurate, and mean.";
@@ -7806,71 +7798,6 @@ function copyMasteryReport(){
 // UTILITIES
 // =============================
      
-// =============================================
-// ARRAY SHUFFLE UTILITY — SAFE TO USE, DO NOT MODIFY
-// =============================================
-// Fisher-Yates shuffle algorithm.
-//
-// Used to randomize:
-// - question order
-// - calculation generators
-// - any randomized sequences
-//
-// DO NOT MODIFY unless you understand:
-// - uniform randomness
-// - bias in random selection
-//
-// Breaking this = predictable patterns in questions
-// =============================================     
-function shuffleArray(arr){
-    for(let i=arr.length-1;i>0;i--){ let j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
-    return arr;
-}     
-
-// =============================================
-// HIGH SCORE TRACKING — OPTIONAL FEATURE
-// =============================================
-// Stores top completion times in browser (localStorage)
-//
-// - Saves name, time, and date
-// - Sorts fastest → slowest
-// - Keeps top 5 results only
-//
-// SAFE TO EDIT:
-// - number of scores kept (slice)
-// - displayed fields (name/date)
-//
-// WARNING:
-// Clearing browser data will erase scores.
-// =============================================
-function updateHighScores(newTimeMs) {
-    let scores = JSON.parse(localStorage.getItem("gauntletHighScores")) || [];
-    scores.push({ name: username, time: newTimeMs, date: new Date().toLocaleDateString() });
-    
-    // Sort by time (lowest/fastest first) and keep top 5
-    scores.sort((a, b) => a.time - b.time);
-    scores = scores.slice(0, 5);
-    
-    localStorage.setItem("gauntletHighScores", JSON.stringify(scores));
-    return scores;
-}
-
-// =============================================
-// TIME FORMATTER — SAFE UTILITY
-// =============================================
-// Converts milliseconds → readable format (Xm Ys)
-//
-// Used for:
-// - victory screen
-// - performance tracking
-//
-// Safe to modify format if desired.
-// =============================================     
-function formatTime(ms) {
-    let mins = Math.floor(ms / 60000);
-    let secs = Math.floor((ms / 1000) % 60);
-    return `${mins}m ${secs}s`;
-}
 
 // =============================================
 // RESULT SHARING — SAFE TO CUSTOMIZE
