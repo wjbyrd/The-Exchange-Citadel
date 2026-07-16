@@ -2873,11 +2873,11 @@ Respect structure strictly.
 <h1 class="mode-title">CHOOSE YOUR CITADEL RUN</h1>
 <p class="mode-subtitle">Select how you want to enter The Exchange Citadel.</p>
     <div class="mode-grid">
-      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full campaign across open-economy identities, exchange rates, policy effects, and Mundell-Fleming logic.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Citadel tests chained open-economy policy judgment.</span></button>
-      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('standard')"><img src="../mode_standard.webp" alt="" aria-hidden="true"><span class="mode-card-title">Standard Campaign</span><span class="mode-card-text">Full campaign across open-economy identities, exchange rates, policy effects, and Mundell-Fleming logic.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('timed')"><img src="../mode_timed.webp" alt="" aria-hidden="true"><span class="mode-card-title">Timed Trial</span><span class="mode-card-text">Ten minutes. Correct answers advance. Misses push you back. Advance as far as you can.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('exam')"><img src="../mode_exam.webp" alt="" aria-hidden="true"><span class="mode-card-title">Exam Drill</span><span class="mode-card-text">No bosses. No artifacts. No Realm progress. Just adaptive practice.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('legendary')"><img src="../mode_legendary.webp" alt="" aria-hidden="true"><span class="mode-card-title">Legendary Mode</span><span class="mode-card-text">Full campaign. Legendary questions. The Citadel tests chained open-economy policy judgment.</span></button>
+      <button class="mode-card" onclick="startSelectedMode('score')" aria-label="Score Attack. Build points through correct answers, streaks, and speed. Misses subtract points and rapid guessing is punished."><img src="../scoreattack.webp" alt="" aria-hidden="true"><span class="mode-card-title">Score Attack</span><span class="mode-card-text">Rack up points with correct answers, streaks, and speed. Misses cost you.</span></button>
     </div>
     <button class="mode-back-btn" onclick="returnToTitleScreen()">BACK</button>
   </div>
@@ -2944,7 +2944,7 @@ or simplify this section.
         <div id="gameShell">
             <div id="wizardBox">
                 <div id="wizardName">The Custodian</div>
-                <img src="custodian.webp" id="wizardImage">
+                <img src="../custodian.webp" id="wizardImage">
             </div>
 
             <!-- GAME -->
@@ -3011,7 +3011,7 @@ or simplify this section.
 <!-- =========================================
    2. GAME ELEMENTS (CHANGE ELEMENTS WITH NEW GAME)
 ========================================= -->
- <script src="exchange_citadel_question_bank.js"></script>
+ <script src="exchange_citadel_question_bank.js?v=20260716_1"></script>
 <script>
 
 // =============================================
@@ -4421,8 +4421,9 @@ function getRemediationQuestion(state){
     const excludeIds = [state.originQuestionId].filter(Boolean);
 
     if(state.stage === "repair"){
-        if(state.skill && microSkillRepairPools[state.skill]){
-            const skillRepairPool = microSkillRepairPools[state.skill] || [];
+        const skillRepairPool = (window.directSkillRepairRoutes || {})[state.skill]
+            || microSkillRepairPools[state.skill] || [];
+        if(state.skill && skillRepairPool.length){
             const skillRepairCandidates = getQuestionsMatchingNeed(
                 skillRepairPool,
                 state.objective,
@@ -4439,7 +4440,8 @@ function getRemediationQuestion(state){
             }
         }
 
-        const repairPool = microSkillRepairPools[state.skill] || [];
+        const repairPool = (window.directSkillRepairRoutes || {})[state.skill]
+            || microSkillRepairPools[state.skill] || [];
         const allRepairPool = Object.values(microSkillRepairPools || {})
             .reduce((all, pool) => all.concat(pool), []);
         const repairCandidates = getQuestionsMatchingNeed(
@@ -4459,8 +4461,9 @@ function getRemediationQuestion(state){
     }
 
     if(state.stage === "bridge"){
-        if(state.skill && microSkillBridgePools[state.skill]){
-            const skillBridgePool = microSkillBridgePools[state.skill] || [];
+        const skillBridgePool = (window.directSkillBridgeRoutes || {})[state.skill]
+            || microSkillBridgePools[state.skill] || [];
+        if(state.skill && skillBridgePool.length){
             const skillBridgeCandidates = getQuestionsMatchingNeed(
                 skillBridgePool,
                 state.objective,
@@ -4989,7 +4992,7 @@ function showCustodianIntro(step = 1){
     if (step === 1) {
         questionElement.innerHTML = `
             <div class="chancellor-intro">
-                <img src="custodian.webp" class="bossIcon custodianGlow chancellor-dialogue-img">
+                <img src="../custodian.webp" class="bossIcon custodianGlow chancellor-dialogue-img">
                 <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
                 <div class="chancellor-dialogue">
@@ -5012,7 +5015,7 @@ function showCustodianIntro(step = 1){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro">
-            <img src="custodian.webp" class="bossIcon custodianGlow">
+            <img src="../custodian.webp" class="bossIcon custodianGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
 
             <div class="chancellor-dialogue">
@@ -5062,7 +5065,7 @@ function showCustodianSuspenseIntro(){
 
     questionElement.innerHTML = `
         <div class="chancellor-intro chancellor-suspense">
-            <img src="custodian.webp" class="bossIcon custodianGlow">
+            <img src="../custodian.webp" class="bossIcon custodianGlow">
             <div class="chancellor-intro-title">THE CUSTODIAN</div>
             <div class="chancellor-intro-line">Final authority revealed.</div>
         </div>
@@ -5621,7 +5624,7 @@ function updateMazeTrack() {
             // Boss icons for future rooms
             if (isBossRoomForMode(i) && i === 10){box.innerHTML = '<img src="keeper.webp" class="boss-icon">';box.classList.add("boss10");}
             else if (isBossRoomForMode(i) && i === 20){box.innerHTML = '<img src="chancellor.webp" class="boss-icon">';box.classList.add("boss20");}
-            else if (isBossRoomForMode(i) && i === 30){box.innerHTML = '<img src="custodian.webp" class="boss-icon">';box.classList.add("boss30");}
+            else if (isBossRoomForMode(i) && i === 30){box.innerHTML = '<img src="../custodian.webp" class="boss-icon">';box.classList.add("boss30");}
             else box.innerText = "🟪";
         }
         
@@ -5921,7 +5924,7 @@ if (isBoss) {
         bossClass = "chancellorGlow";
     }
     else {
-        bossImage = "custodian.webp";
+        bossImage = "../custodian.webp";
         bossClass = "custodianGlow";
     }
 
@@ -8054,8 +8057,6 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
-
-
 
 
 
