@@ -1,4 +1,4 @@
-<!-- EXCHANGE CITADEL — SHARED-ENGINE REPAIR BUILD 20260717_1 -->
+<!-- EXCHANGE CITADEL — NATIONAL ENGINE UPGRADE PORT 20260715_1 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -207,7 +207,6 @@ body::after{
 }
 
 /* PLACEHOLDER */	
-#emailInput::placeholder,
 #username::placeholder{
     color: rgba(216,199,160,0.52);
     font-style: italic;
@@ -2861,7 +2860,6 @@ Respect structure strictly.
 <div id="startScreen">
   <div class="start-content">
     <h1 class="title">THE EXCHANGE CITADEL</h1>
-    <input id="emailInput" type="email" placeholder="Enter your school email" class="name-input">
     <button class="start-btn" onclick="showModeSelect()">ENTER THE CITADEL</button>
     <button id="continueRunBtn" class="start-btn secondary-start-btn" onclick="continueSavedRun()" style="display:none;">
         CONTINUE CITADEL RUN
@@ -3012,7 +3010,8 @@ or simplify this section.
 <!-- =========================================
    2. GAME ELEMENTS (CHANGE ELEMENTS WITH NEW GAME)
 ========================================= -->
-<script src="exchange_citadel_question_bank.js?v=20260717_1" charset="UTF-8"></script>
+<script src="instructional_resources.js?v=20260724_1" charset="UTF-8"></script>
+<script src="exchange_citadel_question_bank_student.js?v=20260716_1" charset="UTF-8"></script>
 <script>
 
 // =============================================
@@ -3141,44 +3140,6 @@ function setGameControlsVisible(isVisible){
 
 setGameControlsVisible(false);
 
-const initialGameBoxHTML = document.getElementById("gameBox").innerHTML;
-
-function resetGameSurfaceForNewRun(forceRestore = false){
-    closeGameModal();
-    closeGraphLightbox();
-
-    const gameBox = document.getElementById("gameBox");
-    if(!gameBox) return;
-
-    if(forceRestore
-        || gameBox.querySelector("#masteryReportScreen")
-        || !gameBox.querySelector("#question")
-        || !gameBox.querySelector("#answers")){
-        gameBox.innerHTML = initialGameBoxHTML;
-    }
-
-    gameBox.classList.remove("boss-mode", "hit");
-    gameBox.style.removeProperty("--bossColor");
-
-    const shell = document.getElementById("gameShell");
-    if(shell) shell.classList.remove("boss-mode");
-
-    const bossMessage = document.getElementById("bossMessage");
-    if(bossMessage){
-        bossMessage.innerText = "";
-        bossMessage.style.color = "";
-    }
-
-    const artifactDrop = document.getElementById("artifactDrop");
-    if(artifactDrop) artifactDrop.style.display = "none";
-
-    const hallway = document.getElementById("hallwayTransition");
-    if(hallway) hallway.classList.remove("active");
-
-    const hallwayText = document.getElementById("hallwayText");
-    if(hallwayText) hallwayText.innerHTML = "";
-}
-
 function pauseAllGameMusic(){
     [bgMusic, bossMusic, finalBossMusic].filter(Boolean).forEach(audio => {
         audio.pause();
@@ -3255,13 +3216,14 @@ let bossCheckpoint = 1;
 let correctAnswers = 0; 
 let maxStreak = 0; 
 let username = "";
-let studentEmail = "";
 let runID = "";
 let questionStartTime = 0;
 let streak = 0; 
-let startTime; // Will be set in startGame()
-let room = 1;
+let startTime;
+let finalElapsedTimeMs=null;function getElapsedTimeMs(){return Number.isFinite(finalElapsedTimeMs)?finalElapsedTimeMs:(startTime?Date.now()-startTime:0);}function freezeCompletionTime(fallbackMs=0){if(!Number.isFinite(finalElapsedTimeMs))finalElapsedTimeMs=startTime?Date.now()-startTime:fallbackMs;return finalElapsedTimeMs;} // Will be set in startGame()
+let room = localStorage.getItem("exchangeCitadelRoom") ? parseInt(localStorage.getItem("exchangeCitadelRoom")) : 1;
 let currentQuestion = null;
+let answerSubmissionPending=false;
 let detourActive = false;
 let detourReturnRoom = null;
 let remediationState = {
@@ -3336,7 +3298,6 @@ const MACRO_PERFECT_CALIBRATION_KEY = "macroHub_perfectCalibration_complete";
 const MACRO_RETURN_AND_REBUILD_KEY = "macroHub_returnAndRebuild_complete";
 
 let gameMode = "standard";
-let runSessionId = 0;
 let timedModeDurationMs = 10 * 60 * 1000;
 let timedModeEndTime = null;
 let timedModeTimerInterval = null;
@@ -3534,20 +3495,6 @@ function getModeDisplayName(){
     return "Standard Campaign";
 }
 
-function beginRunSession(){
-    runSessionId += 1;
-    return runSessionId;
-}
-
-function scheduleForCurrentRun(callback, delay){
-    const scheduledSessionId = runSessionId;
-
-    return setTimeout(() => {
-        if(scheduledSessionId !== runSessionId) return;
-        callback();
-    }, delay);
-}
-
 // =============================================
 // SCORE ATTACK MODE ADDITION — SCORING HELPERS
 // These helpers keep Score Attack self-contained.
@@ -3728,8 +3675,7 @@ function saveGameState(){
         maxStreak,
         streak,
         username,
-        studentEmail,
-        runID,
+runID,
         gameMode,
         conceptMemory,
         masteryState,
@@ -3755,6 +3701,7 @@ function saveGameState(){
 
     localStorage.setItem(getSaveKey(), JSON.stringify(saveData));
     if(modeAllowsRealmProgress()){
+        localStorage.setItem("exchangeCitadelRoom", String(room));
         localStorage.setItem(REALM_STARTED_KEY, "true");
         localStorage.setItem(REALM_STATUS_KEY, "contested");
         localStorage.setItem(REALM_ROOM_KEY, String(room));
@@ -3766,20 +3713,12 @@ function saveGameState(){
     }
 }
 
-function loadSavedGame(expectedMode = gameMode){
-    const normalizedMode = expectedMode || "standard";
-    const saveKey = `${SAVE_KEY}_${normalizedMode}`;
-    const rawSave = localStorage.getItem(saveKey);
+function loadSavedGame(){
+    const rawSave = localStorage.getItem(getSaveKey());
     if(!rawSave) return false;
 
     try {
         const saveData = JSON.parse(rawSave);
-        const savedMode = saveData.gameMode || normalizedMode;
-
-        if(savedMode !== normalizedMode){
-            console.warn(`Saved run mode mismatch for ${saveKey}: expected ${normalizedMode}, found ${savedMode}.`);
-            return false;
-        }
 
         room = Number(saveData.room || 1);
         bossHealth = Number(saveData.bossHealth || 3);
@@ -3790,9 +3729,8 @@ function loadSavedGame(expectedMode = gameMode){
         streak = Number(saveData.streak || 0);
 
         username = saveData.username || username || "";
-        studentEmail = saveData.studentEmail || studentEmail || "";
-        runID = saveData.runID || runID || "";
-        gameMode = normalizedMode;
+runID = saveData.runID || runID || "";
+        gameMode = saveData.gameMode || gameMode || "standard";
 
         conceptMemory = saveData.conceptMemory || {};
         masteryState = saveData.masteryState || { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
@@ -3807,7 +3745,7 @@ function loadSavedGame(expectedMode = gameMode){
         rapidGuessWarnings = Number(saveData.rapidGuessWarnings || 0);
         rapidGuessLocked = !!saveData.rapidGuessLocked;
 
-        bossMistakeCountThisRun = Number(saveData.achievementTracking?.bossMistakeCountThisRun || 0);
+		bossMistakeCountThisRun = Number(saveData.achievementTracking?.bossMistakeCountThisRun || 0);
         bossesDefeatedThisRun = Number(saveData.achievementTracking?.bossesDefeatedThisRun || 0);
 
         if(modeAllowsRealmProgress()){
@@ -3819,16 +3757,22 @@ function loadSavedGame(expectedMode = gameMode){
         return true;
     } catch(error){
         console.warn("Saved game could not be loaded:", error);
-        localStorage.removeItem(saveKey);
+        localStorage.removeItem(getSaveKey());
         return false;
     }
 }
 
 function clearSavedGame(){
     localStorage.removeItem(getSaveKey());
+    if(modeAllowsRealmProgress()){
+        localStorage.removeItem("exchangeCitadelRoom");
+        localStorage.removeItem("vaultLedger");
+        localStorage.removeItem("vaultCharter");
+        localStorage.removeItem("vaultPen");
+    }
 }
 
-function generatePseudonymFromEmail(email) {
+function generatePseudonymFromSeed(seed) {
     const titles = [
         "Axiom", "Grid", "Vector", "Meridian", "Signal", "Cipher",
         "Frontier", "Equity", "Oracle", "Index", "Summit", "Nexus",
@@ -3842,10 +3786,10 @@ function generatePseudonymFromEmail(email) {
     ];
 
     let hash = 0;
-    const cleanEmail = email.trim().toLowerCase();
+    const cleanSeed = String(seed || "").trim().toLowerCase();
 
-    for (let i = 0; i < cleanEmail.length; i++) {
-        hash = ((hash << 5) - hash) + cleanEmail.charCodeAt(i);
+    for (let i = 0; i < cleanSeed.length; i++) {
+        hash = ((hash << 5) - hash) + cleanSeed.charCodeAt(i);
         hash |= 0;
     }
 
@@ -4274,31 +4218,27 @@ function getWeakestBossObjective(bank){
         bank.filter(q => getBossObjectiveKey(q) === obj).length >= 3
     );
     if(eligibleObjectives.length === 0) return null;
-
-    const scoredObjectives = eligibleObjectives.map(obj => {
+    let weakestObjective = null;
+    let weakestScore = -Infinity;
+    eligibleObjectives.forEach(obj => {
         const stats = getObjectiveFamilyStats(obj);
         let score = 0.25;
-
         if(stats.accuracy !== null){
             score = (1 - stats.accuracy) * 2;
             score += Math.min(stats.attempts, 5) * 0.08;
         }
-
         const recentMisses = (masteryState.recent || []).filter(item => {
             const itemObjective = item.objective || "";
             return (itemObjective === obj || itemObjective.startsWith(obj + "_")) && !item.correct;
         }).length;
-
         score += recentMisses * 0.25;
         if(stats.avgTime && stats.avgTime > TYPE_TIME_TARGETS.default) score += 0.15;
-
-        return { objective: obj, score };
+        if(score > weakestScore){
+            weakestScore = score;
+            weakestObjective = obj;
+        }
     });
-
-    const weakestScore = Math.max(...scoredObjectives.map(item => item.score));
-    const tiedWeakest = scoredObjectives.filter(item => item.score === weakestScore);
-
-    return tiedWeakest[Math.floor(Math.random() * tiedWeakest.length)].objective;
+    return weakestObjective || eligibleObjectives[Math.floor(Math.random() * eligibleObjectives.length)];
 }
 
 function getScaffoldedBossGroups(bank){
@@ -4328,36 +4268,6 @@ function getScaffoldedBossGroups(bank){
     });
 
     return groups;
-}
-
-function pickBossScaffold(bank, poolName, chosenObjective){
-    const objectivePool = chosenObjective
-        ? bank.filter(question => getBossObjectiveKey(question) === chosenObjective)
-        : [];
-    const preferredGroups = objectivePool.length >= 3
-        ? getScaffoldedBossGroups(objectivePool)
-        : [];
-    const allGroups = getScaffoldedBossGroups(bank);
-    const usedIds = new Set(usedQuestions[poolName] || []);
-    const unusedPreferredGroups = preferredGroups.filter(group =>
-        group.every(question => !usedIds.has(question.id))
-    );
-    const unusedGroups = allGroups.filter(group =>
-        group.every(question => !usedIds.has(question.id))
-    );
-    const availableGroups = unusedPreferredGroups.length
-        ? unusedPreferredGroups
-        : unusedGroups.length
-            ? unusedGroups
-            : preferredGroups.length
-                ? preferredGroups
-                : allGroups;
-
-    if(availableGroups.length){
-        return [...availableGroups[Math.floor(Math.random() * availableGroups.length)]];
-    }
-
-    return [...bank].sort((a, b) => a.id - b.id).slice(0, 3);
 }
 
 function getSelectionProfile(){
@@ -4819,23 +4729,9 @@ function getRecoveryLine(stage){
   return `${bossName}: The Citadel does not reward guesses.`;
 }
 
-const savedEmail = localStorage.getItem("gauntletEmail");
-const emailInput = document.getElementById("emailInput");
-if (savedEmail && emailInput) emailInput.value = savedEmail;
-function hasSavedGame(mode = "standard"){ return !!localStorage.getItem(`${SAVE_KEY}_${mode}`); }
-function validateAndStoreEmailForModeSelect(){
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-    if (!inputEmail) { alert("An email is required to enter the Citadel."); return false; }
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailPattern.test(inputEmail)) { alert("Enter a valid email address."); return false; }
-    studentEmail = inputEmail; username = generatePseudonymFromEmail(studentEmail);
-    localStorage.setItem("gauntletEmail", studentEmail); localStorage.setItem("gauntletUser", username); return true;
-}
-	 
+function hasSavedGame(mode='standard'){return !!localStorage.getItem(SAVE_KEY+'_'+mode);}
 function showModeSelect(){
-    if(!validateAndStoreEmailForModeSelect()) return;
-
-    setGameControlsVisible(false);
+setGameControlsVisible(false);
 
     document.getElementById("startScreen").style.display = "none";
 
@@ -4853,31 +4749,11 @@ function returnToTitleScreen(){
     showContinueButtonIfSaved();
 }
 	 
-function startSelectedMode(mode){
-    const selectedMode = mode || "standard";
-
-    beginRunSession();
-    stopTimedModeClock();
-    gameMode = selectedMode;
-    localStorage.setItem("exchangeCitadelCurrentMode", selectedMode);
-
-    const modeScreen = document.getElementById("modeSelectScreen");
-    if(modeScreen) modeScreen.style.display = "none";
-
-    resetGameSurfaceForNewRun(true);
-    resetRunStateForNewMode();
-    startGame(false, selectedMode);
-}
+function startSelectedMode(mode){ gameMode = mode || "standard"; localStorage.setItem("exchangeCitadelCurrentMode", gameMode); const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "none"; if(gameMode === "standard"){ startGame(false); return; } resetRunStateForNewMode(); startGame(false); }
 
 function returnToModeSelectFromRun(){
-    beginRunSession();
     stopTimedModeClock();
     stopAllMusic();
-    closeGameModal();
-    closeGraphLightbox();
-
-    const hallway = document.getElementById("hallwayTransition");
-    if(hallway) hallway.classList.remove("active");
 
     setGameControlsVisible(false);
 
@@ -4890,7 +4766,7 @@ function returnToModeSelectFromRun(){
     if(modeScreen) modeScreen.style.display = "flex";
 }
 	 
-function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Saved campaigns will be preserved. Timed Trial, Exam Drill, and Score Attack attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(modeAllowsSave()) saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
+function confirmReturnToModeMenu(){ showGameModal({ title:"Return to Citadel Menu?", text:"Standard Campaign progress will be saved. Timed Trial, Exam Drill, and Score Attack attempts will end.", confirmText:"Return", cancelText:"Stay", onConfirm:function(){ if(modeAllowsSave()) saveGameState(); if(gameMode === "timed"){ endTimedAttemptEarly(); return; } returnToModeSelectFromRun(); }}); }
 let activeModalConfirmAction = null; let activeModalCancelAction = null;
 function showGameModal({title="Citadel Warning",text="",confirmText="Continue",cancelText="",onConfirm=null,onCancel=null}={}){ const modal=document.getElementById("gameModal"),titleEl=document.getElementById("gameModalTitle"),textEl=document.getElementById("gameModalText"),confirmBtn=document.getElementById("gameModalConfirm"),cancelBtn=document.getElementById("gameModalCancel"); if(!modal||!titleEl||!textEl||!confirmBtn||!cancelBtn) return; activeModalConfirmAction=onConfirm; activeModalCancelAction=onCancel; titleEl.innerText=title; textEl.innerText=text; confirmBtn.innerText=confirmText; if(cancelText){cancelBtn.innerText=cancelText; cancelBtn.style.display="inline-block";} else cancelBtn.style.display="none"; modal.style.display="flex"; confirmBtn.onclick=function(){const action=activeModalConfirmAction; closeGameModal(); if(typeof action==="function") action();}; cancelBtn.onclick=function(){const action=activeModalCancelAction; closeGameModal(); if(typeof action==="function") action();}; }
 function closeGameModal(){ const modal=document.getElementById("gameModal"); if(modal) modal.style.display="none"; activeModalConfirmAction=null; activeModalCancelAction=null; }
@@ -4912,19 +4788,11 @@ function endTimedAttemptEarly(){
 
 	 
 function showContinueButtonIfSaved(){ const btn=document.getElementById("continueRunBtn"); if(!btn) return; btn.style.display=hasSavedGame("standard")?"block":"none"; }
-function startNewRun(){
-    gameMode = "standard";
-    clearSavedGame();
-    beginRunSession();
-    resetGameSurfaceForNewRun(true);
-    resetRunStateForNewMode();
-    startGame(false, "standard");
-}
+function startNewRun(){ gameMode="standard"; clearSavedGame(); startGame(false); }
 function continueSavedRun(){
     gameMode = "standard";
     resumedSavedRunThisSession = true;
-    beginRunSession();
-    startGame(true, "standard");
+    startGame(true);
 }
 showContinueButtonIfSaved();
 // =============================================
@@ -4955,41 +4823,16 @@ showContinueButtonIfSaved();
 // - incorrect scoring
 // - progression bugs
 // =============================================
-function startGame(shouldResume = false, requestedMode = null) {
-    const launchMode = requestedMode || gameMode || "standard";
-    gameMode = launchMode;
-    resetGameSurfaceForNewRun(!shouldResume);
-
-    let inputEmail = document.getElementById("emailInput").value.trim().toLowerCase();
-
-    if (!inputEmail) {
-        alert("An email is required to enter the Citadel.");
-        return;
-    }
-
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!emailPattern.test(inputEmail)) {
-        alert("Enter a valid email address.");
-        return;
-    }
-
-    studentEmail = inputEmail;
-    username = generatePseudonymFromEmail(studentEmail);
-
-    const hasSavedRun = shouldResume ? loadSavedGame(launchMode) : false;
+function startGame(shouldResume=false){
+const hasSavedRun=shouldResume?loadSavedGame():false;
     if(!hasSavedRun){
-        gameMode = launchMode;
-        resumedSavedRunThisSession = false;
-        bossCheckpoint = 1;
-        runID = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-    }
+    resumedSavedRunThisSession = false;
+}
 
-    localStorage.setItem("gauntletEmail", studentEmail);
+    if(!hasSavedRun){bossCheckpoint=1;runID=Date.now().toString()+'-'+Math.random().toString(36).slice(2,8);username=generatePseudonymFromSeed(runID);}if(!username)username=generatePseudonymFromSeed(runID||String(Date.now()));
     localStorage.setItem("gauntletUser", username);
     localStorage.setItem("gauntletRunID", runID);
     localStorage.setItem("exchangeCitadelCurrentMode", gameMode);
-
     if(modeAllowsRealmProgress()){
         localStorage.setItem(REALM_STARTED_KEY, "true");
         localStorage.setItem(REALM_STATUS_KEY, "contested");
@@ -5001,21 +4844,22 @@ function startGame(shouldResume = false, requestedMode = null) {
         game: "The Exchange Citadel",
         event: hasSavedRun ? "resume" : "start",
         user: username,
-        email: studentEmail,
         mode: getModeDisplayName()
     });
 
+// =============================================
+// RESET CORE GAME STATE — DO NOT MODIFY STRUCTURE
+// =============================================
+// Resets all progression, scoring, and adaptive tracking
     if(!hasSavedRun){
         room = 1;
         bossHealth = 3;
-        bossCheckpoint = 1;
         streak = 0;
         maxStreak = 0;
         totalAttempts = 0;
         correctAnswers = 0;
         bossPool = [];
-        currentQuestion = null;
-        if(typeof calcBag !== "undefined") calcBag = [];
+        calcBag = [];
         conceptMemory = {};
         masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
         tagHistory = [];
@@ -5025,12 +4869,13 @@ function startGame(shouldResume = false, requestedMode = null) {
         rapidGuessHistory = [];
         rapidGuessWarnings = 0;
         rapidGuessLocked = false;
-        chancellorIntroPlayed = false;
-        bossMistakeCountThisRun = 0;
-        bossesDefeatedThisRun = 0;
+		chancellorIntroPlayed = false;
+		bossMistakeCountThisRun = 0;
+   	    bossesDefeatedThisRun = 0;
         resetScoreAttackState();
 
         if(modeAllowsRealmProgress()){
+            localStorage.removeItem("exchangeCitadelRoom");
             localStorage.removeItem("vaultLedger");
             localStorage.removeItem("vaultCharter");
             localStorage.removeItem("vaultPen");
@@ -5049,8 +4894,12 @@ function startGame(shouldResume = false, requestedMode = null) {
             easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: []
         };
     }
-
-    setGameControlsVisible(true);
+    
+// =============================================
+// UI INITIALIZATION — SAFE TO CUSTOMIZE
+// =============================================
+// Shows main game elements and restores vault visuals
+	setGameControlsVisible(true);
     document.getElementById("startScreen").style.display = "none";
     const modeScreen = document.getElementById("modeSelectScreen");
     if(modeScreen) modeScreen.style.display = "none";
@@ -5059,15 +4908,36 @@ function startGame(shouldResume = false, requestedMode = null) {
     document.getElementById("gameBox").style.display = "block";
     document.getElementById("artifactVault").style.display = modeAllowsRealmProgress() ? "block" : "none";
     document.querySelectorAll(".torch").forEach(t => t.style.display = "block");
+    const timedHud = document.getElementById("timedModeHud");
+    if(timedHud) timedHud.style.display = gameMode === "timed" ? "inline-flex" : "none";
 
+   // =============================================
+   // VAULT RESTORE SYSTEM — SAFE WITH MATCHING IDS
+   // =============================================
+   // IMPORTANT:
+   // localStorage keys must match the HTML element ids.
+   // =============================================    
     ["vaultLedger", "vaultCharter", "vaultPen"].forEach(id => {
         const slot = document.getElementById(id);
-        if(slot) slot.classList.toggle("unlocked", modeAllowsRealmProgress() && localStorage.getItem(id) === "true");
+        if(slot) slot.classList.remove("unlocked");
     });
 
+    if(modeAllowsRealmProgress()){
+        if(localStorage.getItem("vaultLedger") === "true"){
+            document.getElementById("vaultLedger").classList.add("unlocked");
+        }
+        if(localStorage.getItem("vaultCharter") === "true"){
+            document.getElementById("vaultCharter").classList.add("unlocked");
+        }
+        if(localStorage.getItem("vaultPen") === "true"){
+            document.getElementById("vaultPen").classList.add("unlocked");
+        }
+    }
+  
+// Start game loop: music + timer + first question
     initializeRunForMode(gameMode);
     safePlay(bgMusic);
-    startTime = Date.now();
+    finalElapsedTimeMs=null;startTime=Date.now(); 
     loadQuestion();
 }
 
@@ -5163,44 +5033,41 @@ function showCustodianSuspenseIntro(){
         </div>
     `;
 
-    scheduleForCurrentRun(() => {
+    setTimeout(() => {
         showCustodianIntro(1);
     }, 5000);
 }
 	 
 
 function resetRunStateForNewMode(){
-    stopTimedModeClock();
-    timedModeEndTime = null;
-    room = 1;
-    bossHealth = 3;
-    bossPool = [];
-    currentQuestion = null;
+    room=1;
+	bossHealth=3;
+	bossPool=[];
     if(typeof calcBag !== "undefined") calcBag = [];
-    bossCheckpoint = 1;
-    correctAnswers = 0;
-    totalAttempts = 0;
-    maxStreak = 0;
-    streak = 0;
-    conceptMemory = {};
-    masteryState = { byTag: {}, byObjective: {}, bySkill: {}, recent: [] };
-    adaptiveMode = "support";
-    tagHistory = [];
-    lastTypes = [];
-    rapidGuessHistory = [];
-    rapidGuessWarnings = 0;
-    rapidGuessLocked = false;
-    timedHighestRoom = 1;
-    timedSetbacks = 0;
-    bossMistakeCountThisRun = 0;
+	bossCheckpoint=1;
+	correctAnswers=0;
+	totalAttempts=0;
+	maxStreak=0;
+	streak=0;
+	conceptMemory={};
+	masteryState={byTag:{},byObjective:{},bySkill:{},recent:[]};
+	adaptiveMode="support";
+	tagHistory=[];
+	lastTypes=[];
+	rapidGuessHistory=[];
+	rapidGuessWarnings=0;
+	rapidGuessLocked=false;
+	timedHighestRoom=1;
+	timedSetbacks=0;
+	bossMistakeCountThisRun = 0;
     bossesDefeatedThisRun = 0;
     resumedSavedRunThisSession = false;
     resetScoreAttackState();
-    chancellorIntroPlayed = false;
-    resetRemediationState();
-    questionHistory = { easy: [], medium: [], hard: [], elite: [], legendary: [], calculation: [], easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: [] };
-    usedQuestions = { easy: [], medium: [], hard: [], elite: [], legendary: [], easyBoss: [], mediumBoss: [], finalBoss: [], legendaryBoss: [] };
-}
+	chancellorIntroPlayed=false;
+	resetRemediationState();
+	    questionHistory={easy:[],medium:[],hard:[],elite:[],legendary:[],calculation:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
+	    usedQuestions={easy:[],medium:[],hard:[],elite:[],legendary:[],easyBoss:[],mediumBoss:[],finalBoss:[],legendaryBoss:[]};
+	}
 
 function initializeRunForMode(mode){
     gameMode = mode || "standard";
@@ -5296,7 +5163,6 @@ function endTimedModeRun(){
         game: "The Exchange Citadel",
         event: "timed_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -5306,7 +5172,7 @@ function endTimedModeRun(){
         responseTime: 0,
         attempt: totalAttempts,
         streak: streak,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: "timed_complete",
         totalTime: timedModeDurationMs,
         accuracy: accuracy / 100,
@@ -5332,7 +5198,8 @@ function endTimedModeRun(){
     `;
 
     document.getElementById("answers").innerHTML = `
-        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
+<button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartTimedMode()">Retry Timed Trial</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
@@ -5369,18 +5236,6 @@ function getDifficultyForMode(){
 // Allows pressing Enter to start the game
 // Improves usability, does not affect logic
 // =============================================
-document.getElementById("emailInput").addEventListener("keypress", function(event) {
-    if (event.key === "Enter") {
-        event.preventDefault();
-
-        if(hasSavedGame("standard")){
-            continueSavedRun();
-        } else {
-            showModeSelect();
-        }
-    }
-});
-
 // =============================================
 // AREA NAMING SYSTEM — SAFE TO CUSTOMIZE (WITH RULES)
 // =============================================
@@ -5562,91 +5417,41 @@ if(!questionBanks.legendaryBoss || questionBanks.legendaryBoss.length === 0){
     questionBanks.legendaryBoss = questionBanks.finalBoss || questionBanks.mediumBoss || questionBanks.easyBoss || [];
 }
 
-function getDisplayedChoiceKey(option){
-    const displayed = String(option ?? "").trim().replace(/\s+/g, " ");
-    const numericMatch = displayed.match(/^([+-]?)(\$?)(\d[\d,]*(?:\.\d+)?)(%?)$/);
-
-    if(numericMatch){
-        const signPrefix = numericMatch[1] || "";
-        const currency = numericMatch[2] || "";
-        const numericValue = Number(`${signPrefix}${numericMatch[3].replace(/,/g, "")}`);
-        const percent = numericMatch[4] || "";
-
-        if(Number.isFinite(numericValue)){
-            return `numeric:${currency}:${numericValue}:${percent}`;
-        }
-    }
-
-    return `text:${displayed}`;
-}
-
-function normalizeQuestionChoices(question){
-    if(!question || !Array.isArray(question.options)) return question;
-
-    const correct = question.options[question.a];
-    const correctKey = getDisplayedChoiceKey(correct);
-    const seen = new Set([correctKey]);
-    const options = [correct];
-
-    question.options.forEach((option, index) => {
-        if(index === question.a) return;
-
-        const key = getDisplayedChoiceKey(option);
-        if(!seen.has(key)){
-            seen.add(key);
-            options.push(option);
-        }
-    });
-
-    if(options.length !== question.options.length){
-        console.warn(`Duplicate displayed choices removed from question ${question.id ?? "unknown"}.`);
-    }
-
-    return { ...question, options, a: 0 };
-}
-
-function hasUniqueDisplayedChoices(question){
-    if(!question || !Array.isArray(question.options)) return false;
-
-    const correctKey = getDisplayedChoiceKey(question.options[question.a]);
-    const displayedKeys = question.options.map(getDisplayedChoiceKey);
-
-    return displayedKeys.length === 4
-        && new Set(displayedKeys).size === displayedKeys.length
-        && displayedKeys.filter(key => key === correctKey).length === 1;
-}
-
 function shuffleOptions(question){
-    question = normalizeQuestionChoices(question);
-    let q = {
-        id: question.id,
-        q: question.q,
-        options: [...question.options],
-        a: question.a,
-        feedback: question.feedback,
-        hint: question.hint,
-        tag: question.tag,
-        type: question.type,
-        objective: question.objective,
-        image: question.image,
-        difficulty: question.difficulty,
-        conceptCluster: question.conceptCluster,
-        primarySkill: question.primarySkill,
-        secondarySkills: question.secondarySkills ? [...question.secondarySkills] : [],
-        repairSkill: question.repairSkill,
-        commonError: question.commonError
+    const q = {
+        ...question,
+        options: [...(question.options || [])],
+        secondarySkills: [...(question.secondarySkills || [])]
     };
 
-    let correct = q.options[q.a];
-    const correctKey = getDisplayedChoiceKey(correct);
+    const correctText = Number.isInteger(question.a)
+        ? question.options[question.a]
+        : null;
 
     for(let i = q.options.length - 1; i > 0; i--){
-        let j = Math.floor(Math.random() * (i + 1));
+        const j = Math.floor(Math.random() * (i + 1));
         [q.options[i], q.options[j]] = [q.options[j], q.options[i]];
     }
 
-    q.a = q.options.findIndex(option => getDisplayedChoiceKey(option) === correctKey);
+    if(correctText !== null){
+        q.a = q.options.indexOf(correctText);
+    } else {
+        delete q.a;
+    }
+
     return q;
+}
+
+async function isQuestionAnswerCorrect(question, selectedIndex){
+    if(!question || !Array.isArray(question.options)) return false;
+    const selectedOptionText = question.options[selectedIndex] ?? "";
+    if(typeof question.aHash === "string"){
+        if(typeof isPublishedAnswerCorrect !== "function"){
+            throw new Error("Published answer verification helper is missing.");
+        }
+        return isPublishedAnswerCorrect(question, selectedOptionText);
+    }
+    return Number.isInteger(question.a) && selectedIndex === question.a;
 }
 
 // =============================================
@@ -5992,7 +5797,15 @@ if (isBoss) {
         }
 
         if(diff === "legendaryBoss"){
-            bossPool = pickBossScaffold(bank, diff, chosenObjective);
+            const unusedCandidates = candidatePool.filter(q =>
+                q && !(usedQuestions[diff] || []).includes(q.id)
+            );
+
+            const sourcePool = unusedCandidates.length >= 3
+                ? unusedCandidates
+                : candidatePool;
+
+            bossPool = shuffle([...sourcePool]).slice(0, 3);
         } else {
             let groups = getScaffoldedBossGroups(candidatePool);
 
@@ -6109,7 +5922,7 @@ if (isBoss) {
         }
         if(!currentQuestion.type) currentQuestion.type = "synthesis";
         wizardSpeak(getWizardLine(currentQuestion.type));
-        bossMsg.innerText = isBossRoomForMode(room + 1)
+        bossMsg.innerText = (room === 9 || room === 19 || room === 29)
             ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️"
             : "";
         bossMsg.style.color = "#f97316";
@@ -6192,7 +6005,7 @@ if(currentQuestion.image){
     wizardSpeak(wizardText);
 
     // --- UI ---
-    bossMsg.innerText = isBossRoomForMode(room + 1)
+    bossMsg.innerText = ((gameMode === "standard" || gameMode === "legendary") && (room === 9 || room === 19 || room === 29))
         ? (gameMode === "legendary" ? "⚠️ LEGENDARY BOSS DETECTED IN NEXT ROOM ⚠️" : "⚠️ DANGER: BOSS DETECTED IN NEXT ROOM ⚠️")
         : "";
     bossMsg.style.color = "#ef4444";
@@ -6208,10 +6021,10 @@ if(currentQuestion.image){
     
   // --- Final Boss Entrance Shake ---
     if(diff === "finalBoss"){
-        scheduleForCurrentRun(() => {
-            triggerBossShake();
-            scheduleForCurrentRun(triggerBossShake, 450);
-        }, 200);
+        setTimeout(()=>{
+        triggerBossShake();
+        setTimeout(triggerBossShake,450);
+        },200);
     }
 }
 
@@ -6239,7 +6052,8 @@ if(currentQuestion.image){
 //
 // This is the bridge between UI and engine.
 // =============================================     
-function displayQuestion() {
+function displayQuestion(){
+answerSubmissionPending=false;
     const optionsElement = document.getElementById("answers");
     optionsElement.innerHTML = "";
 
@@ -6317,21 +6131,16 @@ function checkRapidGuessing(isCorrect, responseTime){
 // Check for artifact names and CHANGE
      
 async function answer(choice) {
-    const answerSessionId = runSessionId;
+if(answerSubmissionPending||rapidGuessLocked)return;answerSubmissionPending=true;setAnswerButtonsDisabled(true);const responseTime=Date.now()-questionStartTime;let isCorrect=false;try{isCorrect=await isQuestionAnswerCorrect(currentQuestion,choice);}catch(error){console.error(error);answerSubmissionPending=false;setAnswerButtonsDisabled(false);showGameModal({title:'Answer Check Failed',text:'The Exchange Citadel could not verify this answer. Reload the game files and try again.',confirmText:'Continue'});return;}totalAttempts++;
 
     // --- GLOBAL MEMORY DECAY ---
     for(let tag in conceptMemory){
     conceptMemory[tag] *= 0.95;
     }
    
-    totalAttempts++;
-   
     const isBossRoom = isBossRoomForMode(room);
     const msgElement = document.getElementById("message");
     const wizard = document.getElementById("wizardImage");
-const isCorrect = (choice === currentQuestion.a);
-const responseTime = Date.now() - questionStartTime;
-
 // =============================================
 // RAPID GUESSING LOCKOUT
 // Catches button-mashing before it pollutes mastery,
@@ -6356,11 +6165,11 @@ if(rapidGuess.triggered && !rapidGuessLocked){
     sendGameData({
         runID: runID,
         game: "The Exchange Citadel",
-        event: "rapid_guessing",
+        event: "question",
         user: username || "anonymous",
-        email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
+selectedIndex: choice,
         correct: isCorrect ? 1 : 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
@@ -6368,7 +6177,7 @@ if(rapidGuess.triggered && !rapidGuessLocked){
         responseTime: responseTime,
         attempt: totalAttempts ?? 0,
         streak: streak ?? 0,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: adaptiveMode,
         score: scoreAttackScore,
         bestScore: scoreAttackBestScore
@@ -6378,7 +6187,7 @@ if(rapidGuess.triggered && !rapidGuessLocked){
     // Same question. No movement. No reward.
     rapidGuessHistory = [];
 
-    scheduleForCurrentRun(() => {
+    setTimeout(() => {
         rapidGuessLocked = false;
         questionStartTime = Date.now();
         displayQuestion();
@@ -6420,9 +6229,9 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
 		game: "The Exchange Citadel",
         event: "question",
         user: username || "anonymous",
-		email: studentEmail || "",
         room: room,
         questionId: currentQuestion.id || 0,
+selectedIndex: choice,
         correct: isCorrect ? 1 : 0,
         tag: currentQuestion.tag || "none",
         type: currentQuestion.type || "none",
@@ -6430,7 +6239,7 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         responseTime: responseTime,
 	    attempt: totalAttempts ?? 0,
 		streak: streak ?? 0,
-		elapsedTime: startTime ? (Date.now() - startTime) : 0,
+		elapsedTime: getElapsedTimeMs(),
         adaptiveMode: adaptiveMode
     });
 
@@ -6440,7 +6249,6 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
     if(modeUsesScoreAttack()){
         setAnswerButtonsDisabled(true);
         await waitForScoreAttackResolve(isCorrect);
-        if(answerSessionId !== runSessionId) return;
     }
 
     // =============================================
@@ -6465,9 +6273,9 @@ recordAdaptiveAttempt(currentQuestion, isCorrect, responseTime);
         wizardSpeak(getWizardFeedback("correct"));
        
         wizard.style.transform = "scale(1.1)";
-        scheduleForCurrentRun(() => {
-            wizard.style.transform = "";
-        }, 200);
+        setTimeout(()=>{
+        wizard.style.transform = "";
+        },200);
 
 		correctAnswers++;
 		recordMacroCorrectAnswer();
@@ -6535,7 +6343,7 @@ if(remediationState.active){
     room = returnRoom;
     saveGameState();
 
-    scheduleForCurrentRun(loadQuestion, TIMING.normal);
+    setTimeout(loadQuestion, TIMING.normal);
     return;
 }
 
@@ -6568,7 +6376,7 @@ if(remediationState.active){
         triggerBossShake();
         
         if (bossHealth > 0) {
-           scheduleForCurrentRun(loadQuestion, TIMING.boss);
+           setTimeout(loadQuestion, TIMING.boss);
            return;
         }
          // Boss defeated
@@ -6578,7 +6386,6 @@ if(remediationState.active){
 			game: "The Exchange Citadel",
             event: "boss_defeated",
             user: username,
-			email: studentEmail,
             room: room
          });
            
@@ -6620,6 +6427,7 @@ if(modeAllowsRealmProgress()){
    room++;
    timedHighestRoom = Math.max(timedHighestRoom, Math.min(room, 30));
    saveGameState();
+   if(modeAllowsRealmProgress()) localStorage.setItem("exchangeCitadelRoom", String(room));
 
    if(gameMode === "timed" && timedModeEndTime && Date.now() >= timedModeEndTime){
        endTimedModeRun();
@@ -6647,9 +6455,9 @@ if (isBossRoom) {
     wizardSpeak(getWizardFeedback("wrong"));
 
     wizard.style.transform = "translateX(-6px)";
-    scheduleForCurrentRun(() => {
+    setTimeout(() => {
         wizard.style.transform = "translateX(6px)";
-        scheduleForCurrentRun(() => {
+        setTimeout(() => {
             wizard.style.transform = "";
         }, 100);
     }, 100);
@@ -6870,10 +6678,10 @@ function showHallwayTransition(feedback){
 
     document.getElementById("srAnnouncements").innerText =`Correct. ${feedback}`;
     
-    scheduleForCurrentRun(() => {
-        overlay.classList.remove("active");
-        loadQuestion();
-    }, 3200);
+    setTimeout(()=>{
+    overlay.classList.remove("active");
+    loadQuestion();
+    },3200);
 }
 
 // Displays artifact reward popup
@@ -7058,7 +6866,7 @@ function handleLegendaryVictory(){
         sfxVictory.play();
     }
 
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs=freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
     const verificationCode = generateCode(username + "|LEGENDARY", accuracy, maxStreak, totalTimeMs);
@@ -7068,7 +6876,6 @@ function handleLegendaryVictory(){
         game: "The Exchange Citadel",
         event: "legendary_complete",
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -7111,7 +6918,8 @@ function handleLegendaryVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
-        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
+<button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
 
@@ -7137,7 +6945,6 @@ if(gameMode === "timed"){
         game: "The Exchange Citadel",
         event: `${gameMode}_complete`,
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -7147,9 +6954,9 @@ if(gameMode === "timed"){
         responseTime: 0,
         attempt: totalAttempts,
         streak,
-        elapsedTime: startTime ? (Date.now() - startTime) : 0,
+        elapsedTime: getElapsedTimeMs(),
         adaptiveMode: `${gameMode}_complete`,
-        totalTime: startTime ? (Date.now() - startTime) : 0,
+        totalTime: getElapsedTimeMs(),
         accuracy: accuracy / 100,
         maxStreak,
         totalAttempts
@@ -7170,7 +6977,8 @@ if(gameMode === "timed"){
     `;
 
     document.getElementById("answers").innerHTML = `
-        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
+<button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
 
@@ -7257,7 +7065,7 @@ function generateCode(name, acc, streak, total){
 function handleScoreAttackVictory(){
     stopTimedModeClock();
 
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs=freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0
         ? Math.round((correctAnswers / totalAttempts) * 100)
@@ -7270,7 +7078,6 @@ function handleScoreAttackVictory(){
         game: "The Exchange Citadel",
         event: "score_complete",
         user: username,
-        email: studentEmail,
         room: room,
         questionId: 0,
         correct: 1,
@@ -7319,7 +7126,8 @@ function handleScoreAttackVictory(){
     `;
 
     document.getElementById("answers").innerHTML = `
-        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
+        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
+<button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
         <button class="continue-btn" onclick="restartScoreAttackMode()">Retry Score Attack</button>
         <button class="continue-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
     `;
@@ -7366,7 +7174,7 @@ function handleVictory() {
         sfxVictory.play();
     }
 
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs=freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const accuracy = totalAttempts > 0 ? Math.round((correctAnswers / totalAttempts) * 100) : 0;
     const verificationCode = generateCode(username, accuracy, maxStreak, totalTimeMs);
@@ -7376,7 +7184,6 @@ function handleVictory() {
         game: "The Exchange Citadel",
         event: "complete",
         user: username,
-        email: studentEmail,
         room,
         questionId: 0,
         correct: 1,
@@ -7826,7 +7633,7 @@ function getMasteryReportModeName(){
 }
 
 function getMasteryReportData(){
-    const totalTimeMs = startTime ? (Date.now() - startTime) : 0;
+    const totalTimeMs=freezeCompletionTime();
     const accuracy = totalAttempts > 0 ? correctAnswers / totalAttempts : 0;
     const tagEntries = getEntriesFromBuckets(masteryState.byTag || {}, "tag");
     const objectiveEntries = getEntriesFromBuckets(masteryState.byObjective || {}, "objective");
@@ -7912,8 +7719,87 @@ function getMasteryReportData(){
         noMajorWeakness,
         behavior,
         verdict,
-        nextSteps
+        nextSteps,
+        recommendations: getRecommendedReviewResources({ weakestObjectives })
     };
+}
+
+
+let latestReviewMaterialsHTML = "";
+
+function getRecommendedReviewResources(report){
+    const catalog = window.INSTRUCTIONAL_RESOURCES;
+    if(!catalog || !Array.isArray(catalog.resources)) return [];
+
+    const resourceById = new Map(catalog.resources.map(resource => [resource.id, resource]));
+    const selectedIds = [];
+    const addIds = ids => (ids || []).forEach(id => {
+        if(resourceById.has(id) && !selectedIds.includes(id)) selectedIds.push(id);
+    });
+    const objectiveIds = (report && report.weakestObjectives || [])
+        .map(entry => String(entry && entry.key || "").match(/LO\d+\.\d+/i))
+        .filter(Boolean)
+        .map(match => match[0].toUpperCase());
+
+    objectiveIds.forEach(objectiveId => {
+        const mapping = catalog.objectiveMappings && catalog.objectiveMappings[objectiveId];
+        if(mapping){
+            addIds(mapping.resourceIds);
+            addIds(mapping.fallbackResourceIds);
+        }
+    });
+
+    if(!selectedIds.length){
+        Object.values(catalog.fallbackResourceIds || {}).forEach(addIds);
+    }
+
+    return selectedIds
+        .map(id => resourceById.get(id))
+        .filter(Boolean)
+        .slice(0, Number(catalog.settings && catalog.settings.maximumRecommendations) || 3);
+}
+
+function renderRecommendedReview(report){
+    const resources = report.recommendations || getRecommendedReviewResources(report);
+    if(!resources.length){
+        return '<div class="mastery-section"><h3>Recommended Review</h3><p class="mastery-empty">No student-facing review materials are mapped for this run yet.</p></div>';
+    }
+
+    return '<div class="mastery-section" id="recommendedReviewSection">'
+        + '<h3>Recommended Review</h3>'
+        + '<p class="mastery-row-meta">These materials are matched to the learning-objective signals above.</p>'
+        + resources.map(resource => '<article class="mastery-row" style="display:block;margin:10px 0;padding:14px;">'
+            + '<div class="mastery-row-main"><span class="mastery-row-name">' + escapeHTML(resource.title) + '</span>'
+            + '<span class="mastery-row-score" style="font-size:.78em">' + escapeHTML(resource.typeLabel || resource.type) + '</span></div>'
+            + '<span class="mastery-row-meta">' + escapeHTML(resource.description) + '</span><br>'
+            + '<a class="continue-btn" style="display:inline-block;margin-top:10px;text-decoration:none;" href="' + escapeHTML(resource.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(resource.actionLabel || 'Open Resource') + '</a>'
+            + '</article>').join('')
+        + '<button class="continue-btn secondary-modal-btn" onclick="showReviewMaterialsScreen()">Review Materials</button>'
+        + '</div>';
+}
+
+function showReviewMaterialsScreen(){
+    const gameBox = document.getElementById("gameBox");
+    if(!gameBox) return;
+    latestReviewMaterialsHTML = gameBox.innerHTML;
+    const report = getMasteryReportData();
+    const resources = report.recommendations || getRecommendedReviewResources(report);
+    const cards = resources.length ? resources.map(resource => '<article class="mastery-section" style="margin:12px 0;">'
+        + '<h3>' + escapeHTML(resource.title) + '</h3>'
+        + '<p class="mastery-row-meta">' + escapeHTML(resource.typeLabel || resource.type) + ' · ' + escapeHTML(resource.description) + '</p>'
+        + '<a class="continue-btn" style="display:inline-block;text-decoration:none;" href="' + escapeHTML(resource.url) + '" target="_blank" rel="noopener noreferrer">' + escapeHTML(resource.actionLabel || 'Open Resource') + '</a>'
+        + '</article>').join('') : '<p class="mastery-empty">No mapped student-facing materials are available for this report.</p>';
+    gameBox.innerHTML = '<div id="reviewMaterialsScreen" class="mastery-report-screen">'
+        + '<h1 class="mastery-report-title">REVIEW MATERIALS</h1>'
+        + '<p class="mastery-report-subtitle">Focused materials selected from this game\'s local course catalog.</p>'
+        + cards
+        + '<div class="mastery-actions"><button class="continue-btn secondary-modal-btn" onclick="restoreMasteryReportFromMaterials()">Back to Mastery Report</button></div>'
+        + '</div>';
+}
+
+function restoreMasteryReportFromMaterials(){
+    const gameBox = document.getElementById("gameBox");
+    if(gameBox && latestReviewMaterialsHTML) gameBox.innerHTML = latestReviewMaterialsHTML;
 }
 
 function showMasteryReportScreen(){
@@ -8007,8 +7893,11 @@ function showMasteryReportScreen(){
                 ${report.nextSteps.map(step => `<div class="mastery-row"><span class="mastery-row-name">${escapeHTML(step)}</span></div>`).join("")}
             </div>
 
+            ${renderRecommendedReview(report)}
+
             <div class="mastery-actions">
-                <button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
+                <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
+<button class="continue-btn" onclick="copyMasteryReport()">Copy Report</button>
                 ${report.noMajorWeakness && gameMode !== "legendary" ? `<button class="continue-btn" onclick="startSelectedMode('legendary')">Enter Legendary Mode</button>` : ""}
                 <button class="continue-btn secondary-modal-btn" onclick="restoreResultsScreen()">Back to Results</button>
                 <button class="continue-btn secondary-modal-btn" onclick="returnToModeSelectFromRun()">Choose Another Citadel Run</button>
@@ -8054,7 +7943,10 @@ function copyMasteryReport(){
         ...(report.hasSkillWeakness && report.weakestSkills.length ? report.weakestSkills.map(item => `- ${item.label}: ${formatPercent(item.accuracy)} (${item.correct}/${item.attempts})`) : ["- No major skill weakness detected."]),
         "",
         "Next Moves:",
-        ...report.nextSteps.map(step => `- ${step}`)
+        ...report.nextSteps.map(step => `- ${step}`),
+        "",
+        "Recommended Review:",
+        ...(report.recommendations || getRecommendedReviewResources(report)).map(resource => `- ${resource.title} (${resource.typeLabel || resource.type}): ${resource.url}`)
     ].filter(line => line !== null);
 
     const text = lines.join("\n");
@@ -8117,7 +8009,7 @@ function copyMasteryReport(){
 // =============================================
 
 function copyResults() {
-    const totalTimeMs = Date.now() - startTime;
+    const totalTimeMs=freezeCompletionTime();
     const timeString = formatTime(totalTimeMs);
     const code = document.getElementById("vCode").innerText;
     const accuracy = Math.round((correctAnswers / totalAttempts) * 100);
@@ -8144,46 +8036,21 @@ function copyResults() {
         }, 2000);
     });
 }
-function sendGameData(data) {
-  const payload = {
-    timestamp: new Date().toISOString(),
-    runID: data.runID || localStorage.getItem("gauntletRunID") || "",
-    token: data.token || "",
-    version: "ExchangeCitadel-ms-telemetry-v3.5",
-    userAgent: navigator.userAgent || "",
-    game: data.game || "The Exchange Citadel",
-	mode: data.mode || gameMode || "standard",
-    event: data.event || "",
-    user: data.user || username || "anonymous",
-	email: studentEmail || "",  
-    room: Number(data.room ?? 0),
-    questionId: Number(data.questionId ?? data.question ?? 0),
-    correct: Number(data.correct ?? 0),
-    tag: data.tag || "",
-    type: data.type || "",
-    objective: data.objective || "",
-    responseTime: Number(data.responseTime ?? data.responseTimeMs ?? 0),
-    attempt: Number(data.attempt ?? 0),
-    streak: Number(data.streak ?? 0),
-    elapsedTime: Number(data.elapsedTime ?? data.elapsedTimeMs ?? 0),
-    adaptiveMode: data.adaptiveMode || adaptiveMode || "",
-    totalTime: Number(data.totalTime ?? data.totalTimeMs ?? 0),
-    accuracy: Number(data.accuracy ?? 0),
-    maxStreak: Number(data.maxStreak ?? 0),
-    totalAttempts: Number(data.totalAttempts ?? data.attempts ?? 0),
-    verificationCode: data.verificationCode || data.code || "",
-    score: Number(data.score ?? scoreAttackScore ?? 0),
-    bestScore: Number(data.bestScore ?? scoreAttackBestScore ?? 0),
-    scoreEvents: data.scoreEvents || ""
-  };
-
-  fetch("https://default8de80de86d8a47cbb5bc7fb9b5bf1c.64.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/239b526e4b9f4c1997a009d53a32267a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=qQhDuP6P3K8mxdCKyBaMw6S0IPd8rBn8BUAEi_CtlxQ", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify(payload)
-  }).catch(err => console.log("Telemetry failed:", err));
+const TELEMETRY_PREFIX="exchangeCitadelTelemetry_";
+const TELEMETRY_VERSION="ExchangeCitadel-local-telemetry-v4-hash-ready";
+const GAME_VERSION="Exchange-Citadel-2026.07.24.1";
+const TELEMETRY_LATEST_RUN_KEY="exchangeCitadelLatestTelemetryRunID";
+const TELEMETRY_FILENAME_PREFIX="exchange-citadel";
+const GAME_TITLE="The Exchange Citadel";
+const TELEMETRY_COLUMNS = ["eventID","timestamp","telemetryVersion","gameVersion","runID","game","mode","event","room","questionID","questionVersion","difficulty","selectedIndex","correct","rapidGuessing","tag","type","objective","responseTimeMs","attempt","streak","elapsedTimeMs","adaptiveMode","remediationStage","priorExposureCount","firstExposure","score","bestScore","totalTimeMs","accuracy","maxStreak","totalAttempts","verificationCode"];
+function createTelemetryEventID(){ return Date.now().toString(36) + "-" + Math.random().toString(36).slice(2,10); }
+function readLocalTelemetry(id = runID){ try { const rows = JSON.parse(localStorage.getItem(TELEMETRY_PREFIX + (id || "unassigned")) || "[]"); return Array.isArray(rows) ? rows : []; } catch(error) { console.warn("Local telemetry could not be read:", error); return []; } }
+function escapeCsvValue(value){ const text = String(value ?? ""); return /[",\r\n]/.test(text) ? '"' + text.replace(/"/g, '""') + '"' : text; }
+function downloadTelemetryCsv(){ const id = runID || localStorage.getItem(TELEMETRY_LATEST_RUN_KEY) || ""; const records = readLocalTelemetry(id); const csv = [TELEMETRY_COLUMNS.join(","), ...records.map(record => TELEMETRY_COLUMNS.map(column => escapeCsvValue(record[column])).join(","))].join("\r\n"); const blob = new Blob([csv], {type:"text/csv;charset=utf-8"}); const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = TELEMETRY_FILENAME_PREFIX + "-" + (id || "game-data") + ".csv"; document.body.appendChild(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(link.href), 0); }
+function sendGameData(data = {}){
+ const eventName=String(data.event||""), response=eventName==="question", completion=/(?:^|_)complete$/.test(eventName), activeRunID=data.runID||runID||localStorage.getItem("gauntletRunID")||"", records=readLocalTelemetry(activeRunID), questionID=Number(data.questionId ?? data.question ?? 0);
+ const record={eventID:createTelemetryEventID(),timestamp:new Date().toISOString(),telemetryVersion:TELEMETRY_VERSION,gameVersion:GAME_VERSION,runID:activeRunID,game:data.game||GAME_TITLE,mode:data.mode||gameMode||"standard",event:eventName,room:Number(data.room??room??0),questionID,questionVersion:Number(data.questionVersion??currentQuestion?.version??1),difficulty:data.difficulty||currentQuestion?.difficulty||"",selectedIndex:response?Number(data.selectedIndex??-1):-1,correct:response?Number(data.correct??0):0,rapidGuessing:response?Number(data.rapidGuessing??0):0,tag:data.tag||"",type:data.type||"",objective:data.objective||"",responseTimeMs:Number(data.responseTime??data.responseTimeMs??0),attempt:Number(data.attempt??totalAttempts??0),streak:Number(data.streak??streak??0),elapsedTimeMs:completion?Number(data.totalTime??data.totalTimeMs??getElapsedTimeMs()):Number(data.elapsedTime??data.elapsedTimeMs??getElapsedTimeMs()),adaptiveMode:data.adaptiveMode||adaptiveMode||"",remediationStage:data.remediationStage||remediationState?.stage||"",priorExposureCount:questionID>0?records.filter(item=>Number(item.questionID)===questionID&&item.event==="question").length:0,firstExposure:questionID>0&&records.every(item=>Number(item.questionID)!==questionID)?1:0,score:Number(data.score??scoreAttackScore??0),bestScore:Number(data.bestScore??scoreAttackBestScore??0),totalTimeMs:Number(data.totalTime??data.totalTimeMs??finalElapsedTimeMs??0),accuracy:Number(data.accuracy??(totalAttempts?correctAnswers/totalAttempts:0)),maxStreak:Number(data.maxStreak??maxStreak??0),totalAttempts:Number(data.totalAttempts??totalAttempts??0),verificationCode:data.verificationCode||data.code||""};
+ records.push(record); localStorage.setItem(TELEMETRY_PREFIX + activeRunID, JSON.stringify(records.slice(-1500))); localStorage.setItem(TELEMETRY_LATEST_RUN_KEY,activeRunID); return record;
 }
    
 // =====================================================
@@ -8202,6 +8069,7 @@ function sendGameData(data) {
 </script>
 </body>
 </html>
+
 
 
 
