@@ -3072,14 +3072,18 @@ const finalBossMusic = new Audio('final_boss_music.mp3');
 finalBossMusic.loop = true;
 finalBossMusic.volume = 0.12; // slightly louder, it's the final fight    
     
-const sfxMilestone = createSilentAudio();
+const sfxMilestone = new Audio('streak.wav');
 const sfxVictory = createSilentAudio();
 const sfxBossHit = createSilentAudio();
       sfxBossHit.volume = 0.5;
-const sfxCorrect = createSilentAudio();
+const sfxCorrect = new Audio('ding.wav');
       sfxCorrect.volume = 0.25;
-const sfxWrong = createSilentAudio();
+const sfxWrong = new Audio('mistake.wav');
       sfxWrong.volume = 0.4;
+
+[sfxMilestone, sfxCorrect, sfxWrong].forEach(audio => {
+  audio.preload = 'auto';
+});
     
 const hallwayImages = [
     "hallway1.webp",
@@ -3112,6 +3116,7 @@ function toggleGameSound(){
   updateSoundToggle();
 
   if(soundEnabled){
+      unlockGameSfx();
       resumeCurrentMusic();
   } else {
       pauseAllGameMusic();
@@ -3128,6 +3133,58 @@ function restoreSoundSetting(){
 }
 
 restoreSoundSetting();
+
+// Mobile browsers require sound effects to be authorized by a direct user gesture.
+// Prime only the three known SFX files; optional absent sounds remain silent fallbacks.
+let gameSfxUnlocked = false;
+
+function unlockGameSfx(){
+  if(gameSfxUnlocked || !soundEnabled) return;
+
+  gameSfxUnlocked = true;
+
+  [sfxMilestone, sfxCorrect, sfxWrong].forEach(audio => {
+    if(!audio || typeof audio.play !== "function") return;
+
+    const originalVolume = audio.volume;
+    const originalMuted = audio.muted;
+
+    try {
+      audio.muted = false;
+      audio.volume = 0;
+      audio.currentTime = 0;
+
+      const playAttempt = audio.play();
+      if(playAttempt && typeof playAttempt.then === "function"){
+        playAttempt.then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audio.volume = originalVolume;
+          audio.muted = !soundEnabled || originalMuted;
+        }).catch(error => {
+          audio.volume = originalVolume;
+          audio.muted = !soundEnabled || originalMuted;
+          gameSfxUnlocked = false;
+          console.warn("SFX unlock blocked:", audio.src, error);
+        });
+      } else {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.volume = originalVolume;
+        audio.muted = !soundEnabled || originalMuted;
+      }
+    } catch(error) {
+      audio.volume = originalVolume;
+      audio.muted = !soundEnabled || originalMuted;
+      gameSfxUnlocked = false;
+      console.warn("SFX unlock blocked:", audio.src, error);
+    }
+  });
+}
+
+document.addEventListener("pointerdown", unlockGameSfx, { capture: true });
+document.addEventListener("keydown", unlockGameSfx, { capture: true });
+
 
 
 // =============================================
@@ -3194,6 +3251,20 @@ function safePlay(audio){
         console.warn("Audio play blocked:", error);
     });
 }
+
+function safePlaySfx(audio){
+    if(!audio || !soundEnabled) return Promise.resolve();
+
+    try {
+        audio.pause();
+        audio.currentTime = 0;
+    } catch(error) {
+        console.warn("SFX reset failed:", audio?.src || "unknown", error);
+    }
+
+    return safePlay(audio);
+}
+
 
 function resumeCurrentMusic(){
     if(typeof currentMusic !== "undefined"){
@@ -6395,7 +6466,7 @@ selectedIndex: choice,
 
         sfxCorrect.pause();
         sfxCorrect.currentTime = 0;
-        sfxCorrect.play().catch(()=>{});
+        safePlaySfx(sfxCorrect);
     }
         wizardSpeak(getWizardFeedback("correct"));
        
@@ -6577,7 +6648,7 @@ if (isBossRoom) {
 }
 
     sfxWrong.currentTime = 0;
-    sfxWrong.play().catch(() => {});
+    safePlaySfx(sfxWrong);
 
     wizardSpeak(getWizardFeedback("wrong"));
 
@@ -6759,7 +6830,7 @@ function handleStreakVisuals() {
 
     if (streakMsg) {
         sfxMilestone.currentTime = 0;
-        sfxMilestone.play();
+        safePlaySfx(sfxMilestone);
         document.getElementById("streakDisplay").innerHTML = streakMsg;
         document.getElementById("streakDisplay").style.color = streakColor;
     } else if (streak > 0) {
