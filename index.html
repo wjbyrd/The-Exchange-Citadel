@@ -5179,6 +5179,9 @@ function endTimedModeRun(){
     if(gameMode !== "timed") return;
 
     stopTimedModeClock();
+    // Timed Trial is a fixed-duration mode. Freeze the report at exactly 10:00
+    // instead of letting the clock keep running while the results screen is open.
+    finalElapsedTimeMs = timedModeDurationMs;
     gameMode = "timed-complete";
 
     const accuracy = totalAttempts > 0
@@ -5324,7 +5327,7 @@ const wizardLines = {
         "Separate the short run from the long run."
     ],
     trap: [
-        "This is where lazy answers die.",
+        "Separate what must be true from what policy may change.",
         "Do not fall for the obvious trap.",
         "The wording is trying to bait you.",
         "Check the assumption before you answer.",
@@ -6080,8 +6083,39 @@ if(currentQuestion.image){
 //
 // This is the bridge between UI and engine.
 // =============================================     
+function renderCurrentQuestionImage(question = currentQuestion){
+    const imageBox = document.getElementById("questionImageBox");
+    if(!imageBox) return;
+
+    imageBox.replaceChildren();
+    imageBox.style.display = "none";
+
+    const candidates = [
+        question?.image,
+        question?.imagePath,
+        question?.graphImage
+    ];
+    const imageSrc = candidates.find(value => typeof value === "string" && value.trim());
+    if(!imageSrc) return;
+
+    const img = document.createElement("img");
+    img.src = imageSrc;
+    img.alt = question?.imageAlt || question?.graphAlt || "Question graph";
+    img.title = "Click to enlarge";
+
+    const note = document.createElement("div");
+    note.className = "graph-zoom-note";
+    note.textContent = "Click graph to enlarge";
+
+    imageBox.append(img, note);
+    imageBox.style.display = "block";
+}
+
 function displayQuestion(){
 answerSubmissionPending=false;
+    // Every question path, including repair, bridge, and recovery retest,
+    // now refreshes the graph area from the active question record.
+    renderCurrentQuestionImage(currentQuestion);
     const optionsElement = document.getElementById("answers");
     optionsElement.innerHTML = "";
 
