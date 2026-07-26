@@ -1,4 +1,4 @@
-<!-- EXCHANGE CITADEL — NATIONAL ENGINE UPGRADE PORT 20260715_1 -->
+<!-- EXCHANGE CITADEL — NATIONAL ENGINE UPGRADE PORT 20260725 -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -3419,6 +3419,7 @@ const MACRO_PERFECT_CALIBRATION_KEY = "macroHub_perfectCalibration_complete";
 const MACRO_RETURN_AND_REBUILD_KEY = "macroHub_returnAndRebuild_complete";
 
 let gameMode = "standard";
+let runSessionId = 0;
 let timedModeDurationMs = 10 * 60 * 1000;
 let timedModeEndTime = null;
 let timedModeTimerInterval = null;
@@ -3595,6 +3596,18 @@ function modeAllowsSave(){
 
 function modeAllowsRealmProgress(){
     return gameMode === "standard";
+}
+function beginRunSession(){
+    runSessionId += 1;
+    return runSessionId;
+}
+
+function scheduleForCurrentRun(callback, delay){
+    const scheduledSessionId = runSessionId;
+    return setTimeout(() => {
+        if(scheduledSessionId !== runSessionId) return;
+        callback();
+    }, delay);
 }
 
 function getSaveKey(){
@@ -4874,8 +4887,12 @@ function returnToTitleScreen(){
 function startSelectedMode(mode){ gameMode = mode || "standard"; localStorage.setItem("exchangeCitadelCurrentMode", gameMode); const modeScreen = document.getElementById("modeSelectScreen"); if(modeScreen) modeScreen.style.display = "none"; if(gameMode === "standard"){ startGame(false); return; } resetRunStateForNewMode(); startGame(false); }
 
 function returnToModeSelectFromRun(){
+    beginRunSession();
     stopTimedModeClock();
     stopAllMusic();
+
+    const hallway = document.getElementById("hallwayTransition");
+    if(hallway) hallway.classList.remove("active");
 
     setGameControlsVisible(false);
 
@@ -4935,32 +4952,7 @@ function endTimedAttemptEarly(){
         totalAttempts: totalAttempts
     });
 
-    document.getElementById("bossMessage").innerText = "";
-    document.getElementById("formulaHint").innerText = "";
-    document.getElementById("artifactDrop").style.display = "none";
-    closeGraphLightbox();
-    const imageBox = document.getElementById("questionImageBox");
-    imageBox.innerHTML = "";
-    imageBox.style.display = "none";
-
-    document.getElementById("question").innerHTML = `
-        <span class="boss-title">TIMED TRIAL ENDED EARLY</span>
-        <div class="boss-q">
-            Actual Time: ${formatTime(actualElapsedTimeMs)}<br>
-            Room Reached: ${reachedRoom}<br>
-            Accuracy: ${accuracy}%<br>
-            Total Attempts: ${totalAttempts}<br>
-            Best Streak: ${maxStreak}<br>
-            Setbacks Taken: ${timedSetbacks}
-        </div>
-    `;
-
-    document.getElementById("answers").innerHTML = `
-        <button class="continue-btn" onclick="downloadTelemetryCsv()">Download Game Data</button>
-        <button class="continue-btn" onclick="showMasteryReportScreen()">View Mastery Report</button>
-        <button class="continue-btn" onclick="returnToModeSelectFromRun()">Return to Citadel Menu</button>
-    `;
-    document.getElementById("message").innerText = "The trial ends early. The Citadel preserves the record.";
+    returnToModeSelectFromRun();
 }
 
 	 
@@ -6329,7 +6321,8 @@ function checkRapidGuessing(isCorrect, responseTime){
 // Check for artifact names and CHANGE
      
 async function answer(choice) {
-if(answerSubmissionPending||rapidGuessLocked)return;answerSubmissionPending=true;setAnswerButtonsDisabled(true);const responseTime=Date.now()-questionStartTime;let isCorrect=false;try{isCorrect=await isQuestionAnswerCorrect(currentQuestion,choice);}catch(error){console.error(error);answerSubmissionPending=false;setAnswerButtonsDisabled(false);showGameModal({title:'Answer Check Failed',text:'The Exchange Citadel could not verify this answer. Reload the game files and try again.',confirmText:'Continue'});return;}totalAttempts++;
+    const answerSessionId = runSessionId;
+if(answerSubmissionPending||rapidGuessLocked)return;answerSubmissionPending=true;setAnswerButtonsDisabled(true);const responseTime=Date.now()-questionStartTime;let isCorrect=false;try{isCorrect=await isQuestionAnswerCorrect(currentQuestion,choice);if(answerSessionId!==runSessionId)return;}catch(error){if(answerSessionId!==runSessionId)return;console.error(error);answerSubmissionPending=false;setAnswerButtonsDisabled(false);showGameModal({title:'Answer Check Failed',text:'The Exchange Citadel could not verify this answer. Reload the game files and try again.',confirmText:'Continue'});return;}totalAttempts++;
 
     // --- GLOBAL MEMORY DECAY ---
     for(let tag in conceptMemory){
@@ -6447,6 +6440,7 @@ selectedIndex: choice,
     if(modeUsesScoreAttack()){
         setAnswerButtonsDisabled(true);
         await waitForScoreAttackResolve(isCorrect);
+        if(answerSessionId !== runSessionId) return;
     }
 
     // =============================================
@@ -6541,7 +6535,7 @@ if(remediationState.active){
     room = returnRoom;
     saveGameState();
 
-    setTimeout(loadQuestion, TIMING.normal);
+    scheduleForCurrentRun(loadQuestion, TIMING.normal);
     return;
 }
 
@@ -6574,7 +6568,7 @@ if(remediationState.active){
         triggerBossShake();
         
         if (bossHealth > 0) {
-           setTimeout(loadQuestion, TIMING.boss);
+           scheduleForCurrentRun(loadQuestion, TIMING.boss);
            return;
         }
          // Boss defeated
@@ -6876,7 +6870,7 @@ function showHallwayTransition(feedback){
 
     document.getElementById("srAnnouncements").innerText =`Correct. ${feedback}`;
     
-    setTimeout(()=>{
+    scheduleForCurrentRun(()=>{
     overlay.classList.remove("active");
     loadQuestion();
     },3200);
