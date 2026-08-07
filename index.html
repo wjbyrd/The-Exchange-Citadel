@@ -5992,9 +5992,13 @@ function loadQuestion() {
 	imageBox.style.display = "none";
 
     // 1. Determine Difficulty and Boss Status
-if((gameMode === "timed" || gameMode === "exam") && room > 30){
+if(gameMode === "exam" && room > 30){
     handlePracticeModeComplete();
     return;
+}
+
+if(gameMode === "timed" && room > 30){
+    room = 30;
 }
 
     let diff = getDifficultyForMode();
